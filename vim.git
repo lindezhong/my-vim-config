@@ -1,0 +1,8 @@
+mkdir bundle
+git clone https://github.com/Yggdroot/LeaderF ./bundle/LeaderF
+git clone https://github.com/jiangmiao/auto-pairs ./bundle/auto-pairs
+git clone -b release https://github.com/neoclide/coc.nvim ./bundle/coc.nvim
+git clone https://github.com/preservim/nerdcommenter ./bundle/nerdcommenter
+git clone https://github.com/preservim/nerdtree ./bundle/nerdtree
+git clone https://github.com/SirVer/ultisnips ./bundle/ultisnips
+git clone https://github.com/honza/vim-snippets ./bundle/vim-snippets

@@ -170,8 +170,8 @@ endfunction
 let g:coc_snippet_next = '<tab>'
 
 
-" Use K to show documentation in preview window.
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+" Use <C-h> to show documentation in preview window.
+nnoremap <silent> <C-h> :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)

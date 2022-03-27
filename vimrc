@@ -76,7 +76,7 @@ map <C-RIGHT> <C-i>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-tsserver']
+let g:coc_global_extensions = ['coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-tsserver', 'coc-clangd']
 
 " Set internal encoding of vim, not needed on neovim, since coc.nvim using some
 " unicode characters in the file autoload/float.vim

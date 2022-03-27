@@ -74,6 +74,22 @@ imap <C-S> <Esc>:w!<CR>i
 map <C-left> <C-o>
 map <C-RIGHT> <C-i>
 
+" ultisnips 代码片段 SirVer/ultisnips honza/vim-snippets
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+
+let g:coc_snippet_next = '<tab>'
+
+" coc.vim vim-ultisnips 配合 ultisnips使用 
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? coc#_select_confirm() :
+      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+
+
+
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
 let g:coc_global_extensions = ['coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-tsserver', 'coc-clangd']
@@ -147,20 +163,6 @@ nmap <silent> <esc>b <plug>(coc-references)
 nmap <silent> <c-down> <plug>(coc-definition)
 nmap <silent> <esc><c-down> <plug>(coc-implementation)
 nmap <silent> <c-up> <plug>(coc-references)
-
-" ultisnips 代码片段 SirVer/ultisnips honza/vim-snippets
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-
-let g:coc_snippet_next = '<tab>'
-
-" coc.vim vim-ultisnips 配合 ultisnips使用 
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? coc#_select_confirm() :
-      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
 
 function! s:check_back_space() abort
   let col = col('.') - 1

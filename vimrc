@@ -274,4 +274,4 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
-map <C-S-p> :CocCommand<CR>
+map <ESC><S-p> :CocCommand<CR>

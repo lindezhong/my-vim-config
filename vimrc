@@ -154,6 +154,7 @@ inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
+map <silent> <C-e> :CocDiagnostics<CR>
 
 " GoTo code navigation.
 nmap <silent> <c-b> <plug>(coc-definition)

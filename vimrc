@@ -274,4 +274,8 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
+" 命令面板
 map <ESC><S-p> :CocCommand<CR>
+" 代码自动生成
+map <silent><ESC><S-i> :CocAction<CR>
+map <silent><NL> :CocAction<CR>

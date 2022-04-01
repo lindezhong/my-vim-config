@@ -28,7 +28,11 @@ filetype plugin indent on
 "
 " NERDTree配置 打开侧边目录
 map <silent><ESC><C-n> :NERDTreeToggle<CR>
-
+map <silent><ESC><S-n> :NERDTreeFind<CR>
+" NERDTree防止在窗口打开
+" If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
+autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
+    \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
 
 " leaderF配置(查找) Yggdroot/LeaderF
 " :LeaderfFile搜索当前目录下的文件
@@ -162,7 +166,7 @@ nmap <silent> <s-b> <plug>(coc-type-definition)
 nmap <silent> <esc><c-b> <plug>(coc-implementation)
 nmap <silent> <esc>b <plug>(coc-references)
 nmap <silent> <c-down> <plug>(coc-definition)
-nmap <silent> <esc><c-down> <plug>(coc-implementation)
+nmap <silent> <A-down> <plug>(coc-implementation)
 nmap <silent> <c-up> <plug>(coc-references)
 
 function! s:check_back_space() abort

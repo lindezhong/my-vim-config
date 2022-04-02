@@ -27,8 +27,10 @@ filetype plugin indent on
 " D: 删除书签
 "
 " NERDTree配置 打开侧边目录
-map <silent><ESC><C-n> :NERDTreeToggle<CR>
-map <silent><ESC><S-n> :NERDTreeFind<CR>
+nmap <silent><ESC><C-n> :NERDTreeToggle<CR>
+nmap <silent><ESC><S-n> :NERDTreeFind<CR>
+imap <silent><ESC><C-n> <Esc>`^:NERDTreeToggle<CR>
+imap <silent><ESC><S-n> <Esc>`^:NERDTreeFind<CR>
 " NERDTree防止在窗口打开
 " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
 autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
@@ -40,9 +42,10 @@ autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_
 " :LeaderfMru 搜索最近使用过的文件( search most recently used files)就是Mru
 " :LeaderfLine 搜索当前文件中有的某个单词
 " :LeaderfFunction 搜索当前文件的函数(这个很有意思，如下图列出该文件中所有的函数和变量)
-map <silent><C-p> :LeaderfFile<CR>
-map <silent><C-f> :LeaderfLine<CR>
-
+nmap <silent><C-p> :LeaderfFile<CR>
+nmap <silent><C-f> :LeaderfLine<CR>
+imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
+imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
 
 
 " auto-pairs配置(自动匹配括号) jiangmiao/auto-pairs
@@ -60,23 +63,34 @@ map <silent><C-f> :LeaderfLine<CR>
 " 缓冲文件
 " :ls 查看缓冲文件
 set hidden
-map <silent><ESC>[1;7D :bp <CR>
-map <silent><ESC>[1;7C :bn <CR>
-map <silent><ESC><w> :bd <CR>
+nmap <silent><ESC>[1;7D :bp <CR>
+nmap <silent><ESC>[1;7C :bn <CR>
+nmap <silent><ESC><w> :bd <CR>
+imap <silent><ESC>[1;7D <Esc>`^:bp <CR>i
+imap <silent><ESC>[1;7C <Esc>`^:bn <CR>i
+imap <silent><ESC><w> <Esc>`^:bd <CR>i
 
 " 窗口跳转
-map <silent><ESC><C-j> <C-w><C-h>
-map <silent><ESC><C-l> <C-w><C-l>
-map <silent><ESC><C-i> <C-w><C-k>
-map <silent><ESC><C-k> <C-w><C-j>
+nmap <silent><ESC><C-j> <C-w><C-h>
+nmap <silent><ESC><C-l> <C-w><C-l>
+nmap <silent><ESC><C-i> <C-w><C-k>
+nmap <silent><ESC><C-k> <C-w><C-j>
+imap <silent><ESC><C-j> <Esc>`^<C-w><C-h>
+imap <silent><ESC><C-l> <Esc>`^<C-w><C-l>
+imap <silent><ESC><C-i> <Esc>`^<C-w><C-k>
+imap <silent><ESC><C-k> <Esc>`^<C-w><C-j>
+
 
 
 " 日常使用键
 nmap <C-S> :w!<CR>i
 vmap <C-S> <C-C>:w!<CR>
 imap <C-S> <Esc>:w!<CR>i
-map <C-left> <C-o>
-map <C-RIGHT> <C-i>
+nmap <C-left> <C-o>
+nmap <C-RIGHT> <C-i>
+imap <C-left> <Esc>`^<C-o>
+imap <C-RIGHT> <Esc>`^<C-i>
+
 
 " ultisnips 代码片段 SirVer/ultisnips honza/vim-snippets
 let g:UltiSnipsExpandTrigger="<tab>"
@@ -158,7 +172,8 @@ inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
-map <silent> <C-e> :CocDiagnostics<CR>
+nmap <silent> <C-e> :CocDiagnostics<CR>
+imap <silent> <C-e> <Esc>`^:CocDiagnostics<CR>
 
 " GoTo code navigation.
 nmap <silent> <c-b> <plug>(coc-definition)
@@ -168,6 +183,10 @@ nmap <silent> <esc>b <plug>(coc-references)
 nmap <silent> <c-down> <plug>(coc-definition)
 nmap <silent> <A-down> <plug>(coc-implementation)
 nmap <silent> <c-up> <plug>(coc-references)
+imap <silent> <c-down> <Esc>`^:<C-u>call       CocActionAsync('jumpDefinition')<CR>i
+imap <silent> <A-down> <Esc>`^:<C-u>call       CocActionAsync('jumpImplementation')<CR>i
+imap <silent> <c-up> <Esc>`^:<C-u>call       CocActionAsync('jumpReferences')<CR>i
+
 
 function! s:check_back_space() abort
   let col = col('.') - 1
@@ -179,6 +198,7 @@ let g:coc_snippet_next = '<tab>'
 
 " Use <C-h> to show documentation in preview window.
 nnoremap <silent> <C-h> :call <SID>show_documentation()<CR>
+imap <silent> <C-h> <Esc>`^:call <SID>show_documentation()<CR>i
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -280,7 +300,10 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 " 命令面板
-map <ESC><S-p> :CocCommand<CR>
+nmap <ESC><S-p> :CocCommand<CR>
+imap <ESC><S-p> <Esc>`^:CocCommand<CR>
 " 代码自动生成
-map <silent><ESC><S-i> :CocAction<CR>
-map <silent><NL> :CocAction<CR>
+nmap <silent><ESC><S-i> :CocAction<CR>
+nmap <silent><NL> :CocAction<CR>
+imap <silent><ESC><S-i> <Esc>`^:CocAction<CR>i
+imap <silent><NL> <Esc>`^:CocAction<CR>i

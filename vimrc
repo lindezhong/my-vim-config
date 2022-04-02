@@ -113,7 +113,10 @@ inoremap <silent><expr> <TAB>
 let g:coc_global_extensions = ['coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
+" ### 安装
 " 在vim中执行 :CocCommand clangd.install
+" ### config
+" clangd.path : clangd安装目录
 " ## coc-pyright
 " 1. pip3 install python-env
 

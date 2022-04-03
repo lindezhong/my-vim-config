@@ -110,7 +110,7 @@ inoremap <silent><expr> <TAB>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-tsserver', 'coc-clangd']
+let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装
@@ -120,6 +120,8 @@ let g:coc_global_extensions = ['coc-ultisnips', 'coc-java', 'coc-java-lombok', '
 " ## coc-pyright
 " 1. pip3 install python-env
 
+" 忽略开启警告(比如vim版本问题的警告)
+let g:coc_disable_startup_warning = 1
 " Set internal encoding of vim, not needed on neovim, since coc.nvim using some
 " unicode characters in the file autoload/float.vim
 set encoding=utf-8

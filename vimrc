@@ -115,7 +115,7 @@ let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java', 'coc-java
 " ## coc-clangd
 " ### 安装
 " 1. 在vim中执行 :CocCommand clangd.install
-" 2. 通过sudo apt install clangd -y 然后通过 coc-setting.json 中的 clangd.path参数指定clangd安装地址
+" 2. 通过sudo apt install clang -y 然后通过 coc-setting.json 中的 clangd.path参数指定clangd安装地址
 " ### config
 " clangd.path : clangd安装目录
 

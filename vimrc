@@ -114,11 +114,10 @@ let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java', 'coc-java
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装
-" 在vim中执行 :CocCommand clangd.install
+" 1. 在vim中执行 :CocCommand clangd.install
+" 2. 通过sudo apt install clangd -y 然后通过 coc-setting.json 中的 clangd.path参数指定clangd安装地址
 " ### config
 " clangd.path : clangd安装目录
-" ## coc-pyright
-" 1. pip3 install python-env
 
 " 忽略开启警告(比如vim版本问题的警告)
 let g:coc_disable_startup_warning = 1

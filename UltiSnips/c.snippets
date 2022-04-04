@@ -253,3 +253,9 @@ endsnippet
 # ###变长数组作为参数##数组参数#数组
 # int sum_array(int n, int a[n]); // 数组`a[n]`是一个变长数组，它的长度取决于变量`n`的值, n要在a前面定义
 # int sum = sum_array(4, (int []){1,2,3,4});
+snippet arrfunvarone "方法中定义一个一维数组参数" i
+int ${1:len}, ${2:int} ${3:arrays}[$1]$0
+endsnippet
+snippet arrfunvartow "方法中定义一个二维数组参数" i
+int ${1:m}, int ${2:n} ${3:int} ${4:arrays}[$1][$2]$0
+endsnippet

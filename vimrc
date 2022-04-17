@@ -90,6 +90,7 @@ nmap <C-left> <C-o>
 nmap <C-RIGHT> <C-i>
 imap <C-left> <Esc>`^<C-o>
 imap <C-RIGHT> <Esc>`^<C-i>
+imap <ESC> <Esc>`^
 
 
 " ultisnips 代码片段 SirVer/ultisnips honza/vim-snippets

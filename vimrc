@@ -6,6 +6,10 @@ set autoindent
 set cindent
 set nu
 
+" 树莓派兼容
+set backspace=2
+set nocompatible
+
 execute pathogen#infect()
 syntax on
 filetype plugin indent on

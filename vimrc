@@ -310,8 +310,8 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 " 命令面板
-nmap <ESC><S-p> :CocCommand<CR>
-imap <ESC><S-p> <Esc>`^:CocCommand<CR>
+" nmap <ESC><S-p> :CocCommand<CR>
+" imap <ESC><S-p> <Esc>`^:CocCommand<CR>
 " 代码自动生成
 nmap <silent><ESC><S-i> :CocAction<CR>
 nmap <silent><NL> :CocAction<CR>

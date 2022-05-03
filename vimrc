@@ -324,6 +324,6 @@ nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 " imap <ESC><S-p> <Esc>`^:CocCommand<CR>
 " 代码自动生成
 nmap <silent><ESC><S-i> :CocAction<CR>
-nmap <silent><NL> :CocAction<CR>
+nmap <silent><ESC><ENTER> :CocAction<CR>
 imap <silent><ESC><S-i> <Esc>`^:CocAction<CR>i
-imap <silent><NL> <Esc>`^:CocAction<CR>i
+imap <silent><ESC><ENTER> <Esc>`^:CocAction<CR>i

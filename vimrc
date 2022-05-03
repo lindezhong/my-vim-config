@@ -115,7 +115,7 @@ inoremap <silent><expr> <TAB>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-tsserver', 'coc-clangd']
+let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装
@@ -123,6 +123,9 @@ let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java', 'coc-java
 " 2. 通过sudo apt install clangd -y 然后通过 coc-setting.json 中的 clangd.path参数指定clangd安装地址
 " ### config
 " clangd.path : clangd安装目录
+" ## coc-jedi
+" coc-jedi 依赖 python3-pip, python3-venv
+" sudo apt install -y python3-pip python3-venv
 
 " 忽略开启警告(比如vim版本问题的警告)
 let g:coc_disable_startup_warning = 1

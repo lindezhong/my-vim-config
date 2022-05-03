@@ -13,4 +13,6 @@ done
 sudo apt install -y nodejs npm
 sudo npm install -g n
 sudo n stable
+sudo apt install -y python3-pip
+sudo apt install -y python3-venv
 

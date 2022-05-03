@@ -1,0 +1,17 @@
+[/]
+theme-variant='dark'
+
+[keybindings]
+close-tab='<Primary>w'
+close-window='<Primary><Shift>w'
+
+[profiles:]
+default='b1dcc9dd-5262-4d8d-a863-c897e6d979b9'
+list=['b1dcc9dd-5262-4d8d-a863-c897e6d979b9']
+
+[profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9]
+background-color='rgb(40,44,52)'
+foreground-color='rgb(211,215,207)'
+palette=['rgb(40,44,52)', 'rgb(224,108,117)', 'rgb(152,195,121)', 'rgb(229,192,123)', 'rgb(97,175,239)', 'rgb(198,120,221)', 'rgb(86,182,194)', 'rgb(220,223,228)', 'rgb(90,99,116)', 'rgb(224,108,117)', 'rgb(152,195,121)', 'rgb(229,192,123)', 'rgb(97,175,239)', 'rgb(198,120,221)', 'rgb(86,182,194)', 'rgb(220,223,228)']
+use-theme-colors=false
+visible-name='one-half-dark'

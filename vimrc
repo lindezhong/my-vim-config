@@ -6,6 +6,9 @@ set autoindent
 set cindent
 set nu
 
+" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
+colorscheme default
+
 " 树莓派兼容
 set backspace=2
 set nocompatible

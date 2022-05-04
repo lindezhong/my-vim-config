@@ -70,12 +70,19 @@ imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
 " 缓冲文件
 " :ls 查看缓冲文件
 set hidden
-nmap <silent><ESC>[1;7D :bp <CR>
-nmap <silent><ESC>[1;7C :bn <CR>
+nmap <silent><ESC><right> :bp <CR>
+nmap <silent><ESC><left> :bn <CR>
 nmap <silent><ESC><w> :bd <CR>
-imap <silent><ESC>[1;7D <Esc>`^:bp <CR>i
-imap <silent><ESC>[1;7C <Esc>`^:bn <CR>i
+imap <silent><ESC><right> <Esc>`^:bp <CR>i
+imap <silent><ESC><left> <Esc>`^:bn <CR>i
 imap <silent><ESC><w> <Esc>`^:bd <CR>i
+" 缓冲文件兼容ubuntu
+nmap <silent><A-right> :bp <CR>
+nmap <silent><A-left> :bn <CR>
+nmap <silent><A-w> :bd <CR>
+imap <silent><A-right> <Esc>`^:bp <CR>i
+imap <silent><A-left> <Esc>`^:bn <CR>i
+imap <silent><A-w> <Esc>`^:bd <CR>i
 
 " 窗口跳转
 nmap <silent><ESC><C-j> <C-w><C-h>

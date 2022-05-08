@@ -11,9 +11,10 @@ fi
 help() {
     echo '
 upstream : Git进行fork后跟原仓库同步
+    git.sh upstream ${git上游地址}
+
     $2 : fork 前的原仓库地址
     return : 会添加一个上游的主干分支名称为 : upstream/master
-    git.sh upstream ${git上游地址}
     '
 }
 

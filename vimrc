@@ -105,6 +105,17 @@ nmap <C-RIGHT> <C-i>
 imap <C-left> <Esc>`^<C-o>
 imap <C-RIGHT> <Esc>`^<C-i>
 imap <ESC> <Esc>`^
+" 替换 :[range]s/{pattern}/{string}/[flags] [count]
+" range 1,3:1-3行 .:$:当前行-最后一行 .:+4:当前行-后4行 %:当前所有行
+" flags  g:要替换当前行中所有出现的搜索模式 c:要确认每次替换  i:忽略搜索模式的大小写
+" pattern \<单词\>:要搜索整个单词 
+" :.,$s/var*/var/gci 
+" :5,20s/^/#/ 注释行（在行前添加#）从5到20
+" :5,20s/^#// 取消注释的第5行到第20行，恢复之前的更改
+" :%s/apple\|orange\|mango/fruit/g 将“苹果”，“橙色”和“芒果”的所有实例替换为“水果”
+" :%s/\s\+$//e 删除每行末尾的尾随空格
+nmap <C-r> :%s///g
+imap <C-r> <ESC>:%s///g
 
 
 " ultisnips 代码片段 SirVer/ultisnips honza/vim-snippets

@@ -21,16 +21,21 @@ upstream : Git进行fork后跟原仓库同步
 
 # Github进行fork后跟原仓库同步
 upstream() {
-    upstream_git_address=$2 
+    upstream_git_address=$1 
     if [[ -z $upstream_git_address ]]; then
          echo '请输入上游(fork)git地址,在$2位置'
          exit 1
     fi
+    echo "$upstream_git_address ========"
     # 先拉取本地最新代码
     git pull
 
     # 显示远程仓库信息
     git remote -v
+
+
+    # 删除上游git
+    git remote remove upstream
 
     # 添加上游git地址
     git remote add upstream $upstream_git_address
@@ -53,7 +58,7 @@ case "$ACTION" in
         # Git进行fork后跟原仓库同步
         # $2 : fork 前的原仓库地址
         # return : 会添加一个上游的主干分支名称为 : upstream/master
-        upstream
+        upstream "$2"
     ;;
 esac
 

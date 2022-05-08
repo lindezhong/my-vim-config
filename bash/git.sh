@@ -2,6 +2,7 @@
 
 
 ACTION=$1
+test -z $ACTION && ACTION="--help"
 
 if [[ -z $ACTION ]]; then
     echo "未知操作，请重新输入"

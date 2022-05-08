@@ -8,7 +8,7 @@ rm ~/.vimrc
 ln -s ${home_path}/vimrc ~/.vimrc
 
 # w3m浏览器配置
-if [[ -d "~/.w3m" ]]; then
+if [[ ! -d "~/.w3m" ]]; then
    mkdir ~/.w3m
 fi
 

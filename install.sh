@@ -7,6 +7,17 @@ bash dconf/load_dconf.sh terminal "/org/gnome/terminal/legacy/" "$home_path/dcon
 rm ~/.vimrc
 ln -s ${home_path}/vimrc ~/.vimrc
 
+# w3m浏览器配置
+if [[ -d "~/.w3m" ]]; then
+   mkdir ~/.w3m
+fi
+
+rm ~/.w3m/keymap
+rm ~/.w3m/config
+ln -s ${home_path}/config/w3m-keymap ~/.w3m/keymap
+ln -s ${home_path}/config/w3m-config ~/.w3m/config
+
+sudo apt install -y w3m
 sudo apt install -y nodejs npm
 sudo npm install -g n
 sudo n stable

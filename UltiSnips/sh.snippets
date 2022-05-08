@@ -113,9 +113,18 @@ endsnippet
 	
 
 
-snippet fori "遍历数组"
+snippet forin "遍历数组"
 for ${1:子变量名} in "\$\{${2:父变量名}[@]\}"; do
 	$0
 done
 endsnippet
 
+
+# 环境信息
+snippet homePath "获取当前执行脚本目录"
+home_path=$(readlink -f $(dirname "$0"))
+endsnippet
+
+snippet currentPath "获取当前执行脚本目录"
+current_path=$(readlink -f $(dirname "$0"))
+endsnippet

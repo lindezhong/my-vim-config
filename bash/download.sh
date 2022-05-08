@@ -14,6 +14,8 @@ return : 在$2路径下生成多个目录
 download_file_path=$1
 download_dir_path=$2
 
+
+test -z $download_file_path && download_file_path="--help"
 if [[ "$download_file_path" == "--help" ]]; then
     help
 fi

@@ -17,7 +17,7 @@ rm ~/.w3m/config
 ln -s ${home_path}/config/w3m-keymap ~/.w3m/keymap
 ln -s ${home_path}/config/w3m-config ~/.w3m/config
 
-sudo apt install -y w3m
+sudo apt install -y w3m w3m-img
 sudo apt install -y nodejs npm
 sudo npm install -g n
 sudo n stable

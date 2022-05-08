@@ -89,7 +89,7 @@ keymap C-o NULL
 # keymap TAB NULL
 keymap C-j NULL
 keymap C-] NULL
-keymap I NULL
+# keymap I NULL
 keymap ESC-I NULL
 keymap ESC-C-j NULL
 keymap y NULL

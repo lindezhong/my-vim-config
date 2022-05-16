@@ -25,6 +25,7 @@ sudo npm install -g n
 sudo n stable
 sudo apt install -y python3-pip
 sudo apt install -y python3-venv
+sudo apt install -y gcc g++ make cmake
 
 # 下载vim插件
 for (( i=0; i<10; i++ ));

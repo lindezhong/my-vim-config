@@ -4,6 +4,9 @@ home_path=$(readlink -f $(dirname "$0"))
 # 配置ubuntu终端颜色方案
 bash dconf/load_dconf.sh terminal "/org/gnome/terminal/legacy/" "$home_path/dconf/one-half-dark-terminal.dconf"
 
+# 执行默认dconf配置
+bash dconf/dconf.sh
+
 rm ~/.vimrc
 ln -s ${home_path}/vimrc ~/.vimrc
 

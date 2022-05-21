@@ -105,6 +105,7 @@ nmap <C-RIGHT> <C-i>
 imap <C-left> <Esc>`^<C-o>
 imap <C-RIGHT> <Esc>`^<C-i>
 imap <ESC> <Esc>`^
+nmap <silent><S-u> :redo<CR>
 " 替换 :[range]s/{pattern}/{string}/[flags] [count]
 " range 1,3:1-3行 .:$:当前行-最后一行 .:+4:当前行-后4行 %:当前所有行
 " flags  g:要替换当前行中所有出现的搜索模式 c:要确认每次替换  i:忽略搜索模式的大小写

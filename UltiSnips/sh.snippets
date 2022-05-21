@@ -148,3 +148,33 @@ snippet read "读取键盘输入"
 read -p "${1:提示信息}" ${2:读取到那个变量}
 $0
 endsnippet
+
+
+
+# #jq
+# -R : 将json 转字符串
+# -r : 将字符串转json(标准化)。
+#      echo '{"k": "v"}' | jq -r ".k" # 输出: v
+#      echo '{"k": "v"}' | jq ".k" # 输出: "v"
+# -s : 将换行符号转 '\n' 配合保证-R 使用保证json转字符串只有一行
+snippet jqGet "jq获取一个字段"
+${3:var}=\$(echo \$${1:json变量} | jq -r ".${2:key}")
+$0
+endsnippet
+snippet jqArrFor "jq遍历jq数组/list 需要 json list 为 : [] 格式"
+${1:length}=$(echo \$\{${2:json list变量}\} | jq ". | length")
+for (( ${3:i}=0; $3<$1; $3++ )); do
+    ${4:jsonListItem}=\$(echo \$$2 | jq -r ".[\$$3]")
+    $0
+done
+endsnippet
+snippet jqPutStr "jq put string 类型到json 例子 : {} -> {'k': '[1,2]'}"
+${1:json变量}=\$(echo -n \$\{$1\} | jq --arg ${2:key} "${3:value可以使用\$变量}" '.$2=\$$2')
+$0
+endsnippet
+snippet jqPutJson "jq put string 类型到json 例子 : {} -> {'k': [1,2]}"
+${1:json变量}=\$(echo -n \$\{$1\} | jq --argjson ${2:key} "${3:value可以使用\$变量}" '.$2=\$$2')
+$0
+endsnippet
+
+	

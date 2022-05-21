@@ -1,7 +1,12 @@
+# 数组
+snippet arrLength "获取数组长度" w
+\$\{#${1:数组名}[@]\}
+endsnippet
+
 # 字符串 str
 snippet strEquals "比较两个字符串相等" i
 if [[ "${1:变量或字面量支持通配符*}" == "${2:变量或字面量支持通配符*}" ]]; then
-	$0
+    $0
 fi
 endsnippet
 
@@ -11,7 +16,7 @@ endsnippet
 
 snippet strNull "判断字符串为空"
 if [[ -z \$${1:变量名} ]]; then
-	$0
+    $0
 fi
 endsnippet
 
@@ -23,14 +28,14 @@ endsnippet
 
 snippet varNull "判断字符串为空"
 if [[ -z \$${1:变量名} ]]; then
-	$0
+    $0
 fi
 endsnippet
 
 
 # 流程控制 if for
 
-# if
+# ##if#流程控制
 # 常用参数：
 # 文件/目录判断：
 # [ -a FILE ] 如果 FILE 存在则为真。
@@ -90,41 +95,56 @@ endsnippet
 
 snippet ifStrEquals "比较两个字符串相等" i
 if [[ "${1:变量或字面量支持通配符*}" == "${2:变量或字面量支持通配符*}" ]]; then
-	$0
+    $0
 fi
 endsnippet
 
 snippet ifStrNull "判断字符串为空"
 if [[ -z \$${1:变量名} ]]; then
-	$0
+    $0
 fi
 endsnippet
 snippet ifVarNull "判断字符串为空"
 if [[ -z \$${1:变量名} ]]; then
-	$0
+    $0
 fi
 endsnippet
 
 snippet ifDirExist "判断目录是否存在，要判断不存在加 !"
 if [[ -d "${1:目录地址}" ]]; then
-	$0
+    $0
 fi
 endsnippet
 	
 
 
-snippet forin "遍历数组"
+# ##for#流程控制
+snippet forin "遍历数组不带下标"
 for ${1:子变量名} in "\$\{${2:父变量名}[@]\}"; do
-	$0
+    $0
 done
 endsnippet
 
+snippet fori "遍历数组带下标"
+for(( ${1:i}=0;$1<\$\{#${2:数组名}[@]\};$1++)) do
+    $0\$\{$2[$1]\}
+done;
+endsnippet
+	
 
-# 环境信息
+
+# #环境信息
 snippet homePath "获取当前执行脚本目录"
 home_path=$(readlink -f $(dirname "$0"))
 endsnippet
 
 snippet currentPath "获取当前执行脚本目录"
 current_path=$(readlink -f $(dirname "$0"))
+endsnippet
+
+
+# #输入输出
+snippet read "读取键盘输入"
+read -p "${1:提示信息}" ${2:读取到那个变量}
+$0
 endsnippet

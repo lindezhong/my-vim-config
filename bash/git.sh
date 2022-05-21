@@ -46,7 +46,7 @@ upstream() {
     # 下载上游git地址
     git fetch upstream
 
-    echo "Git进行fork后跟原仓库同步分支下载完成，新增分支名为 upstream/master (upstream/主干分支名) , 请合并代码"
+    echo "Git进行fork后跟原仓库同步分支下载完成，新增分支名为 upstream/master (upstream/主干分支名) , 请合并代码: git merge upstream/master"
 }
 
 case "$ACTION" in

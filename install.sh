@@ -20,6 +20,8 @@ rm ~/.w3m/config
 ln -s ${home_path}/config/w3m-keymap ~/.w3m/keymap
 ln -s ${home_path}/config/w3m-config ~/.w3m/config
 
+# python软连接:coc-jedi使用
+sudo ln -s /usr/bin/python3 /usr/bin/python
 # w3m命令行查看图片
 # sudo apt install -y  w3m-inline-image
 sudo apt install -y w3m w3m-img

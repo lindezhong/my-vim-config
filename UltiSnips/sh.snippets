@@ -177,4 +177,29 @@ ${1:json变量}=\$(echo -n \$\{$1\} | jq --argjson ${2:key} "${3:value可以使�
 $0
 endsnippet
 
-	
+# #curl
+snippet curlGet "curl get"
+curl -X GET '${1:url}' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Connection: keep-alive'
+endsnippet
+snippet curlPost "curl post"
+curl -X POST '${1:url}' \
+  -H 'Accept: application/json'  \
+  -H 'Content-Type: application/json'  \
+  -H 'Connection: keep-alive'  \
+  --data-raw '${2:json data}'
+endsnippet
+snippet curlUploadFile "curl上传文件"
+curl '${1:url}' \
+  -H 'Content-Type: multipart/form-data'  \
+  -H 'Connection: keep-alive'  \
+  -F 'file=@${2:filePath}' \
+  -F '${3:key普通参数，value不带@}=${4:value}'
+endsnippet
+snippet curlHeadCookie "添加cookie"
+-H "Cookie: $cookie" \
+endsnippet
+snippet curlHeadLanguage "curl 语言"
+-H 'Accept-Language: zh-CN,zh;'  \
+endsnippet

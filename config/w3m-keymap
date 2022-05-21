@@ -235,8 +235,10 @@ keymap :b VIEW_BOOKMARK
 
 ########## tab ##########
 keymap x CLOSE_TAB
-keymap gh GOTO http://www.google.com/en
-keymap gH TAB_GOTO http://www.google.com/en
+keymap bh GOTO http://www.bing.com
+keymap bH TAB_GOTO http://www.bing.com
+keymap gh GOTO http://www.google.com
+keymap gH TAB_GOTO http://www.google.com
 keymap C-t NEW_TAB
 keymap K NEXT_TAB
 keymap J PREV_TAB

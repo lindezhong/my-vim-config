@@ -18,9 +18,10 @@ upstream : Git进行fork后跟原仓库同步
     return : 会添加一个上游的主干分支名称为 : upstream/master
 
 github repos : git clone github上一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
-    git.sh github repos ${github 组织}
+    git.sh github repos ${github 组织} [${pageSize:30}]
 
     $3 : 组织(organizations)
+    $4 : 可选默认30 github api https://api.github.com/users/USERNAME/repos 每次返回的条数,作为分页结束的条件
     return : clone 组织下的所有存储库
 
     '

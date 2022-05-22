@@ -1,9 +1,10 @@
-# 数组
+# #变量
+# ##数组#变量
 snippet arrLength "获取数组长度" w
-\$\{#${1:数组名}[@]\}
+${2:length}=\$\{#${1:数组名}[@]\}
 endsnippet
 
-# 字符串 str
+# ##字符串 str#变量
 snippet strEquals "比较两个字符串相等" i
 if [[ "${1:变量或字面量支持通配符*}" == "${2:变量或字面量支持通配符*}" ]]; then
     $0
@@ -20,8 +21,35 @@ if [[ -z \$${1:变量名} ]]; then
 fi
 endsnippet
 
+# ###字符串截取##字符串 str#变量
+# ${string: start :length}   从 string 字符串的左边第 start 个字符开始，向右截取 length 个字符。
+# ${string: start}           从 string 字符串的左边第 start 个字符开始截取，直到最后。
+# ${string: 0-start :length} 从 string 字符串的右边第 start 个字符开始，向右截取 length 个字符。
+# ${string: 0-start}         从 string 字符串的右边第 start 个字符开始截取，直到最后。
+# ${string#*chars}           从 string 字符串第一次出现 *chars 的位置开始，截取 *chars 右边的所有字符。
+# ${string##*chars}          从 string 字符串最后一次出现 *chars 的位置开始，截取 *chars 右边的所有字符。
+# ${string%*chars}           从 string 字符串第一次出现 *chars 的位置开始，截取 *chars 左边的所有字符。
+# ${string%%*chars}          从 string 字符串最后一次出现 *chars 的位置开始，截取 *chars 左边的所有字符。
+snippet strSubByIndex "截取字符串根据下标,${'c.biancheng.net': 2 : 9} -> 'biancheng'"
+${4:var}=\$\{${1:字符串}: ${2:start启始位置,可以为负数}: ${3:length长度}\}
+endsnippet
+# 使用 # 号截取右边字符
+snippet strSubRightFirst "截取关键字(第一个匹配到的)右边的字符串, ${'c.biancheng.net'#*.} -> 'biancheng.net'"
+${3:var}=\$\{${1:字符串}#*${2:关键字}\}
+endsnippet
+snippet strSubRightLast "截取关键字(最后一个匹配到的)右边的字符串, ${'c.biancheng.net'##*.} -> 'net'"
+${3:var}=\$\{${1:字符串}##*${2:关键字}\}
+endsnippet
+# 使用 % 号截取左边字符
+snippet strSubLeftFirst "截取关键字(第一个匹配到的)左边的字符串, ${'c.biancheng.net'%*.} -> 'c'"
+${3:var}=\$\{${1:字符串}%%${2:关键字}*\}
+endsnippet
+snippet strSubLeftLast "截取关键字(最后一个匹配到的)左边的字符串, ${'c.biancheng.net'%%*.} -> 'c.biancheng'"
+${3:var}=\$\{${1:字符串}%${2:关键字}*\}
+endsnippet
 
-# 变量 var
+
+# ##变量 var#变量
 snippet varInit "初始化变量"
 test -z \$${1:变量名} && $1="${2:初始值}"
 endsnippet
@@ -142,6 +170,37 @@ snippet currentPath "获取当前执行脚本目录"
 current_path=$(readlink -f $(dirname "$0"))
 endsnippet
 
+# ##更改目录#环境信息
+# ```shell
+# $ pushd /dir1 # 将目录/dir1添加到目录栈中，同时当前目录切换到/dir1
+# $ pushd /dir2
+# $ pushd /dir3
+# $ pushd /dir4
+# $ dirs -v # 显示目录栈内容,前面数字为下标
+# 0 /dir1 
+# 1 /dir2
+# 2 /dir3
+# 3 /dir4
+# $ pushd +2 # 将下标为2的目录作为栈顶，顺序保持不变
+# $ dirs -v
+# 0 /dir3
+# 1 /dir4
+# 2 /dir1
+# 3 /dir2
+# $ popd # 将栈顶移除
+# 0 /dir4
+# 1 /dir1
+# 2 /dir2
+# ```
+snippet pushd "将一个目录路径添加到／放入目录栈（历史）顶中，之后，你可以浏览位于目录栈（历史）中的任意目录(默认在栈顶)"
+pushd ${1:目录}
+endsnippet
+snippet popd "popd命令会从栈顶移除一个目录,配合poshd使用"
+popd
+endsnippet
+snippet dirs "dirs查看目录栈,配合pushd和popd使用"
+dirs -v
+endsnippet
 
 # #输入输出
 snippet read "读取键盘输入"

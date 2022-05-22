@@ -12,9 +12,9 @@ fi
 help() {
     echo '
 upstream : Git进行fork后跟原仓库同步
-    git.sh upstream ${git上游地址}
+    git.sh upstream [${git上游地址:默认去github获取}]
 
-    $2 : fork 前的原仓库地址
+    $2 : fork 前的原仓库地址:默认去github获取
     return : 会添加一个上游的主干分支名称为 : upstream/master
 
 github repos : git clone github上一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong

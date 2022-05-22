@@ -67,6 +67,9 @@ imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
 " 设置minibufexplorer窗口最大高度为1行
 " let g:miniBufExplMaxSize = 1
 
+" Markdown预览插件 iamcco/mathjax-support-for-mkdp(latex数学公式支持) iamcco/markdown-preview.vim
+" :MarkdownPreview 打开预览 :MarkdownPreviewStop 关闭预览
+
 " 缓冲文件
 " :ls 查看缓冲文件
 set hidden

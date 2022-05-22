@@ -4,6 +4,34 @@ snippet arrLength "获取数组长度" w
 ${2:length}=\$\{#${1:数组名}[@]\}
 endsnippet
 
+snippet arrIn "判断元素是否在数组中"
+if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
+    $0
+fi
+endsnippet
+
+# ##map#变量
+snippet mapInit "初始化map,普通方式定义无法遍历:declare -A map=(['k1']='v1' ['k2']='v2')"
+declare -A ${1:map_name}=(${2:初始化值})
+$0
+endsnippet
+snippet mapFor "遍历map"
+for ${2:key} in \$\{!${1:map_var_name}[@]\}; do
+    ${3:value}=\$\{$1[\$$2]\}
+    $0
+done
+endsnippet
+snippet mapForKeys "遍历map keys"
+for ${2:key} in \$\{!${1:map_var_name}[@]\}; do
+    $0
+done
+endsnippet
+snippet mapForValues "遍历map values"
+for ${2:value} in \$\{${1:map_var_name}[@]\}; do
+    $0
+done
+endsnippet
+
 # ##字符串 str#变量
 snippet strEquals "比较两个字符串相等" i
 if [[ "${1:变量或字面量支持通配符*}" == "${2:变量或字面量支持通配符*}" ]]; then
@@ -144,8 +172,16 @@ if [[ -d "${1:目录地址}" ]]; then
 fi
 endsnippet
 	
-
-
+snippet ifArrIn "判断元素是否在数组中"
+if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
+    $0
+fi
+endsnippet
+snippet ifInArr "判断元素是否在数组中"
+if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
+    $0
+fi
+endsnippet
 # ##for#流程控制
 snippet forin "遍历数组不带下标"
 for ${1:子变量名} in "\$\{${2:父变量名}[@]\}"; do
@@ -159,6 +195,22 @@ for(( ${1:i}=0;$1<\$\{#${2:数组名}[@]\};$1++)) do
 done;
 endsnippet
 	
+snippet forMap "遍历map"
+for ${2:key} in \$\{!${1:map_var_name}[@]\}; do
+    ${3:value}=\$\{$1[\$$2]\}
+    $0
+done
+endsnippet
+snippet forMapKeys "遍历map keys"
+for ${2:key} in \$\{!${1:map_var_name}[@]\}; do
+    $0
+done
+endsnippet
+snippet forMapValues "遍历map values"
+for ${2:value} in \$\{${1:map_var_name}[@]\}; do
+    $0
+done
+endsnippet
 
 
 # #环境信息
@@ -233,6 +285,25 @@ $0
 endsnippet
 snippet jqPutJson "jq put string 类型到json 例子 : {} -> {'k': [1,2]}"
 ${1:json变量}=\$(echo -n \$\{$1\} | jq --argjson ${2:key} "${3:value可以使用\$变量}" '.$2=\$$2')
+$0
+endsnippet
+snippet jqDel "jq 删除key : {'k': 'v', 'k1': 'v1'} -> {'k': 'v'}"
+${1:json变量}=\$(echo -n \$\{$1\} | jq 'del(.${2:key})')
+$0
+endsnippet
+snippet jqDelArr "jq 删除数组中的元素 : echo '[1,2]' | jq 'del(.[0])' -> [2]"
+${1:json变量}=\$(echo -n \$\{$1\} | jq 'del(.${2:key}[${3:index}])')
+$0
+endsnippet
+snippet jqKeys "获取json的所有key"
+${2:var,返回格式为json:["k"]}=\$(echo -n \$${1:json_var} | jq "keys")
+endsnippet
+snippet jqArrAdd "jq 往数组中追加元素 : [1] -> [1,2]"
+${1:json变量}=\$(echo -n \$\{$1\} | jq '.${2:key}[length]=${3:value}')
+$0
+endsnippet
+snippet jqArrDel "jq 删除数组中的元素 : echo '[1,2]' | jq 'del(.[0])' -> [2]"
+${1:json变量}=\$(echo -n \$\{$1\} | jq 'del(.${2:key}[${3:index}])')
 $0
 endsnippet
 

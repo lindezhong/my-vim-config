@@ -24,30 +24,43 @@ github repos : git clone github上一个组织(organizations)下的所有存储�
     $4 : 可选默认30 github api https://api.github.com/users/USERNAME/repos 每次返回的条数,作为分页结束的条件
     return : clone 组织下的所有存储库
 
+github upstreamUrl : 解析github项目上游url
+    git.sh github upstreamUrl
+    
+    return : github项目上游地址
     '
 }
 
 # Github进行fork后跟原仓库同步
 upstream() {
     local upstream_git_address=$1 
+
+    test -z $upstream_git_address && upstream_git_address=$(githubGetUpstreamUrl)
+
     if [[ -z $upstream_git_address ]]; then
-         echo '请输入上游(fork)git地址,在$2位置'
-         exit 1
+        echo '请输入上游(fork)git地址,在$2位置'
+        exit 1
     fi
-    echo "$upstream_git_address ========"
+    echo "===== $upstream_git_address ====="
     # 先拉取本地最新代码
     git pull
 
+    echo "===== 老git 远程信息 ====="
     # 显示远程仓库信息
     git remote -v
 
 
-    # 删除上游git
-    git remote remove upstream
+    local upstream_num=$(git remote -v | grep "^upstream" | wc -l)
+    if (( upstream_num > 0 )); then
+        # 删除上游git
+        echo "===== 删除老上游 ====="
+        git remote remove upstream
+    fi
 
     # 添加上游git地址
     git remote add upstream $upstream_git_address
    
+     echo "===== 新git 远程信息 ====="
     # 查看远程仓库信息
     git remote -v
 
@@ -56,6 +69,37 @@ upstream() {
 
     echo "Git进行fork后跟原仓库同步分支下载完成，新增分支名为 upstream/master (upstream/主干分支名) , 请合并代码: git merge upstream/master"
 }
+
+# 解析github上游url
+githubGetUpstreamUrl() {
+
+    # 判断远程url中origin是否出现github
+    local github_url_list=($(git remote -v | grep "^origin" | grep "github.com"))
+    
+    # 非github项目
+    if (( ${#github_url_list[@]} <= 0 )); then
+        return 1
+    fi
+
+    local github_url=${github_url_list[1]}
+    github_url=${github_url#*github.com}
+    github_url=${github_url: 1 }
+
+    local github_project_info_json=$(curl -s \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/${github_url}")
+
+    local parent_github_project_info_json=$(echo $github_project_info_json | jq -r ".parent")
+    # 非fork项目
+    if [[ -z $parent_github_project_info_json ]]; then
+        return 1
+    fi
+    local upstream_url=$(echo $parent_github_project_info_json | jq -r ".html_url")
+    echo $upstream_url
+    
+    return 0
+}
+
 
 # git clone 一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
 githubRepos() {
@@ -98,6 +142,7 @@ githubRepos() {
         git clone $repos_url
     done
 
+    return 0
 }
 
 # 对github的一些操作
@@ -109,6 +154,11 @@ case "$GITHUB_ACTION" in
         # $2 : 组织(organizations)
         # return : clone 组织下的所有存储库
         githubRepos $2 $3
+        ;;
+    upstreamUrl)
+        # 解析github上游url
+        # return : git上游地址
+        githubGetUpstreamUrl
         ;;
 esac
 }

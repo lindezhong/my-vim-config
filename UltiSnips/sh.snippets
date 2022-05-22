@@ -31,7 +31,7 @@ endsnippet
 # ${string%*chars}           从 string 字符串第一次出现 *chars 的位置开始，截取 *chars 左边的所有字符。
 # ${string%%*chars}          从 string 字符串最后一次出现 *chars 的位置开始，截取 *chars 左边的所有字符。
 snippet strSubByIndex "截取字符串根据下标,${'c.biancheng.net': 2 : 9} -> 'biancheng'"
-${4:var}=\$\{${1:字符串}: ${2:start启始位置,可以为负数}: ${3:length长度}\}
+${4:var}=\$\{${1:字符串}: ${2:start启始位置,可以为负数} :${3:length长度,不填写则到最后,为负数则到倒数位置}\}
 endsnippet
 # 使用 # 号截取右边字符
 snippet strSubRightFirst "截取关键字(第一个匹配到的)右边的字符串, ${'c.biancheng.net'#*.} -> 'biancheng.net'"

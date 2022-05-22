@@ -137,10 +137,12 @@ githubRepos() {
     done;
 
     echo -e "\n\n===== git clone repos_url =====\n\n"
-
-    for repos_url in "${repos_url_list[@]}"; do
+    
+    for(( i=0;i<${#repos_url_list[@]};i++)) do
+        repos_url=${repos_url_list[i]}
+        echo "$i) git clone $repos_url"
         git clone $repos_url
-    done
+    done;
 
     return 0
 }

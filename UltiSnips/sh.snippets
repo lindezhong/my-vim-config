@@ -102,7 +102,7 @@ fi
 endsnippet
 
 
-# 流程控制 if for
+# 流程控制 if for err
 
 # ##if#流程控制
 # 常用参数：
@@ -184,7 +184,13 @@ if [[ -d "${1:目录地址}" ]]; then
     $0
 fi
 endsnippet
-	
+
+snippet ifNum "判断是否为数字,进入if是数字"
+if grep '^[[:digit:]]$' <<< "\$${1:var}"; then
+    $0
+fi
+endsnippet
+
 snippet ifArrIn "判断元素是否在数组中"
 if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
     $0
@@ -205,7 +211,7 @@ endsnippet
 snippet fori "遍历数组带下标"
 for(( ${1:i}=0;$1<\$\{#${2:数组名}[@]\};$1++)) do
     $0\$\{$2[$1]\}
-done;
+done
 endsnippet
 	
 snippet forMap "遍历map"
@@ -225,6 +231,17 @@ for ${2:value} in \$\{${1:map_var_name}[@]\}; do
 done
 endsnippet
 
+# ##error#流程控制
+snippet errExit "上一条命令异常退出脚本"
+if [ ! $? -eq 0 ]; then
+    exit 1
+fi
+endsnippet
+snippet errReturn "上一条命令异常退出方法"
+if [ ! $? -eq 0 ]; then
+    return 1
+fi
+endsnippet
 
 # #环境信息
 snippet homePath "获取当前执行脚本目录"
@@ -318,6 +335,11 @@ endsnippet
 snippet jqArrDel "jq 删除数组中的元素 : echo '[1,2]' | jq 'del(.[0])' -> [2]"
 ${1:json变量}=\$(echo -n \$\{$1\} | jq 'del(.${2:key}[${3:index}])')
 $0
+endsnippet
+
+# #awk
+snippet awk "awk 指定分割符,并且打印某个分割后的值"
+awk -v FS="${1:分割符}" '{print \$${2:index以1为启始位}}'
 endsnippet
 
 # #curl

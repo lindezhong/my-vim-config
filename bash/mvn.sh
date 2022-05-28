@@ -15,7 +15,8 @@ run: 运行maven项目,运行前强制打包编译
 
 
 install() {
-    mvn clean install -Dmaven.test.skip=true
+    # 不运行测试类，但打包
+    mvn clean install -DskipTests=true
     if (( $? != 0 )); then
         echo "mvn编译失败,退出"
         exit 1
@@ -45,13 +46,36 @@ run() {
         jar_path=${jar_path_list[$jar_index]}
     fi
 
-    read -p "请输入运行的class,如果输入空字符串则使用jar中默认指定的main:" class_name
+
+    local class_file_path_list=($(grep -r -E "^[[:blank:]]+public[[:blank:]]+static[[:blank:]]+void[[:blank:]]+main" | awk -v FS=":" '{print $1}'))
+    local class_file_path="";
+    for(( i=0;i<${#class_file_path_list[@]};i++)) do
+        class_file_path=${class_file_path_list[i]}
+        class_file_path=${class_file_path#*src/main/java/}
+        class_file_path=${class_file_path#*src/test/java/}
+        class_file_path=${class_file_path//\//.}
+        class_file_path=${class_file_path%.java*}
+        class_file_path_list[$i]="$class_file_path"
+        echo "$i) $class_file_path"
+    done
+
+    read -p "请输入运行的class下标或class,如果输入空字符串则使用jar中默认指定的main:" class_index
+
+    if [[ -z $class_index ]]; then
+        echo "输入class为空,使用jar指定的main"
+    elif grep '^[[:digit:]]$' <<< "$class_index"; then
+        class_file_path=${class_file_path_list[class_index]}
+        echo "输入class_index: $class_index, class: $class_file_path"
+    else
+        class_file_path=$class_index
+        echo "输入class: $class_file_path"
+    fi
 
 
-    if [[ -z $class_name ]]; then
+    if [[ -z $class_file_path ]]; then
         java -jar $jar_path
     else
-        java -cp $jar_path $class_name
+        java -cp $jar_path $class_file_path
     fi
     
 

@@ -49,6 +49,19 @@ if [[ -z \$${1:变量名} ]]; then
 fi
 endsnippet
 
+snippet strReplaceOne "替换字符串可以用通配符(*),只替换第一个匹配的字符串"
+${4:var}=\$\{${1:var}/${2:被替换字符}/${3:替换字符}\}
+$0
+endsnippet
+snippet strReplaceAll "替换字符串可以用通配符(*),替换第全部匹配的字符串"
+${4:var}=\$\{${1:var}//${2:被替换字符}/${3:替换字符}\}
+$0
+endsnippet
+snippet strReplaceSed "替换字符串,使用正则表达式, 最后'/g' 为全部匹配,如果为 '/'则只替换匹配的第一个"
+${4:var}=\$(echo \$${1:var} | sed 's/${2:被替换字符}/${3:替换字符}/g')
+$0
+endsnippet
+
 # ###字符串截取##字符串 str#变量
 # ${string: start :length}   从 string 字符串的左边第 start 个字符开始，向右截取 length 个字符。
 # ${string: start}           从 string 字符串的左边第 start 个字符开始截取，直到最后。

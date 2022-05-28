@@ -63,7 +63,7 @@ run() {
 
     if [[ -z $class_index ]]; then
         echo "输入class为空,使用jar指定的main"
-    elif grep '^[[:digit:]]$' <<< "$class_index"; then
+    elif grep '^[[:digit:]]*$' <<< "$class_index"; then
         class_file_path=${class_file_path_list[class_index]}
         echo "输入class_index: $class_index, class: $class_file_path"
     else

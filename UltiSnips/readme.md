@@ -38,6 +38,10 @@ ultisnips 插件需要你的 vim 支持 python，可以在 vim 命令模式下�
 
 ## 定义一个代码片段
 
+## snippets 文件对应文件类型规则
+
+- 1. 如果sh.snippets 对于shell脚本的代码片段 则 sh_xxx.snippets 也对应对于shell脚本的代码片段
+
 ## 定义格式
 
 ```vim

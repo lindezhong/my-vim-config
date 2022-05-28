@@ -214,6 +214,10 @@ endsnippet
 # // 注意，`sizeof`返回值的数据类型是`size_t`，所以`sizeof(a) / sizeof(a[0])`的数据类型也是`size_t`。在`printf()`里面的占位符，要用`%zd`或`%zu`。
 # // 注意如果是f(int arr[]) { size_t len = sizeof(arr); } 会报错，因为f()函数中的arr数组作为参数传给函数时，是传给数组的地址，而不是传给整个的数组空间
 # ```
+snippet arrLength "数组长度"
+size_t ${2:length}=sizeof(${1:arr_var})/sizeof($1[0]);
+$0
+endsnippet
 # ##数组的地址#数组
 # ```c
 # //数组名等同于起始地址，也就是说，数组名就是指向第一个成员
@@ -259,3 +263,48 @@ endsnippet
 snippet arrFunVarTow "方法中定义一个二维数组参数" i
 int ${1:m}, int ${2:n} ${3:int} ${4:arrays}[$1][$2]$0
 endsnippet
+
+# #字符串
+# C 语言没有单独的字符串类型，字符串被当作字符数组，即char 类型的数组。比如，字符串"Hello"等价于{'H','e','l','l','o','\0'} . '\0' = false
+# 所有字符串的最后一个字符，都是\0 。这样做的好处是，C 语言不需要知道字符串的长度，就可以读取内存里面的字符串，只要发现有一个字符是\0 ，那么就知道字符串结束了。所以char localStr[10];最多只能容纳9个字符的字符串。
+# ##字符串定义#字符串
+# ```c
+# char str[5]="Hello"; // 报错,因为字符串“hello”的实际长度6,在末尾有 '\0',如果定义的长度大于6(str[100]),则后面都填充'\0'
+# char str[6]={'H','e','l','l','o','\0'};
+# char str[]="Hello"; // 自动推断长度
+# char* str="Hello";
+# char str[]="hello \
+# world"; // str = "hello world" 第一行尾部的反斜杠，将字符串拆成两行,上面这种写法有一个缺点，就是第二行必须顶格书写，如果想包含缩进，那么缩进也会被计入字符串
+# char str[]="hel""lo"; // str = "hello"
+# ```
+# ##字符指针与字符数组的差异#字符串
+# ```c
+# // 1. 字符串指针为常量无法修改,字符串数组可以被修改
+# // 原因是系统会将字符串的字面量保存在内存的常量区，这个区是不允许用户修改的。声明为指针时，指针变量存储的值是一个指向常量区的内存地址，因此用户不能通过这个地址去修改常量区
+# // 声明为数组时，编译器会给数组单独分配一段内存，字符串字面量会被编译器解释成字符数组，逐个字符写入这段新分配的内存之中，而这段新内存是允许修改的。
+# char* str="Hello"; str[0]='h'; // 报错
+# char str[]="Hello"; str[0]='h'; // 不报错,str被修改,str="hello"
+# // 2. 指针变量可以指向其它字符串。字符数组变量不能指向另一个字符串。
+# // 原因是数组变量所在的地址无法改变，或者说，编译器一旦为数组变量分配地址后，这个地址就绑定这个数组变量了，这种绑定关系是不变的。C 语言也因此规定，数组变量是一个不可修改的左值，即不能用赋值运算符为它重新赋值。
+# char* str="Hello"; str="hello"; // 不报错
+# char str[]="Hello"; str="hello"; // 报错
+# ```
+# ##字符串函数#字符串
+# - strlen(const char *) : 获取字符串长度 char s[50]="Hello"; strlen(s)=5; sizeof(s)=50;
+# - strcpy(char *, const char *) : 复制字符串 。复制字符串之前，必须要保证第一个参数的长度不小于第二个参数，否则虽然不会报错，
+# - strncpy(char *, const char *, unsigned long) : strncpy() 跟strcpy() 的用法完全一样，只是多了第3个参数，用来指定复制的最大字符数，防止溢出目标字符串变量的边界。  
+# - strcat(char *, const char *) : 它接受两个字符串作为参数，把第二个字符串的副本添加到第一个字符串的末尾。
+# - strncat(char *, const char *, unsigned long) : strncat() 用于连接两个字符串，用法与strcat() 完全一致，只是增加了第三个参数，指定最大添加的字符数一旦达到指定的字符数，或者在源字符串中遇到空字符\0 ，就不再添加了。
+# - int strcmp(const char* s1, const char* s2) : 函数用于比较两个字符串的内容。如果s1 小于s2 ，strcmp() 返回值小于0；如果s1 大于s2 ，返回值大于0。
+# - strncmp() : 由于strcmp() 比较的是整个字符串，C 语言又提供了strncmp() 函数，只比较到指定的位置。
+# - sprintf(char* s, const char* format, ...) : 函数跟printf() 类似，但是用于将数据写入字符串s
+# - snprintf(char*s, size_t n, const char* format, ...) : 用来控制写入变量的字符串不超过n - 1
+# ##字符串数组#字符串
+# char weekdays[7][10]={"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"}
+# char weekdays[][10]={"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"} //二维数组第一维的长度由编译器根据后面的赋值
+# char* weekdays[]={"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"} // 其实是一个一维数组，成员就是7个字符指针，每个指针指向一个字符串
+
+
+# # #c语言关键字
+# - const : 常量
+# - extern : 对该变量/函数作"外部变量声明",表示该变量是一个已经定义的外部变量。有了此声明，就可以从“声明”处起，合法地使用该外部变量

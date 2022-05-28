@@ -186,7 +186,7 @@ fi
 endsnippet
 
 snippet ifNum "判断是否为数字,进入if是数字"
-if grep '^[[:digit:]]*$' <<< "\$${1:var}"; then
+if grep -E '^[0-9][0-9]*$' <<< "\$${1:var}"; then
     $0
 fi
 endsnippet

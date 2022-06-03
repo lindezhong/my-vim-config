@@ -15,8 +15,13 @@ if [ ! -d ${HOME}/.w3m ]; then
     mkdir ${HOME}/.w3m
 fi
 
-rm ${HOME}/.w3m/keymap
-rm ${HOME}/.w3m/config
+
+if [ -f ${HOME}/.w3m/keymap ]; then
+    rm ${HOME}/.w3m/keymap
+fi
+if [ -f ${HOME}/.w3m/config ]; then
+    rm ${HOME}/.w3m/config
+fi
 ln -s ${home_path}/config/w3m-keymap ${HOME}/.w3m/keymap
 ln -s ${home_path}/config/w3m-config ${HOME}/.w3m/config
 

@@ -62,6 +62,36 @@ ${4:var}=\$(echo \$${1:var} | sed 's/${2:被替换字符}/${3:替换字符}/g')
 $0
 endsnippet
 
+# #!/bin/bash
+# str="1xxxx2,3 4"
+# OLD_IFS=${IFS}
+# IFS="xxxx"
+# arr=($str)
+# IFS=${OLD_IFS}
+# for(( i=0; i<${#arr[@]}; i++)) do
+#     item=${arr[i]}
+#     echo "$item"
+# done
+# echo "arr数组长度: ${#arr[@]}"
+# 输出:
+# 1
+# 
+# 
+# 
+# 2,3 4
+# arr数组长度: 5
+snippet strSplit "分割字符串(将分割字符串换成IFS),但要注意字符串中有IFS的情况。 '1,2 3' -> ['1','2','3']"
+${3:str_arr_var}=(\$\{${1:str_var}//${2:分割符}/\$\{IFS\}\})
+$0
+endsnippet
+snippet strSplitIfs "分割字符串(通过修改IFS实现),要注意1.分割符只能有一位2.要使用带下标的for循环(否则原来字符串中带IFS会分割)  。'1,2 3' -> ['1','2 3']"
+OLD_IFS=\$\{IFS\}
+IFS='${1:分割符}'
+${3:str_arr_var}=(\$${2:str_var})
+IFS=\$\{OLD_IFS\}
+$0
+endsnippet
+
 # ###字符串截取##字符串 str#变量
 # ${string: start :length}   从 string 字符串的左边第 start 个字符开始，向右截取 length 个字符。
 # ${string: start}           从 string 字符串的左边第 start 个字符开始截取，直到最后。
@@ -209,7 +239,7 @@ done
 endsnippet
 
 snippet fori "遍历数组带下标"
-for(( ${1:i}=0;$1<\$\{#${2:数组名}[@]\};$1++)) do
+for(( ${1:i}=0; $1<\$\{#${2:数组名}[@]\}; $1++)) do
     $0\$\{$2[$1]\}
 done
 endsnippet

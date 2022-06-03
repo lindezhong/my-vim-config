@@ -27,7 +27,7 @@ run() {
 
     install
 
-    local jar_path_list=($(find ./ -name "*.jar"))
+    local jar_path_list=($(find ./ -name "*.jar" | grep -v "/lib"))
     local jar_num=${#jar_path_list[@]}
 
     if (( $jar_num <= 0 )); then

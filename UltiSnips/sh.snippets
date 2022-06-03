@@ -323,8 +323,8 @@ if [[ -z \$${1:变量名} ]]; then
 fi
 endsnippet
 
-snippet ifDirExist "判断目录是否存在，要判断不存在加 !"
-if [[ -d "${1:目录地址}" ]]; then
+snippet ifDirExist "判断目录(目录不能用''包裹)是否存在，要判断不存在加 !"
+if [ -d ${1:目录地址} ]; then
     $0
 fi
 endsnippet

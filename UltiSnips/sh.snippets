@@ -57,6 +57,20 @@ endsnippet
 # echo "Found"
 # fi	判断item_1是否在array中
 
+snippet mapLength "获取map长度" w
+${2:length}=\$\{#${1:map名}[@]\}
+endsnippet
+
+snippet mapInKey "判断map中是否包含某个key"
+if [ -n "\$\{${1:map}[${2:key}]\}" ]; then
+    $0
+fi
+endsnippet
+snippet mapInValue "判断map中是否包含某个Value"
+if [[ "\$\{${1:map}[@]\}" =~ "\$\{${2:value}\}" ]]; then
+    $0
+fi
+endsnippet
 
 snippet mapInit "初始化map,普通方式定义无法遍历:declare -A map=(['k1']='v1' ['k2']='v2')"
 declare -A ${1:map_name}=(${2:初始化值})
@@ -331,6 +345,19 @@ if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
     $0
 fi
 endsnippet
+snippet ifInMapKey "判断map中是否包含某个key"
+if [ -n "\$\{${1:map}[${2:key}]\}" ]; then
+    $0
+fi
+endsnippet
+snippet ifInMapValue "判断map中是否包含某个Value"
+if [[ "\$\{${1:map}[@]\}" =~ "\$\{${2:value}\}" ]]; then
+    $0
+fi
+endsnippet
+
+
+
 # ##for#流程控制
 snippet forin "遍历数组不带下标"
 for ${1:子变量名} in "\$\{${2:父变量名}[@]\}"; do

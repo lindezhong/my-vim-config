@@ -1,5 +1,19 @@
 # #变量
 # ##数组#变量
+# #	个数相关,$#：shell的参数个数
+# @、*	所有元素,$@ $: shell的所有参数列表 array[@]/array[]: 数组的所有元素
+# ${#array[@]}	取数组元素的个数
+# ${#array[*]}	取数组元素的个数
+# ${array[*]}	取所有数组的元素
+# ${array[@]}	取所有数组的元素
+# ${!array[@]}	取数组下标的值
+# ${array[@]:n:m}	从数组n位置开始取m个元素
+# array_new=(${array1[@]} ${array2[@]})	数组合并:将array1和array2合并然后赋值给array_new
+# array=($(echo ${ayyary[@]} | sed ‘s/ /\n/g’ |sort )) | uniq	对数组进行去重排序，详细解释
+# if echo “${array[@]}” | grep -w “item_1” &>/dev/null; then
+# echo "Found"
+# fi	判断item_1是否在array中
+
 snippet arrLength "获取数组长度" w
 ${2:length}=\$\{#${1:数组名}[@]\}
 endsnippet
@@ -29,6 +43,21 @@ endsnippet
 
 
 # ##map#变量
+# #	个数相关,$#：shell的参数个数
+# @、*	所有元素,$@ $: shell的所有参数列表 array[@]/array[]: 数组的所有元素
+# ${#array[@]}	取数组元素的个数
+# ${#array[*]}	取数组元素的个数
+# ${array[*]}	取所有数组的元素
+# ${array[@]}	取所有数组的元素
+# ${!array[@]}	取数组下标的值
+# ${array[@]:n:m}	从数组n位置开始取m个元素
+# array_new=(${array1[@]} ${array2[@]})	数组合并:将array1和array2合并然后赋值给array_new
+# array=($(echo ${ayyary[@]} | sed ‘s/ /\n/g’ |sort )) | uniq	对数组进行去重排序，详细解释
+# if echo “${array[@]}” | grep -w “item_1” &>/dev/null; then
+# echo "Found"
+# fi	判断item_1是否在array中
+
+
 snippet mapInit "初始化map,普通方式定义无法遍历:declare -A map=(['k1']='v1' ['k2']='v2')"
 declare -A ${1:map_name}=(${2:初始化值})
 $0

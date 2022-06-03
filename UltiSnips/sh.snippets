@@ -10,6 +10,24 @@ if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
 fi
 endsnippet
 
+# #!/bin/bash
+# fun() {
+#     local __tmp_arr_var=$(declare -p "$1")
+#     eval "declare -A local arr_var"=${__tmp_arr_var#*=}
+#     for arr_item in "${arr_var[@]}"; do
+#         echo -n "$arr_item "
+#     done
+# }
+# arr=('1' 2 3)
+# fun arr
+# 输出: 3 2 1
+snippet arrArgs "数组作为函数/方法的参数,调用例子(fun为函数arr_var为map变量,调用时不带$). fun arr_var"
+local __tmp_arr_var=\$(declare -p "\$${1:index}")
+eval "declare -A local ${2:arr_var}"=${__tmp_arr_var#*=}
+$0
+endsnippet
+
+
 # ##map#变量
 snippet mapInit "初始化map,普通方式定义无法遍历:declare -A map=(['k1']='v1' ['k2']='v2')"
 declare -A ${1:map_name}=(${2:初始化值})
@@ -30,6 +48,24 @@ snippet mapForValues "遍历map values"
 for ${2:value} in \$\{${1:map_var_name}[@]\}; do
     $0
 done
+endsnippet
+
+# #!/bin/bash
+# fun() {
+#     local __tmp_map_var=$(declare -p "$1")
+#     eval "declare -A local map_var"=${__tmp_map_var#*=}
+#     for key in ${!map_var[@]}; do
+#         value=${map_var[$key]}
+#         echo "$key : $value"
+#     done
+# }
+# declare -A map=(["k"]="v")
+# fun map
+# 输出 : k : v
+snippet mapArgs "map作为函数/方法的参数,调用例子(fun为函数map_var为map变量,调用时不带$). fun map_var"
+local __tmp_map_var=\$(declare -p "\$${1:index}")
+eval "declare -A local ${2:map_var}"=${__tmp_map_var#*=}
+$0
 endsnippet
 
 # ##字符串 str#变量
@@ -119,6 +155,41 @@ snippet strSubLeftLast "截取关键字(最后一个匹配到的)左边的字符
 ${3:var}=\$\{${1:字符串}%${2:关键字}*\}
 endsnippet
 
+
+# ##函数参数args#变量
+# #!/bin/bash
+# fun() {
+#     local __tmp_map_var=$(declare -p "$1")
+#     eval "declare -A local map_var"=${__tmp_map_var#*=}
+#     for key in ${!map_var[@]}; do
+#         value=${map_var[$key]}
+#         echo "$key : $value"
+#     done
+# }
+# declare -A map=(["k"]="v")
+# fun map
+# 输出 : k : v
+snippet argsMap "map作为函数/方法的参数,调用例子(fun为函数map_var为map变量,调用时不带$). fun map_var"
+local __tmp_map_var=\$(declare -p "\$${1:index}")
+eval "declare -A local ${2:map_var}"=${__tmp_map_var#*=}
+$0
+endsnippet
+# #!/bin/bash
+# fun() {
+#     local __tmp_arr_var=$(declare -p "$1")
+#     eval "declare -A local arr_var"=${__tmp_arr_var#*=}
+#     for arr_item in "${arr_var[@]}"; do
+#         echo -n "$arr_item "
+#     done
+# }
+# arr=('1' 2 3)
+# fun arr
+# 输出: 3 2 1
+snippet argsArr "数组作为函数/方法的参数,调用例子(fun为函数arr_var为map变量,调用时不带$). fun arr_var"
+local __tmp_arr_var=\$(declare -p "\$${1:index}")
+eval "declare -A local ${2:arr_var}"=${__tmp_arr_var#*=}
+$0
+endsnippet
 
 # ##变量 var#变量
 snippet varInit "初始化变量"

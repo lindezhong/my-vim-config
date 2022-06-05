@@ -195,16 +195,30 @@ endsnippet
 # const int* const p; // p = 0 和 *p = 0 都报错
 # ##可变参数#函数
 # ```c
-# double average(int i, ...) {
+# double average(int argsLength, ...) {
 #   double total = 0;
 #   va_list ap; // 一个数据类型，用来定义一个可变参数对象。它必须在操作可变参数时，首先使用
-#   va_start(ap, i); // 一个函数，用来初始化可变参数对象。它接受两个参数，第一个参数是可变参数对象，第二个参数是原始函数里面，可变参数之前的那个参数，用来为可变参数定位。
-#   for (int j = 1; j <= i; ++j) {
+#   va_start(ap, argsLength); // 一个函数，用来初始化可变参数对象。它接受两个参数，第一个参数是可变参数对象，第二个参数是原始函数里面，可变参数之前的那个参数，用来为可变参数定位。
+#   for (int j = 1; j <= argsLength; ++j) {
 #     total += va_arg(ap, double); // ：一个函数，用来取出当前那个可变参数，每次调用后，内部指针就会指向下一个可变参数。它接受两个参数，第一个是可变参数对象，第二个是当前可变参数的类型。
 #   }
 #   va_end(ap); // 一个函数，用来清理可变参数对象。
-#   return total / i;
+#   return total / argsLength;
 # }
+# double ave = average(3, 1,2,3); // ave=2, 调用方式,请注意需要传递参数中的 argsLength
+# ```
+snippet argsVariadicDefinition "可变参数定义,调用的时候需传递参数长度argsLength"
+int ${1:argsLength}, ...
+endsnippet
+snippet argsVariadicUse "可变参数使用"
+va_list ${1:var};
+va_start($1, ${2:argsLength,'...'前的int变量});
+for (int ${3:i}=0; $3<$2; $3++) {
+    ${4:可变参数类型} ${5:var} = va_arg($1, $4);
+	$0
+}
+va_end($1);
+endsnippet
 
 # #数组
 # ```c
@@ -249,18 +263,21 @@ endsnippet
 # ```
 # ##数组复制#数组
 # int* a; int b[] = {1,2,3}; memcpy(a, b, sizeof(b));
+snippet arrCopy "数组复制"
+memcpy(${1:目标数组名}, ${2:源数组名}, sizeof($2));
+endsnippet
 # ##数组参数#数组
 # ###二维数组参数##数组参数#数组
 # in sum_array(arr[][2], int len);
 # // 函数`sum_array()`的参数是一个二维数组。第一个参数是数组本身（`a[][4]`），这时可以不写第一维的长度，因为它作为第二个参数，会传入函 数，但是一定要写第二维的长度`4`。
-# // 这是因为函数内部拿到的，只是数组的起始地址`a`，以及第一维的成员数量`2`。如果要正确计算数组的结束地址，还必须知道第一维每个成员的字节长度。写>    成`int a[][4]`，编译器就知道了，第一维每个成员本身也是一个数组，里面包含了4个整数，所以每个成员的字节长度就是`4 * sizeof(int)`。
+# // 这是因为函数内部拿到的，只是数组的起始地址`a`，以及第一维的成员数量`2`。如果要正确计算数组的结束地址，还必须知道第一维每个成员的字节长度。写成`int a[][4]`，编译器就知道了，第一维每个成员本身也是一个数组，里面包含了4个整数，所以每个成员的字节长度就是`4 * sizeof(int)`。
 # ###变长数组作为参数##数组参数#数组
 # int sum_array(int n, int a[n]); // 数组`a[n]`是一个变长数组，它的长度取决于变量`n`的值, n要在a前面定义
 # int sum = sum_array(4, (int []){1,2,3,4});
-snippet arrFunVarOne "方法中定义一个一维数组参数" i
+snippet argsArrFunVarOne "方法中定义一个一维数组参数" i
 int ${1:len}, ${2:int} ${3:arrays}[$1]$0
 endsnippet
-snippet arrFunVarTow "方法中定义一个二维数组参数" i
+snippet argsArrFunVarTow "方法中定义一个二维数组参数" i
 int ${1:m}, int ${2:n} ${3:int} ${4:arrays}[$1][$2]$0
 endsnippet
 
@@ -291,14 +308,35 @@ endsnippet
 # ```
 # ##字符串函数#字符串
 # - strlen(const char *) : 获取字符串长度 char s[50]="Hello"; strlen(s)=5; sizeof(s)=50;
+snippet strLength "获取字符串长度"
+int ${2:length} = strlen(${1:str_var});
+endsnippet
 # - strcpy(char *, const char *) : 复制字符串 。复制字符串之前，必须要保证第一个参数的长度不小于第二个参数，否则虽然不会报错，
+snippet strCopy "复制字符串,dest:必须是数组不能是指针，有返回值,必须要保证目标字符串的长度不小于源字符串参数，否则虽然不会报错"
+strcpy(${1:dest}, ${2:src});
+endsnippet
 # - strncpy(char *, const char *, unsigned long) : strncpy() 跟strcpy() 的用法完全一样，只是多了第3个参数，用来指定复制的最大字符数，防止溢出目标字符串变量的边界。  
+snippet strCopyN "复制n个长度src字符串,dest:必须是数组不能是指针，有返回值"
+strncpy(${1:dest}, ${2:src},${3:n});
+endsnippet
 # - strcat(char *, const char *) : 它接受两个字符串作为参数，把第二个字符串的副本添加到第一个字符串的末尾。
+snippet strCat "连接字符串,第一个参数只能是数组不能为指针，把第二个字符串的副本添加到第一个字符串的末尾,注意不要超过第一个字符串长度"
+strcat(${1:追加字符串}, ${2:var});
+endsnippet
 # - strncat(char *, const char *, unsigned long) : strncat() 用于连接两个字符串，用法与strcat() 完全一致，只是增加了第三个参数，指定最大添加的字符数一旦达到指定的字符数，或者在源字符串中遇到空字符\0 ，就不再添加了。
+snippet strCatN "连接字符串,第一个参数只能是数组不能为指针,把第二个字符串的副本添加到第一个字符串的末尾,并指定长度n, strncat('world', 'ldz', 3) -> 'world ldz'"
+strncat(${1:追加字符串}, ${2:var},${3:n});
+endsnippet
 # - int strcmp(const char* s1, const char* s2) : 函数用于比较两个字符串的内容。如果s1 小于s2 ，strcmp() 返回值小于0；如果s1 大于s2 ，返回值大于0。
 # - strncmp() : 由于strcmp() 比较的是整个字符串，C 语言又提供了strncmp() 函数，只比较到指定的位置。
 # - sprintf(char* s, const char* format, ...) : 函数跟printf() 类似，但是用于将数据写入字符串s
+snippet strPrintf "函数跟printf() 类似，但是用于将数据写入字符串str,str为数组不能为指针,注意写入长度不要超过str长度"
+sprintf(${1:str}, ${2:format}, ${3:...});
+endsnippet
 # - snprintf(char*s, size_t n, const char* format, ...) : 用来控制写入变量的字符串不超过n - 1
+snippet strPrintfN "函数跟printf() 类似，但是用于将数据写入字符串str,并且控制写入变量的字符串不超过n - 1,str为数组不能为指针,注意写入长度不要超过str长度"
+snprintf(${1:str}, ${2:n}, ${3:format}, ${4:...});
+endsnippet
 # ##字符串数组#字符串
 # char weekdays[7][10]={"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"}
 # char weekdays[][10]={"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"} //二维数组第一维的长度由编译器根据后面的赋值

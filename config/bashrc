@@ -1,0 +1,19 @@
+alias transz="trans en:zh"
+alias transe="trans zh:en"
+
+alias mvninstall="mvn clean install -Dmaven.test.skip=true"
+alias mvnsource="mvn dependency:sources -DdownloadJavadocs=true"
+alias mvntree="mvn dependency:tree"
+alias mvndebug='export MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspen=n"'
+
+export JAVA_HOME=/opt/jdk11
+export CLASSPATH=.:${JAVA_HOME}/lib/dt.jar:${JAVA_HOME}/lib/tools.jar
+export MAVEN_HOME=/opt/apache-maven-3.8.5
+export BASH_HOME=~/.vim/bash
+# 指定c语言额外的include,lib路径
+export LD_LIBRARY_PATH="~/.local/lib:~/.local/include"
+export CPPFLAGS="-I~/.local/include"
+export LDFLAGS="-L~/.local/lib"
+alias gcc="gcc -I gcc -I ~/.local/include"
+
+PATH=.:${PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/jre/bin:${MAVEN_HOME}/bin:${BASH_HOME}

@@ -296,7 +296,7 @@ endsnippet
 # ```
 # ##字符指针与字符数组的差异#字符串
 # ```c
-# // 1. 字符串指针为常量无法修改,字符串数组可以被修改
+# // 1. 字符串指针(但用malloc()分配出来的可以修改)为常量无法修改,字符串数组可以被修改
 # // 原因是系统会将字符串的字面量保存在内存的常量区，这个区是不允许用户修改的。声明为指针时，指针变量存储的值是一个指向常量区的内存地址，因此用户不能通过这个地址去修改常量区
 # // 声明为数组时，编译器会给数组单独分配一段内存，字符串字面量会被编译器解释成字符数组，逐个字符写入这段新分配的内存之中，而这段新内存是允许修改的。
 # char* str="Hello"; str[0]='h'; // 报错
@@ -352,6 +352,81 @@ endsnippet
 # int* q = p; // void 指针转为整数指针
 # printf("%c\n", *p); // 报错(Argument type 'void' is incomplete):由于不知道 void 指针指向什么类型的值，所以不能用`*`运算符取出它指向的值。
 # ```
+# ##内存相关函数#内存
+# void* malloc(size_t size) : 函数用于分配内存，该函数向系统要求一段内存，系统就在“堆”里面分配一段连续的内存块给它。
+# ```c
+# int* p = (int*) malloc(sizeof(int));
+# // `malloc()`分配内存有可能分配失败，这时返回常量 NULL。Null 的值为0，是一个无法读写的内存地址，
+# if (p == NULL && !p) {printf("内存分配失败\n");}
+# *p = 12;
+# // `malloc()`用来创建数组，有一个好处，就是它可以创建动态数组，即根据成员数量的不同，而创建长度不同的数组。
+# int* arr = (int*)malloc(n * sizeof(int));
+# char* str = malloc(11);
+# strcpy(str, "hello world"); // 用malloc分配出来的字符串不是不可变的，可以被修改
+# ```
+snippet memoryMalloc "内存分配(分配在堆中),不会初始化内存,这个内存块会一直占用到程序运行结束,分配内存有可能分配失败，这时返回常量 NULL。"
+void* ${2:var} = malloc(${1:size});
+$0
+endsnippet
+snippet memoryFree "用于释放`malloc()`函数分配的内存，，不释放内存块会一直占用到程序运行结束。分配的内存块一旦释放，就不应该再次操作已经释放的地址，包括重新`free()`"
+free(${1:var});
+$0
+endsnippet
+# ```c
+# int* p = calloc(10, sizeof(int));
+# 
+# // 等同于
+# int* p = malloc(sizeof(int) * 10);
+# memset(p, 0, sizeof(int) * 10);
+# ```
+snippet memoryCalloc "内存分配(分配在堆中),会将所分配的内存全部初始化为0。分配大小: n*size。这个内存块会一直占用到程序运行结束,分配内存有可能分配失败，这时返回常量 NULL。"
+void* ${3:var} = calloc(${1:n}, ${2:size});
+$0
+endsnippet
+# 修改已分配的内存块大小失败返回NULL。block=NULL等价于malloc(),size=0就会释放掉内存块。会复制原有数据,缩小:丢弃超出的部分>    优先在原有内存块上进行缩减,放大:不初始化内存,可以手动调用memset(),注意，`realloc()`不会对内存块进行初始化。
+snippet memoryRealloc "修改已分配的内存块大小失败返回NULL。block=NULL等价于malloc(),size=0就会释放掉内存块。会复制原有数据"
+${1:block} = realloc($1, ${2:size};
+$0
+endsnippet
+# ```c
+# //不管传入的`dest`和`src`是什么类型的指针，将它们重新定义成一字节的 Char 指针，这样就可以逐字节进行复制。`*d++ = *s++`语句相当于先执行`*d = *s`（源字节的值复制给目标字节），然后各自移动到下一个字节。最后，返回复制后的`dest`指针，便于后续使用。
+# void* my_memcpy(void* dest, void* src, int byte_count) {
+#   char* s = src;
+#   char* d = dest;
+#   while (byte_count--) {
+#     *d++ = *s++;
+#   }
+#   return dest;
+# }
+# ```
+snippet memoryMemcpy "用于将一块内存拷贝到另一块内存,指定复制长度n,目标区域与源区域不允许重叠,有重叠使用memmove()"
+memcpy(${1:dest}, ${2:src}, ${3:n});
+$0
+endsnippet
+# ```c
+# int a[100];
+# memmove(&a[0], &a[1], 99 * sizeof(int));
+# ```
+snippet memoryMemmove "函数用于将一段内存数据复制到另一段内存。允许目标区域与源区域有重叠。如果发生重叠，源区域的内容会被更改；如果没有重叠，它与`memcpy()`行为相同。"
+memmove(${1:dest}, ${2:src}, ${3:n});
+$0
+endsnippet
+snippet memoryMemcmp "比较两个内存区域,指定长度n,如果`s1`大于`s2`，返回大于0的整数；如果`s1`小于`s2`，返回小于0的整数。"
+int ${4:var} = memcmp(${1:s1}, ${2:s2}, ${3:n});
+endsnippet
+# ##restrict(受限指针)#内存
+# 声明指针变量时，可以使用`restrict`说明符，告诉编译器，该块内存区域只有当前指针一种访问方式，其他指针不能读写该块内存。这种指针称为“受限指针”（restrict pointer）。但实际上能访问只是告诉编译器用于优化
+# ```c
+# int* restrict p;
+# p = malloc(sizeof(int));
+# 
+# int* q = p;
+# *q = 0; //不报错，但现在该内存有`p`和`q`两种访问方式, 后面通过`*q`对该内存区域赋值，会导致未定义行为。
+# ```
+
+
+
+	
 
 
 

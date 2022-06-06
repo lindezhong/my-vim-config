@@ -456,11 +456,15 @@ endsnippet
 #      echo '{"k": "v"}' | jq ".k" # 输出: "v"
 # -s : 将换行符号转 '\n' 配合保证-R 使用保证json转字符串只有一行
 snippet jqGet "jq获取一个字段, key结构如下 : .第一层key.k第二层key (使用'.'分割)"
-${3:var}=\$(echo \$${1:json变量} | jq -r ".${2:key}")
+${3:var}=\$(echo \$${1:json变量} | jq -r '.${2:key}')
+$0
+endsnippet
+snippet jqGetByKey "jq获取一个字段,key由参数传递, key结构如下 : .第一层key.k第二层key (使用'.'分割)"
+${3:var}=\$(echo \$${1:json变量} | jq -r --arg key  "\$\{${2:key}\}" '.[\$key]')
 $0
 endsnippet
 snippet jqArrFor "jq遍历jq数组/list 需要 json list 为 : [] 格式"
-${1:length}=$(echo \$\{${2:json list变量}\} | jq ". | length")
+${1:length}=$(echo \$\{${2:json list变量}\} | jq '. | length')
 for (( ${3:i}=0; $3<$1; $3++ )); do
     ${4:jsonListItem}=\$(echo \$$2 | jq -r ".[\$$3]")
     $0
@@ -470,8 +474,16 @@ snippet jqPutStr "jq put string 类型到json 例子 : {} -> {'k': '[1,2]'}"
 ${1:json变量}=\$(echo -n \$\{$1\} | jq --arg ${2:key} "${3:value可以使用\$变量}" '.$2=\$$2')
 $0
 endsnippet
+snippet jqPutStrKV "jq put string 类型到json,key/value都由参数传递 例子 : {} -> {'k': '[1,2]'}"
+${1:json变量}=\$(echo -n \$\{$1\} | jq --arg key  "\$\{${2:key}\}"  --arg value  "\$\{${3:value}\}"  '.[\$key]=\$value')
+$0
+endsnippet
 snippet jqPutJson "jq put string 类型到json 例子 : {} -> {'k': [1,2]}"
 ${1:json变量}=\$(echo -n \$\{$1\} | jq --argjson ${2:key} "${3:value可以使用\$变量}" '.$2=\$$2')
+$0
+endsnippet
+snippet jqPutJsonKV "jq put string 类型到json,key/value都由参数传递 例子 : {} -> {'k': [1,2]}"
+${1:json变量}=\$(echo -n \$\{$1\} | jq --arg key "\$\{${2:key}\}" --argjson value "\$\{${3:value}\}" '.[\$key]=\$value')
 $0
 endsnippet
 snippet jqDel "jq 删除key : {'k': 'v', 'k1': 'v1'} -> {'k': 'v'}"
@@ -483,7 +495,8 @@ ${1:json变量}=\$(echo -n \$\{$1\} | jq 'del(.${2:key}[${3:index}])')
 $0
 endsnippet
 snippet jqKeys "获取json的所有key"
-${2:var,返回格式为json:["k"]}=\$(echo -n \$${1:json_var} | jq "keys")
+${2:var,返回格式为json:["k"]}=\$(echo -n \$${1:json_var} | jq 'keys')
+$0
 endsnippet
 snippet jqArrAdd "jq 往数组中追加元素 : [1] -> [1,2]"
 ${1:json变量}=\$(echo -n \$\{$1\} | jq '.${2:key}[length]=${3:value}')

@@ -455,11 +455,11 @@ endsnippet
 #      echo '{"k": "v"}' | jq -r ".k" # 输出: v
 #      echo '{"k": "v"}' | jq ".k" # 输出: "v"
 # -s : 将换行符号转 '\n' 配合保证-R 使用保证json转字符串只有一行
-snippet jqGet "jq获取一个字段, key结构如下 : .第一层key.k第二层key (使用'.'分割)"
+snippet jqGet "jq获取一个字段, key结构如下 : .第一层key.第二层key (使用'.'分割)"
 ${3:var}=\$(echo \$${1:json变量} | jq -r '.${2:key}')
 $0
 endsnippet
-snippet jqGetByKey "jq获取一个字段,key由参数传递, key结构如下 : .第一层key.k第二层key (使用'.'分割)"
+snippet jqGetByKey "jq获取一个字段,key由参数传递, key结构如下 : .第一层key.第二层key (使用'.'分割)"
 ${3:var}=\$(echo \$${1:json变量} | jq -r --arg key  "\$\{${2:key}\}" '.[\$key]')
 $0
 endsnippet

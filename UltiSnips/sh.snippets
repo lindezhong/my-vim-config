@@ -388,6 +388,23 @@ for ${2:value} in \$\{${1:map_var_name}[@]\}; do
 done
 endsnippet
 
+snippet forArr2In "遍历二维数组不带下标，arr2=('1 2 3' '4 5 6'),如果子数组带空格用(')包裹"
+for ${2:arr_1_var} in "\$\{${1:arr}[@]\}"; do
+    eval ${3:arr_2_var}=(\$$2) 
+    for ${4:item} in "\$\{$3[@]\}"; do
+        $0
+	done
+done
+endsnippet
+snippet forArr2I "遍历二维数组带下标,arr2=('1 2 3' '4 5 6'),如果子数组带空格用(')包裹"
+for(( ${1:i}=0; $1<\$\{#${2:数组名}[@]\}; $1++)) do
+    eval ${3:tmp_arr_var}=(\$\{$2[$1]\})
+    for(( ${4:j}=0; $4<\$\{#$3[@]\}; $4++)) do
+        $0\$\{$3[$4]\}
+    done
+done
+endsnippet
+
 # ##error#流程控制
 snippet errExit "上一条命令异常退出脚本"
 if [ ! $? -eq 0 ]; then
@@ -541,7 +558,11 @@ snippet curlHeadLanguage "curl 语言"
 -H 'Accept-Language: zh-CN,zh;'  \
 endsnippet
 
-# #其他shell命令
+# #其他shell命令/shell
 snippet continue "跳过for/while循环"
 continue
+endsnippet
+
+snippet eval "eval:1.要在命令的最前面2.扫描eval后面的命令两遍第一遍替换变量，第二遍执行 arr_v='1 2',eval arr=($arr_v) => arr=(1 2)"
+eval
 endsnippet

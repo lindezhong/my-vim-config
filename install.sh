@@ -37,6 +37,10 @@ for sh_file_path in $home_path/bash/* ; do
     ln -s $sh_file_path $target_ln_path
 done
 
+# 配置,shell tab 提示
+sudo ln -s ${HOME}/config/bash_completion /etc/bash_completion.d
+
+
 # python软连接:coc-jedi使用
 if [ ! -f /usr/bin/python ]; then
     sudo ln -s /usr/bin/python3 /usr/bin/python

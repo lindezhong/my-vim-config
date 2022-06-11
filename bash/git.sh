@@ -17,17 +17,19 @@ upstream : Git进行fork后跟原仓库同步
     $2 : fork 前的原仓库地址:默认去github获取
     return : 会添加一个上游的主干分支名称为 : upstream/master
 
-github repos : git clone github上一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
-    git.sh github repos ${github 组织} [${pageSize:30}]
+github : github相关操作
 
-    $3 : 组织(organizations)
-    $4 : 可选默认30 github api https://api.github.com/users/USERNAME/repos 每次返回的条数,作为分页结束的条件
-    return : clone 组织下的所有存储库
-
-github upstreamUrl : 解析github项目上游url
-    git.sh github upstreamUrl
+    github repos : git clone github上一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
+        git.sh github repos ${github 组织} [${pageSize:30}]
     
-    return : github项目上游地址
+        $3 : 组织(organizations)
+        $4 : 可选默认30 github api https://api.github.com/users/USERNAME/repos 每次返回的条数,作为分页结束的条件
+        return : clone 组织下的所有存储库
+    
+    github upstreamUrl : 解析github项目上游url
+        git.sh github upstreamUrl
+        
+        return : github项目上游地址
     '
 }
 
@@ -179,6 +181,10 @@ case "$ACTION" in
     github)
         # 对github的一些操作,多传递一些参数防止不够用
         github "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+        ;;
+    * )
+        echo "未知操作,请查看帮助文档"
+        help
         ;;
 esac
 

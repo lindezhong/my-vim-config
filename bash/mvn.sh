@@ -10,6 +10,9 @@ help() {
 --help: 查看mvn.sh脚本帮助文档
 
 run: 运行maven项目,运行前强制打包编译
+    mvn.sh run
+    
+    return: 打包运行maven项目
     '
 }
 
@@ -87,6 +90,9 @@ case $ACTION in
         ;;
     'run' )
         run
+        ;;
+    * )
+        echo "未知操作"
         ;;
 esac
 

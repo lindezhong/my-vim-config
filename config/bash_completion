@@ -1,0 +1,88 @@
+# 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/bash_completion.d/下，这样在下次登录终端时即可自动source自动补全脚本。
+complete -F _complete_func git.sh
+complete -F _complete_func python.sh
+complete -F _complete_func apaas.sh
+complete -F _complete_func pandoraboot
+_complete_func() {
+
+    # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
+    # COMP_CWORD: 型为整数，当前输入的单词在COMP_WORDS中的索引
+    # COMPREPLY: 类型为数组，候选的补全结果
+    # COMP_WORDBREAKS: 类型为字符串，表示单词之间的分隔符
+    # COMP_LINE: 类型为字符串，表示当前的命令行输入字符
+    # COMP_POINT: 类型为整数，表示光标在当前命令行的哪个位置
+
+    local original_cmd=${COMP_WORDS[0]}
+
+    # cmd_list 编写规则:
+    # 格式如下 : cmd_list=("$cmd_item $cmd_item {key} '{key}' [cmd] '[cmd]'  ...")
+    # 1. cmd_list中的每个元素为提示的完整命令行
+    # 2. cmd_item支持{key}形式 : 输出{key},并且不比较与原始的shell命令
+    # 3. cmd_item支持[cmd]形式 : 输出执行的cmd结果,并且不比较与原始的shell命令
+    # 4. 如果cmd_item带空格可以用''(单引号)包裹
+    local cmd_list=()
+    if [[ "$original_cmd" == "python.sh" ]]; then
+        cmd_list=("python.sh --help" "python.sh setuptools env" "python.sh setuptools init {项目名}" "python.sh setuptools install" "python.sh setuptools build" )
+    elif [[ "$original_cmd" == "git.sh" ]]; then
+        cmd_list=("git.sh --help" "git.sh upstream {上游git地址}" "git.sh github repos" "git.sh github upstreamUrl")
+    fi
+
+    COMPREPLY=()
+    local command_name="${COMP_WORDS[COMP_CWORD]}"
+
+    # key: 在cmd_item , value: 提示值
+    declare -A local completion_map=()
+
+    local i
+    for(( i=0; i<${#cmd_list[@]}; i++)) do
+        local cmd=${cmd_list[i]}
+        eval local cmd_item_list=($cmd)
+        local cmd_item_list_length=${#cmd_item_list[@]}
+
+        if (( "$cmd_item_list_length" <= "$COMP_CWORD" )); then
+            continue
+        fi
+
+        # 匹配的次数/要提示的位置
+        local match_num=0
+        local index=0
+        for(( index=0; index<$COMP_CWORD; index++)) do
+            local cmd_item=${cmd_item_list[index]}
+            local original_cmd_item=${COMP_WORDS[index]}
+            
+            if [[ $cmd_item == "$original_cmd_item" ]]; then
+                (( match_num=match_num+1 ))
+            # 支持{key}形式,{key} : 为任意支持只是作为提示
+            elif grep -E '^\{.*\}$' <<< "$cmd_item" > /dev/null; then
+                (( match_num=match_num+1 ))
+            # 支持[cmd]形式 : 为任意支持,但提示内容通过cmd执行,cmd使用'@'替换空格防止二维数组遍历失败
+            elif grep -E '^\[.*\]$' <<< "$cmd_item" > /dev/null; then
+                (( match_num=match_num+1 ))
+            else
+                break
+            fi
+        done
+
+        if (( match_num == COMP_CWORD )); then
+            local completion_cmd=${cmd_item_list[match_num]}
+            if grep -E '^\[.*\]$' <<< "$completion_cmd" > /dev/null; then
+                local run_completion_cmd=${completion_cmd%]*}
+                run_completion_cmd=${run_completion_cmd#*[}
+                completion_map[$completion_cmd]=$(eval $run_completion_cmd)
+            else
+                completion_map[$completion_cmd]=$completion_cmd
+            fi
+
+        fi
+    done
+
+    local completion_txt=""
+    local value
+    for value in ${completion_map[@]}; do
+        completion_txt="$completion_txt $value"
+    done
+
+    # 输出tab提示
+    COMPREPLY=($(compgen -W "${completion_txt}" -- ${command_name}))
+    return 0
+}

@@ -10,9 +10,17 @@ help() {
 --help: 查看mvn.sh脚本帮助文档
 
 run: 运行maven项目,运行前强制打包编译
-    mvn.sh run
+    mvn.sh run [${class过滤字符:默认不过滤}]
     
+    $2 : class过滤字符:默认不过滤
     return: 打包运行maven项目
+
+find_main: 扫描本目录下所有的main java
+    mvn.s find_main [${路径中要包含的字符:默认不过滤}] [${路径中要包含的字符:默认不过滤}]
+
+    $2: 路径中要包含的字符,默认不过滤,一般为src/main或src/test 用来区分是否为测试类
+    $3: 路径中要包含的字符,默认不过滤,一般为类名
+    return 本目录下所有的main java全路径(package.class_name)
     '
 }
 
@@ -26,8 +34,32 @@ install() {
     fi
 }
 
+findMainClass() {
+
+    
+    local filter_class1=$1
+    local filter_class2=$2
+
+    local class_file_path_list=($(grep -r -E "^[[:blank:]]+public[[:blank:]]+static[[:blank:]]+void[[:blank:]]+main" | awk -v FS=":" '{print $1}' | grep "$filter_class1" | grep "$filter_class2"))
+    local class_file_path_list_txt=""
+    local class_file_path=""
+    for(( i=0;i<${#class_file_path_list[@]};i++)) do
+        class_file_path=${class_file_path_list[i]}
+        class_file_path=${class_file_path#*src/main/java/}
+        class_file_path=${class_file_path#*src/test/java/}
+        class_file_path=${class_file_path//\//.}
+        class_file_path=${class_file_path%.java*}
+
+        class_file_path_list_txt="$class_file_path_list_txt $class_file_path"
+    done
+    echo $class_file_path_list_txt
+
+}
+
 run() {
 
+    local filter_class=$1
+    
     install
 
     local jar_path_list=($(find ./ -name "*.jar" | grep -v "/lib"))
@@ -49,19 +81,14 @@ run() {
         jar_path=${jar_path_list[$jar_index]}
     fi
 
-
-    local class_file_path_list=($(grep -r -E "^[[:blank:]]+public[[:blank:]]+static[[:blank:]]+void[[:blank:]]+main" | awk -v FS=":" '{print $1}'))
-    local class_file_path="";
+    local class_file_path=''
+    local class_file_path_list=($(findMainClass "src/main" $filter_class))
     for(( i=0;i<${#class_file_path_list[@]};i++)) do
         class_file_path=${class_file_path_list[i]}
-        class_file_path=${class_file_path#*src/main/java/}
-        class_file_path=${class_file_path#*src/test/java/}
-        class_file_path=${class_file_path//\//.}
-        class_file_path=${class_file_path%.java*}
-        class_file_path_list[$i]="$class_file_path"
         echo "$i) $class_file_path"
     done
 
+    
     read -p "请输入运行的class下标或class,如果输入空字符串则使用jar中默认指定的main:" class_index
 
     if [[ -z $class_index ]]; then
@@ -73,7 +100,8 @@ run() {
         class_file_path=$class_index
         echo "输入class: $class_file_path"
     fi
-
+    
+    
 
     if [[ -z $class_file_path ]]; then
         java -jar $jar_path
@@ -89,7 +117,10 @@ case $ACTION in
         help
         ;;
     'run' )
-        run
+        run "$2"
+        ;;
+    'find_main' )
+        findMainClass "$2" "$3"
         ;;
     * )
         echo "未知操作"

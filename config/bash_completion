@@ -25,7 +25,7 @@ _complete_func() {
     elif [[ "$original_cmd" == "git.sh" ]]; then
         cmd_list=("git.sh --help" "git.sh upstream {上游git地址}" "git.sh github repos" "git.sh github upstreamUrl")
     elif [[ "$original_cmd" == "mvn.sh" ]]; then
-        cmd_list=("mvn.sh --help" "mvn.sh run")
+        cmd_list=("mvn.sh --help" "mvn.sh find_main {过滤字符1} {过滤字符2}" "mvn.sh run '[mvn.sh find_main src/main]'")
     fi
 
     COMPREPLY=()

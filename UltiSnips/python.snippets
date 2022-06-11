@@ -1,0 +1,646 @@
+# TODO 缓冲区协议 : https://docs.python.org/zh-cn/3/c-api/buffer.html#bufferobjects
+
+# #内置类型
+# ##逻辑值检测##内置类型
+# 一个对象在默认情况下均被视为真值，除非当该对象被调用时其所属类定义了 __bool__() 方法且返回 False 或是定义了 __len__() 方法且返回零。 下面基本完整地列出了会被视为假值的内置对象:
+# - 被定义为假值的常量: None 和 False。
+# - 任何数值类型的零: 0, 0.0, 0j, Decimal(0), Fraction(0, 1)
+# - 空的序列和多项集: '', (), [], {}, set(), range(0)
+# 产生布尔值结果的运算和内置函数总是返回 0 或 False 作为假值，1 或 True 作为真值，除非另行说明。 （重要例外：布尔运算 or 和 and 总是返回其中一个操作数。）
+# ###布尔运算##boolean#内置类型
+# - `and` : x or y : 这是个短路运算符，因此只有在第一个参数为假值时才会对第二个参数求值。
+# - `or` : x and y : 这是个短路运算符，因此只有在第一个参数为真值时才会对第二个参数求值
+# - `not` : not x : not 的优先级比非布尔运算符低，因此 not a == b 会被解读为 not (a == b) 而 a == not b 会引发语法错误。
+# ##比较运算#内置类型
+# 在 Python 中有八种比较运算符。 它们的优先级相同（比布尔运算的优先级高）。 比较运算可以任意串连；例如，x < y <= z 等价于 x < y and y <= z，前者的不同之处在于 y 只被求值一次（但在两种情况下当 x < y 结果为假值时 z 都不会被求值）
+# - `<` 严格小于
+# - `<=` 小于或等于
+# - `>` 严格大于
+# - `>=` 大于或等于
+# - `==` 等于
+# - `!=` 不等于
+# - `is` 对象标识
+# - `is not` 否定的对象标识
+# 除了不同数字类型以外，不同类型的对象比较时绝对不会相等。 而且，某些类型（例如函数对象）仅支持简化比较形式，即任何两个该种类型的对象必定不相等。 <, <=, > 和 >= 运算符在以下情况中将引发 TypeError 异常：当比较复数与另一个内置数字类型时，当两个对象具有无法被比较的不同类型时，或在未定义次序的其他情况时。
+# 具有不同标识的类的实例比较结果通常为不相等，除非类定义了 __eq__() 方法。
+# 一个类实例不能与相同类或的其他实例或其他类型的对象进行排序，除非该类定义了足够多的方法，包括 __lt__(), __le__(), __gt__() 以及 __ge__() (而如果你想实现常规意义上的比较操作，通常只要有 __lt__() 和 __eq__() 就可以了)。
+# is 和 is not 运算符无法自定义；并且它们可以被应用于任意两个对象而不会引发异常。
+# 还有两种具有相同语法优先级的运算 in 和 not in，它们被 iterable 或实现了 __contains__() 方法的类型所支持。
+# ##数字类型#内置类型
+# ###int##数字类型#内置类型
+# ```python
+# n: int = -37
+# bin(n) # -0b100101
+# n.bit_length() # 6 :  如果n 非零，则 n.bit_length() 是使得 2**(k-1) <= abs(n) < 2**k 的唯一正整数 k
+# def bit_length(self):
+#     s = bin(self)       # binary representation:  bin(-37) --> '-0b100101'
+#     s = s.lstrip('-0b') # remove leading zeros and minus sign
+#     return len(s)       # len('100101') --> 6
+# ```
+# ###bool(为int子类型)##数字类型#内置类型
+# ```python
+# # float.as_integer_ratio() 返回一对整数，其比率正好等于原浮点数并且分母为正数。 无穷大会引发 OverflowError 而 NaN 则会引发 ValueError。
+# # float.is_integer() 如果 float 实例可用有限位整数表示则返回 True，否则返回 False
+# print((-2.0).is_integer()) # True
+# print((3.2).is_integer()) # False
+# # float.hex() 以十六进制字符串的形式返回一个浮点数表示。 对于有限浮点数，这种表示法将总是包含前导的 0x 和尾随的 p 加指数
+# # classmethod float.fromhex(s) 返回以十六进制字符串 s 表示的浮点数的类方法。 字符串 s 可以带有前导和尾随的空格。
+# # 请注意 float.hex() 是实例方法，而 float.fromhex() 是类方法。
+# print(float.fromhex('0x3.a7p10')) # 3740.0
+# print(float.hex(3740.0)) # 0x1.d380000000000p+11
+# ```
+# ###float##数字类型#内置类型
+# ###complex(复数)##数字类型#内置类型
+# complex(re, im) 一个带有实部 re 和虚部 im 的复数。im 默认为0。
+
+# ##str#内置类型
+# 字符串实现了所有 一般 序列的操作，还额外提供了以下列出的一些附加方法,即支持 ###通用操作##序列类型#内置类型 中的操作
+# ###u,r,b,f含义##str#内置类型
+# - f : 格式化的字符串文字前缀为"f"，类似str.format()。包含由花括号包围的替换区域。替换字段是表达式，在运行时进行评估，然后使用format()协议进行格式化。
+# - u : 后面字符串以 Unicode 格式 进行编码，一般用在中文字符串前面，防止因为源码储存格式问题，导致再次使用时出现乱码
+# - r : 声明后面的字符串是普通字符串，即不转义 \n \t 等
+# - b : 代表的就是bytes类
+# ###str格式化##str#内置类型
+# ```python
+# # {%}[(映射键)][转换旗标][最小字段宽度][精度][长度修饰符]{转换类型} [] : 可选 {} ：必选
+# print('%(language)s has %(number)03d quote types.' % {'language': "Python", "number": 2}) # Python has 002 quote types.
+# print("hello %s world " % ("ldz"))
+# # 使用f"" 格式化 指定了转换符时，表达式求值的结果会先转换，再格式化。转换符 '!s' 调用 str() 转换求值结果，'!r' 调用 repr()，'!a' 调用 ascii()
+# name="Fred"
+# print(f"He said his name is {name!r}.") # 输出 : He said his name is 'Fred'.
+# width,precision,value = 10,4,decimal.Decimal("12.34567")
+# print(f"result: {value:{width}.{precision}}") # nested fields 输出: result:      12.35
+# today = datetime(year=2017, month=1, day=27)
+# print(f"{today:%B %d, %Y}") # 输出: January 27, 2017
+# number = 1024
+# print(f"{number:#0x}") # 输出: 0x400
+# foo,line = "bar","The mill's closed"
+# print(f"{line = }") # 输出: line = "The mill\'s closed"
+# print(f"{line = :20}") # 输出: "line = The mill's closed   "
+# print(f"{line = !r:20}") # 输出: 'line = "The mill\'s closed" '
+# 
+# list=["hello"]
+# print("{} {}".format("hello", "world"))
+# print("{1[0]} {0}".format("world", list))
+# print("hello {name}".format(name = "ldz"))
+# # 填充与对齐
+# # ^、<、>分别是居中、左对齐、右对齐，后面带宽度
+# # :号后面带填充的字符，只能是一个字符，不指定的话默认是用空格填充
+# print '{:>8}'.format('3.14')
+# print '{:<8}'.format('3.14')
+# print '{:^8}'.format('3.14')
+# print '{:0>8}'.format('3.14')
+# print '{:a>8}'.format('3.14')
+# # 浮点数精度
+# print '{:.4f}'.format(3.1415926)
+# print '{:0>10.4f}'.format(3.1415926)
+# # 进制
+# # b、d、o、x分别是二进制、十进制、八进制、十六进制
+# print '{:b}'.format(11)
+# print '{:d}'.format(11)
+# print '{:o}'.format(11)
+# print '{:x}'.format(11)
+# print '{:#x}'.format(11)
+# print '{:#X}'.format(11)
+# # 千位分隔符
+# print '{:,}'.format(15700000000)
+# ```
+# ##二进制序列类型#内置类型
+# 操作二进制数据的核心内置类型是 `bytes` 和 `bytearray`。 它们由 `memoryview` 提供支持，该对象使用 缓冲区协议 来访问其他二进制对象所在内存，不需要创建对象的副本。
+# ###bytes##二进制序列类型#内置类型
+# bytes 对象是由单个字节构成的不可变序列。 由于许多主要二进制协议都基于 ASCII 文本编码，因此 bytes 对象提供了一些仅在处理 ASCII 兼容数据时可用，并且在许多特性上与字符串对象紧密相关的方法。(即 `bytes_var[0] = 104` 报错)
+# ####字面量###bytes##二进制序列类型
+# 首先，表示 bytes 字面值的语法与字符串字面值的大致相同，只是添加了一个 b 前缀 : b"hello world python"
+# 虽然 bytes 字面值和表示法是基于 ASCII 文本的，但 bytes 对象的行为实际上更像是不可变的整数序列，序列中的每个值的大小被限制为 0 <= x < 256 (如果违反此限制将引发 ValueError)。
+# ###bytearray##二进制序列类型
+# bytearray 对象是 bytes 对象的可变对应物。
+# bytearray 对象没有专属的字面值语法，它们总是通过调用构造器来创建
+# - 创建一个空实例: bytearray()
+# - 创建一个指定长度的以零值填充的实例: bytearray(10)
+# - 通过由整数组成的可迭代对象: bytearray(range(20))
+# - 通过缓冲区协议复制现有的二进制数据: bytearray(b'Hi!')
+# ###内存视图##二进制序列类型
+# memoryview 对象允许 Python 代码访问一个对象的内部数据，只要该对象支持[缓冲区协议](https://docs.python.org/zh-cn/3.11/c-api/buffer.html#bufferobjects) (内置类型中bytes和bytearray支持) 而无需进行拷贝。
+# ```python
+# import array
+# a = array.array('l', [-11111111, 22222222, -33333333, 44444444])
+# m = memoryview(a)
+# m[0]
+# -11111111
+# ```
+# ##迭代器类型#内置类型
+snippet iter "迭代器基础代码"
+class ${1:class_name}:
+    def __init__(self) :
+        pass
+
+    def __iter__(self):
+        # 在这要重置参数或者重新new一个
+        return self
+
+    def __next__(self) -> ${2:return_object}:
+        if ${3:条件} :
+            raise StopIteration() # 根据条件停止循环
+        return None
+endsnippet
+
+# ##生成器#内置类型
+# 在 Python 中，使用了 yield 的函数被称为生成器（generator）。
+# 跟普通函数不同的是，生成器是一个返回迭代器的函数，只能用于迭代操作，更简单点理解生成器就是一个迭代器。
+# 在调用生成器运行的过程中，每次遇到 yield 时函数会暂停并保存当前所有的运行信息，返回 yield 的值, 并在下一次执行 next() 方法时从当前位置继续运行。
+# 调用一个生成器函数，返回的是一个迭代器对象。
+#!/usr/bin/python3
+# ```python
+# import sys
+# def fibonacci(n): # 生成器函数 - 斐波那契
+#     a, b, counter = 0, 1, 0
+#     while True:
+#         if (counter > n):
+#             return
+#         yield a
+#         a, b = b, a + b
+#         counter += 1
+# f = fibonacci(10) # f 是一个迭代器，由生成器返回生成
+# while True:
+#     try:
+#         print (next(f), end=" ")
+#     except StopIteration:
+#         sys.exit()
+# ```
+# ##序列类型#内置类型
+# ###通用操作##序列类型#内置类型
+# - x in s ： 如果 s 中的某项等于 x 则结果为 True，否则为 False ， 虽然 in 和 not in 操作在通常情况下仅被用于简单的成员检测，某些专门化序列 (例如 str, bytes 和 bytearray) 也使用它们进行子序列检测: `"gg" in "eggs"` # ture
+# - x not in s : 如果 s 中的某项等于 x 则结果为 False，否则为 True
+# - s.extend(t) 或 s + t : s 与 t 相拼接
+# - s * n 或 n * s : 相当于 s 与自身进行 n 次拼接
+# - s[i] : s 的第 i 项，起始为 0
+# - s[i:j] : s 从 i 到 j 的切片(浅拷贝)
+# - s[i:j:k] : s 从 i 到 j 步长为 k 的切片(浅拷贝)
+# - len(s) : s 的长度
+# - min(s) : s 的最小项
+# - max(s) : s 的最大项
+# - s.index(x[, i[, j]]) : x 在 s 中首次出现项的索引号（索引号在 i 或其后且在 j 之前）
+# - s.count(x) : x 在 s 中出现的总次数
+# - s[i] = x : 将 s 的第 i 项替换为 x
+# - s[i:j] = t : 将 s 从 i 到 j 的切片替换为可迭代对象 t 的内容
+# - del s[i:j] : 等同于 s[i:j] = []
+# - s.append(x) : 将 x 添加到序列的末尾 (等同于 s[len(s):len(s)] = [x])
+# - s.clear() : 从 s 中移除所有项 (等同于 del s[:]) 包括 clear() 和 copy() 是为了与不支持切片操作的可变容器 (例如 dict 和 set) 的接口保持一致。 copy() 不是 collections.abc.MutableSequence ABC 的一部分，但大多数具体的可变序列类都提供了它。
+# - s.copy() : 创建 s 的浅拷贝 (等同于 s[:])
+# - s.insert(i, x) : 在由 i 给出的索引位置将 x 插入 s (等同于 s[i:i] = [x])
+# - s.pop() 或 s.pop(i) : 提取在 i 位置上的项，并将其从 s 中移除
+# - s.remove(x) : 删除 s 中第一个 s[i] 等于 x 的项目。
+# - s.reverse() : 就地将列表中的元素逆序。
+# - del s[i:j] : 从列表中移除切片
+# - del s : 删除整个变量再引用 s 就会报错（直到为它赋与另一个值）
+# ###类型##序列类型#内置类型
+# - list : 列表末尾添加和删除元素非常快，但在列表开头插入或移除元素却很慢（因为所有其他元素都必须移动一位）
+# - collections.deque : 可以快速从两端添加或删除元素 queue = deque(["Eric", "John", "Michael"])
+# - tuple : 元组是 immutable （不可变的)而且可以 打包: t = 'hello','python';  解包: x,y = t;
+# - range
+# ###列表推导式##序列类型#内置类型
+# 列表推导式对序列或可迭代对象中的每个元素应用某种操作，用生成的结果创建新的列表；或用满足特定条件的元素创建子序列
+# (列表推导式可以嵌套)格式如下 : [表达式 for 变量 in 列表 {if 条件:可为空}]/[out_exp_res for out_exp in input_list {if condition:可为空}]
+# ```python
+# # 两个等价
+# squares=[x*y for x in range(1,5) if x > 2 for y in range(1,4) if y < 3]
+# squares=[]
+# for x in range(1,5)
+#     if x > 2
+#         for y in range(1,4)
+#             if y < 3
+#                 squares.append(x*y)
+# ```
+# ###元组推导式##序列类型#内置类型
+# 元组推导式格式(可嵌套):(expression for item in Sequence if conditional )
+# ##集合类型set#内置类型
+# 作为一种无序的多项集，集合并不记录元素位置或插入顺序。 相应地，集合不支持索引、切片或其他序列类的操作
+# - set 对象是由具有唯一性的 hashable(可哈希即对象有__hash__() , __eq__() 方法) 对象所组成的无序多项集。
+# - frozenset 类型是不可变并且为 hashable --- 其内容在被创建后不能再改变；因此它可以被用作字典的键或其他集合的元素。
+# set,frozenset常见操作
+# - set <= other : 检测是否集合中的每个元素都在 other 之中。
+# - set < other : 检测集合是否为 other 的真子集，即 set <= other and set != other。
+# - set | other | ... : 返回一个新集合，其中包含来自原集合以及 others 指定的所有集合中的元素。
+# - set & other & ... : 返回一个新集合，其中包含原集合以及 others 指定的所有集合中共有的元素。
+# - set - other - ... : 返回一个新集合，其中包含原集合中在 others 指定的其他集合中不存在的元素。
+# - set ^ other : 返回一个新集合，其中的元素或属于原集合或属于 other 指定的其他集合，但不能同时属于两者。
+# - set |= other | ... : 更新集合，添加来自 others 中的所有元素。(frozenset不可操作)
+# - set &= other & ... : 更新集合，只保留其中在所有 others 中也存在的元素。(frozenset不可操作)
+# - set -= other | ... : 更新集合，移除其中也存在于 others 中的元素。(frozenset不可操作)
+# - set ^= other : 更新集合，只保留存在于集合的一方而非共同存在的元素。(frozenset不可操作)
+# ```python
+# setVar :set = {"a", "b", "c"}
+# setVar :set = set(["a", "b", "c"])
+# frozensetVar :frozenset = frozenset(["a", "b", "c"])
+# print(setVar) # 输出 : {'c', 'a', 'b'}
+# ```
+# ###集合(set)推导式##集合类型set#内置类型
+# 集合推导式格式(可嵌套): { expression for item in Sequence if conditional }
+# ##映射类型map#内置类型
+# ###字典推导式##映射类型map#内置类型
+# 字典推导式格式(可嵌套):{ key_expr: value_expr for value in collection if condition }
+# mapping 对象会将 hashable 值映射到任意对象。 映射属于可变对象。 目前仅有一种标准映射类型 字典。
+# 常见操作
+# - d[key] = value : 将 d[key] 设为 value。
+# - del d[key] : 将 d[key] 从 d 中移除。 如果映射中不存在 key 则会引发 KeyError。
+# - key in d : 如果 d 中存在键 key 则返回 True，否则返回 False。
+# - iter(d) : 返回以字典的键为元素的迭代器。 这是 iter(d.keys()) 的快捷方式。
+# - get(key[, default]) : 如果 key 存在于字典中则返回 key 的值，否则返回 default。 如果 default 未给出则默认为 None，因而此方法绝不会引发 KeyError。
+# - items() : 返回由字典项 ((键, 值) 对) 组成的一个新视图。
+# - keys() : 返回由字典键组成的一个新视图。 参见 视图对象文档。
+# - values() : 返回由字典值组成的一个新视图。 参见 视图对象文档。
+# - pop(key[, default]) : 如果 key 存在于字典中则将其移除并返回其值，否则返回 default。 如果 default 未给出且 key 不存在于字典中，则会引发 KeyError。
+# - popitem() : 从字典中移除并返回一个 (键, 值) 对。 键值对会按 LIFO 的顺序被返回。popitem() 适用于对字典进行消耗性的迭代，这在集合算法中经常被使用。 如果字典为空，调用 popitem() 将引发 KeyError。
+# - reversed(d) : 返回一个逆序获取字典键的迭代器。 这是 reversed(d.keys()) 的快捷方式。
+# - setdefault(key[, default]) : 如果字典存在键 key ，返回它的值。如果不存在，插入值为 default 的键 key ，并返回 default 。 default 默认为 None。
+# - d | other : 合并 d 和 other 中的键和值来创建一个新的字典，两者必须都是字典。当 d 和 other 有相同键时， other 的值优先。
+# - d |= other : 用 other 的键和值更新字典 d ，other 可以是 mapping 或 iterable 的键值对。当 d 和 other 有相同键时， other 的值优先。
+# ```python
+# mapVar = {x: x ** 2 for x in range(10)} # 字典推导式
+# a = dict(one=1, two=2, three=3)
+# b = {'one': 1, 'two': 2, 'three': 3}
+# c = dict(zip(['one', 'two', 'three'], [1, 2, 3]))
+# d = dict([('two', 2), ('one', 1), ('three', 3)])
+# e = dict({'three': 3, 'one': 1, 'two': 2})
+# f = dict({'one': 1, 'three': 3}, two=2)
+# print(a == b == c == d == e == f) # 输出True
+# print(list(d)) # 输出 ['one', 'two', 'three'] 返回字典 d 中使用的所有键的列表。
+# print(len(d)) # 输出 3 返回字典 d 中的项数
+# print(d['one']) # 输出 1 返回 d 中以 key 为键的项。 如果映射中不存在 key 则会引发 KeyError。
+# for k,v in a.items()
+# 	print("key : {k} , value : {v}".format(k=k,v=v))
+# # 如果字典的子类定义了方法 __missing__() 并且 key 不存在，则 d[key] 操作将调用该方法并附带键 key 作为参数。 d[key] 随后将返回或引发 __missing__(key) 调用所返回或引发的任何对象或异常。 没有其他操作或方法会发起调用 __missing__()。 如果未定义 __missing__()，则会引发 KeyError。 __missing__() 必须是一个方法；它不能是一>个实例变量:
+# class Counter(dict):
+#     def __missing__(self, key):
+#         print(key)
+#         return 0
+# c = Counter()
+# print(c['red']) # 输出0
+# c['red'] += 1
+# print(c['red']) # 输出1
+# ```
+# ###字典视图对象##映射类型map#内置类型
+# 由 dict.keys(), dict.values() 和 dict.items() 所返回的对象是 视图对象。 该对象提供字典条目的一个动态视图，这意味着当字典改变时，视图也会相应改变。
+# 支持操作 : 1. len(dictview) 2. iter(dictview) 3. x in dictview 4. reversed(dictview) 5. dictview.mapping(返回 types.MappingProxyType 对象，封装了字典视图指向的原始字典。)
+# ##上下文管理器(AutoCloseable)#内置类型
+# 上下文管理器是指在一段代码执行之前执行一段代码，用于一些预处理工作；执行之后再执行一段代码，用于一些清理工作。比如打开文件进行读写，读写完之后需要将文件关闭。又比如在数据库操作中，操作之前需要连接数据库，操作之后需要关闭数据库。在上下文管理协议中，有两个方法__enter__和__exit__，分别实现上述两个功能。
+# ###with语法##上下文管理器(AutoCloseable)#内置类型
+# ```python
+# with EXPR as VAR:
+#     BLOCK
+# ```
+# - 执行EXPR语句，获取上下文管理器（Context Manager）
+# - 调用上下文管理器中的__enter__方法，该方法执行一些预处理工作。
+# - 这里的as VAR可以省略，如果不省略，则将__enter__方法的返回值赋值给VAR。
+# - 执行代码块BLOCK，这里的VAR可以当做普通变量使用。
+# - 最后调用上下文管理器中的的__exit__方法。
+# - __exit__方法有三个参数：exc_type, exc_val, exc_tb。如果代码块BLOCK发生异常并退出，那么分别对应异常的type、value 和 traceback。否则三个参数全为None。
+# - __exit__方法的返回值可以为True或者False。如果为True，那么表示异常被忽视，相当于进行了try-except操作；如果为False，则该异常会被重新raise。
+# ```python
+# # 自定义打开文件操作
+# class MyOpen(object):
+#     def __init__(self, file_name):
+#         """初始化方法"""
+#         self.file_name = file_name
+#         self.file_handler = None
+#         return
+#     def __enter__(self):
+#         """enter方法,返回file_handler"""
+#         print("enter:", self.file_name)
+#         self.file_handler = open(self.file_name, "r")
+#         return self.file_handler
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         """exit方法,关闭文件并返回True"""
+#         print("exit:", exc_type, exc_val, exc_tb) # 输出 : exit: <class 'ZeroDivisionError'>  <traceback object at 0x7f8a557ee9c0>
+#         if self.file_handler:
+#             self.file_handler.close()
+#         return True
+# # 使用实例
+# with MyOpen("python_base.py") as file_in:
+#     for line in file_in:
+#         print(line)
+#         raise ZeroDivisionError
+# # 代码块中主动引发一个除零异常，但整个程序不会引发异常
+# ```
+# ###内置库contextlib的使用##上下文管理器(AutoCloseable)#内置类型
+# ```python
+# import contextlib
+# # 装饰器contextmanager。该装饰器将一个函数中yield语句之前的代码当做__enter__方法执行，yield语句之后的代码当做__exit__方法执行。同时yield返回值赋值给as后的变量。
+# @contextlib.contextmanager
+# def open_file(file_name):
+#     # __enter__方法
+#     print('open file:', file_name, 'in __enter__')
+#     file_handler = open(file_name, 'r')
+# 
+#     try:
+#         yield file_handler
+#     finally:
+#         # __exit__方法
+#         print('close file:', file_name, 'in __exit__')
+#         file_handler.close()
+#     # 正常执行不抛出异常则可以执行到这
+#     print("exit")
+# with open_file("./hello.py") as file_in:
+#     for line in file_in:
+#         print(line)
+#         raise ZeroDivisionError
+# ```
+# ```python
+# # closing类。该类会自动调用传入对象的close方法。使用实例如下:
+# import contextlib
+# class MyOpen2(object):
+#     def __init__(self, file_name):
+#         """初始化方法"""
+#         self.file_handler = open(file_name, "r")
+#         return
+# 
+#     def close(self):
+#         """关闭文件，会被自动调用"""
+#         print("call close in MyOpen2")
+#         if self.file_handler:
+#             self.file_handler.close()
+#         return
+# with contextlib.closing(MyOpen2("./hello.py")) as file_in:
+#     for line in file_in:
+#         print(line)
+#         raise ZeroDivisionError
+# ```
+snippet try_resources "自动关闭资源"
+with ${1:object} as ${2:var_name}:
+    ${3:pass}
+endsnippet
+snippet try_resources_contextlib_closing "自动关闭资源,object: 实现close()的类,import contextlib"
+with  contextlib.closing(${1:object}) as ${2:var_name}:
+    ${3:pass}
+endsnippet
+
+snippet autoCloseable "自动关闭资源类，配合with语法使用,try_resources(代码片段提示)"
+class ${1:class_name}(object):
+    def __init__(self):
+        pass
+    def __enter__(self):
+        """enter方法,返回file_handler"""
+        self.resource = ${2:初始化资源}
+        return self.resource
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """exit方法,关闭资源并返回True(表示异常被忽视，相当于进行了try-except操作),False(异常会被重新raise)"""
+        ${3:关闭资源}
+        return True
+endsnippet
+snippet autoCloseableContextlib "自动关闭资源类，装饰器contextmanager实现方式。import contextlib"
+@contextlib.contextmanager
+def ${1:fun_name}():
+    # __enter__方法
+    resource = ${2:初始化资源}
+    try:
+        yield resource
+    finally:
+        # __exit__方法
+        ${3:关闭资源}
+endsnippet
+snippet autoCloseableClosing "自动关闭资源类，closing类实现。通过实现close的类自动关闭资源,需要通过 with contextlib.closing(test()) as var: 使用(try_resources_contextlib_closing),import contextlib"
+class ${1:class_name}(object):
+    def __init__(self):
+        ${2:初始化资源}
+    def close(self):
+        ${3:关闭资源}
+endsnippet
+# ##泛型#内置类型
+# ###GenericAlias##泛型#内置类型
+# ```python
+# # class types.GenericAlias(t_origin, t_args) : 參數化泛型的類型，例如 list[int] 。t_origin 應該是非參數化的泛型類，例如 list , tuple 或 dict 。 t_args 應該是參數化 t_origin 的類型的 tuple(可能長度為 1)
+# from types import GenericAlias
+# print(list[int] == GenericAlias(list, (int,))) # 输出 : True
+# print(dict[str, int] == GenericAlias(dict, (str, int))) # 输出 : True
+# ```
+# ###Union##泛型#内置类型
+# TODO 没看懂Union
+##特殊属性#内置类型
+# 语言实现为部分对象类型添加了一些特殊的只读属性，它们具有各自的作用。 其中一些并不会被 dir() 内置函数所列出。
+# - object.__dict__ : 一个字典或其他类型的映射对象，用于存储对象的（可写）属性。
+# - instance.__class__ : 类实例所属的类。
+# - class.__bases__ : 由类对象的基类所组成的元组。
+# - definition.__name__ : 类、函数、方法、描述器或生成器实例的名称。
+# - definition.__qualname__  : 类、函数、方法、描述器或生成器实例的 qualified name。
+# - class.__mro__ : 此属性是由类组成的元组，在方法解析期间会基于它来查找基类。
+# - class.mro() : 此方法可被一个元类来重载，以为其实例定制方法解析顺序。 它会在类实例化时被调用，其结果存储于 __mro__ 之中。
+# - class.__subclasses__() : 每个类都存有对直接子类的弱引用列表。本方法返回所有存活引用的列表。列表的顺序按照子类定义的排列。例如：
+
+# #流程控制
+# ##for#流程控制
+snippet fori "for循环i,请注意i在循环结束后还存在"
+for ${1:i} in range(${2:10}):
+    ${3:pass}
+endsnippet
+snippet forIndex "for循环:通过下标遍历list,请注意i在循环结束后还存在"
+for ${1:i} in range(len(${2:list})):
+    ${3:pass}
+endsnippet
+snippet forMultiple "for循环多个List,已最短的那个list为最大长度"
+for ${1:循环变量} in zip(${2:循环list}):
+    ${3:pass}
+endsnippet
+snippet forReversed "for循环逆序"
+for ${1:var} in reversed(${2:list}):
+    ${3:pass}
+endsnippet
+snippet forSorted "for循环控制顺序"
+for ${1:var} in sorted(${2:list}):
+    ${3:pass}
+endsnippet
+snippet forElse "for循环正常结束(没被break,抛出异常),会执行else中的代码"
+for ${1:for循环类型}:
+    ${2:pass}
+else:
+    ${3:pass}
+endsnippet
+snippet forEnumerate "循环同时获取下标"
+for ${2:i}, ${3:item} in enumerate(${1:list_var}):
+    ${4:pass}
+endsnippet
+# ##深入条件控制#流程控制
+# ```python
+# string1, string2, string3 = '', 'Trondheim', 'Hammer Dance'
+# non_null = string1 or string2 or string3
+# print(non_null) # 输出: Trondheim
+# ```
+
+
+# ##match(switch)语句#流程控制
+# ```python
+# from dataclasses import dataclass
+# 
+# status=400 # 输出: http status=400
+# # '|' : 为or条件
+# match status:
+#     case 400 | 404:
+#         print(f"http status={status}")
+#     # '_' : 为通配符匹配所有
+#     case _:
+#         pass
+# 
+# point=(1,2) # 输出 x=1 , y = 2
+# # point=(1,2,3) # 抛出 异常
+# # 匹配元组
+# match point:
+#     case (0, 0):
+#         print("Origin")
+#     case (0, y):
+#         print(f"{y = }")
+#     case (x, 0):
+#         print(f"{x = }")
+#     case (x,y):
+#         print(f"{x = } , {y = }")
+#     case _:
+#         raise ValueError("Not a point")
+# 
+# @dataclass
+# class Point:
+#     x: int
+#     y: int
+# point=Point(x=1, y=2) # 输出: x = 1 , y = 2
+# #point=Point(x=1, y=1) # 输出: Y=X at 1
+# # 匹配对象
+# match point:
+#     case Point(x=0, y=0):
+#         print("Origin")
+#     case Point(x=0, y=y):
+#         print(f"{y = }")
+#     case Point(x=x, y=0):
+#         print(f"{x = }")
+#     # 为模式添加成为守护项的 if 子句。如果守护项的值为假，则 match 继续匹配下一个 case 语句块。注意，值的捕获发生在守护项被求值之前：
+#     case Point(x, y) if x == y:
+#         print(f"Y=X at {x}")
+#     case Point():
+#         print(f"{x = } , {y = }")
+#     case _:
+#         raise ValueError("Not a point")
+# point1=Point(x=1, y=3)
+# point2=Point(x=1, y=3)
+# point=(point1, point2) # 输出: p1=(p1.x = 1,p1.y = 3) , p2=(p2.x = 1,p2.y = 3)
+# # 匹配对象元组,需要使用as捕获子模式
+# match point:
+#     case (Point(x1, y1) as p1 , Point(x2, y2) as p2) if y1 == y2 and x2 == x1:
+#         print(f"p1=({p1.x = },{p1.y = }) , p2=({p2.x = },{p2.y = })")
+# ```
+snippet switch "switch语句, '|' : 为or条件 ,匹配的值可以为'_',对象,解包（元组），'_' : 为通配符匹配所有 ,  可以匹配对象 : 只要值初始化好"
+match ${1:要匹配的对象}:
+    case ${2:匹配的值}:
+		pass$0
+	case _:
+		pass
+endsnippet
+# ##函数function#流程控制
+# ###参数##函数function#流程控制
+# ```python
+# # 1.默认值与关键字 : kwarg=value 形式的 关键字参数 ,
+# def parrot(voltage, state='a stiff', action='voom', type='Norwegian Blue'):
+#     pass
+# # 该函数接受一个必选参数（voltage）和三个可选参数（state, action 和 type）。该函数可用下列方式调用：
+# parrot(1000)                                          # 1 positional argument
+# parrot(voltage=1000)                                  # 1 keyword argument
+# parrot(voltage=1000000, action='VOOOOOM')             # 2 keyword arguments
+# parrot(action='VOOOOOM', voltage=1000000)             # 2 keyword arguments
+# parrot('a million', 'bereft of life', 'jump')         # 3 positional arguments
+# parrot('a thousand', state='pushing up the daisies')  # 1 positional, 1 keyword
+# 
+# # 2.特殊参数 '/' : 仅限位置形参应放在 / （正斜杠）前, '*' :  仅限关键字 形参前添加 *
+# def combined_example(pos_only, /, standard, *, kwd_only):
+#     print(pos_only, standard, kwd_only)
+# combined_example(1, 2, kwd_only=3) # 输出: 1 2 3
+# combined_example(1, standard=2, kwd_only=3) # 输出: 1 2 3
+# 
+# # 3.任意实参数列表与解包实参列表
+# def cheeseshop(kind, *arguments, **keywords):
+#     pass
+# cheeseshop("Limburger", "It's very runny, sir.","It's really very, VERY runny, sir.",shopkeeper="Michael Palin",client="John Cleese")
+# args,dists=[1,2],{"k": "v"}
+# cheeseshop("Limburger", *args, **dists)
+# ```
+# ###lambda表达式##函数function#流程控制
+# ```python
+# def make_incrementor(n: int) :
+#     return lambda x: x + n
+# f = make_incrementor(42)
+# print(f(1)) # 输出: 43
+# 
+# # lambda 作为参数:
+# pairs: List[Tuple[int, str]] = [(1, 'one'), (2, 'two'), (3, 'three'), (4, 'four')]
+# pairs.sort(key = lambda pair: pair[1])
+# print(pairs) # 输出: [(4, 'four'), (1, 'one'), (3, 'three'), (2, 'two')]
+# ```
+snippet lambda "lambda表达式,expression只能有一行"
+lambda ${1:arguments}: ${2:expression}
+endsnippet
+# #模块
+# ##dir()函数#模块
+# 内置函数 dir() 用于查找模块定义的名称(变量、模块、函数)。返回结果是经过排序的字符串列表
+# dir() 不会列出内置函数和变量的名称。这些内容的定义在标准模块 builtins 里
+# ```python
+# import builtins
+# dir(builtins)
+# ```
+# #异常(error)
+snippet errorClass "自定义异常类"
+class ${1:err_class_name}(Exception):
+    def __init__(self, message: str) -> None:
+	    super().__init__(message)
+    def __init__(self, e :Exception ,message: str) -> None:
+        super().__init__(e,message)
+endsnippet
+snippet errorNote "异常添加信息"
+${1:error_name}.add_note("${2:message}")
+endsnippet
+# ##异常链#异常
+# ```python
+# # raise 语句支持可选的 from 子句，该子句用于启用链式异常，异常链会在 except 或 finally 子句内部引发异常时自动生成。 这可以通过使用 from None 这样的写法来禁用。
+# try:
+#     func()
+# except ConnectionError as exc:
+#     raise RuntimeError('Failed to open database') from exc # 会将func()的异常堆栈也打印出来，如果不想要则raise RuntimeError from None
+# ```
+# ##ExceptionGroup#异常
+# 内置ExceptionGroup函数包装了一个异常实例列表，以便它们可以一起引发。它本身就是一个异常，因此它可以像任何其他异常一样被捕获。
+# ```python
+# def f():
+#     excs = [OSError('error 1'), SystemError('error 2')]
+#     raise ExceptionGroup('there were problems', excs)
+# # + Exception Group Traceback (most recent call last):
+# # |   File "<stdin>", line 1, in <module>
+# # |   File "<stdin>", line 3, in f
+# # | ExceptionGroup: there were problems
+# # +-+---------------- 1 ----------------
+# #   | OSError: error 1
+# #   +---------------- 2 ----------------
+# #   | SystemError: error 2
+# #   +------------------------------------
+# ```
+
+# #类
+# ```python
+# class Model(object):
+#     # static 变量
+#     use_user_list :list = []
+#     # 标识成员变量给ide使用
+#     __slots__ = ("use_name","_spam", "__spam")
+#     def __init__(self, use_name :str) -> None:
+#         # user_name为public成员变量,外部可以访问
+#         self.use_name :str = use_name
+#         # 带有一个下划线的名称 (例如 _spam) 外部可以访问/修改，但不应该去访问/修改
+#         self._spam = use_name
+#         # private变量外部无法访问
+#         self.__spam = use_name
+#         self.use_user_list.append(use_name)
+# model1 :Model = Model("user1")
+# model2 :Model = Model("user2")
+# print(model2.use_user_list, model2._spam)
+# 
+# # 于多数应用来说，在最简单的情况下，你可以认为搜索从父类所继承属性的操作是深度优先、从左至右的，当层次结构中存在重叠时不会在同一个类中搜索两次。 因此，如果某一属性在 DerivedClassName  中未找到，则会到 Model 中搜索它，然后（递归地）到 Model 的基类中搜索，如果在那里未找到，再到 object 中搜索，依此类推
+# # 真实情况比这个更复杂一些；方法解析顺序会动态改变以支持对 super() 的协同调用。 这种方式在某些其他多重继承型语言中被称为后续方法调用，它比单继承型语言中的 super 调用更强大。
+# # 动态改变顺序是有必要的，因为所有多重继承的情况都会显示出一个或更多的菱形关联（即至少有一个父类可通过多条路径被最底层类所访问）。 例如，所有类都是继承自 object，因此任何多重继承的情况都提供了一条以上的路径可以通向 object。 为了确保基类不会被访问一次以上，动态算法会用一种特殊方式将搜索顺序线性化， 保留每个类所指定的从左至右的顺序，只调用每个父类一次，并且保持单调（ 即一个类可以被子类化而不影响其父类的优先顺序）。 总而言之，这些特性使得设计具有多重继承的可靠且可扩展的类成为可能。 要了解更多细节，请参阅 https://www.python.org/download/releases/2.3/mro/。
+# class DerivedClassName(Model, object):
+#     pass
+# ```
+snippet classVar "定义类字段，供ide提示用"
+__slots__ = ("${1: field_name}")
+endsnippet

@@ -18,17 +18,17 @@ upstream : Git进行fork后跟原仓库同步
     return : 会添加一个上游的主干分支名称为 : upstream/master
 
 reset : git回滚到某个版本  
-    git.sh reset {git_commit_id}
+    git.sh reset [{git_commit_id}]
 
     如果需要覆盖远程执行 : git push -f , 如果需要放弃回滚 : git pull
-    $2: git提交日志id,使用 git log 查看git_commit_id
+    $2: git提交日志id,使用 git log 查看git_commit_id,为空则需要手动输入
     return : git回滚到某个版本
 
 init_server : 初始化git服务端项目,供git clone user@ip:/项目路径
-    git.sh init_server {项目名}
+    git.sh init_server [{项目名}]
 
     先决条件:需要开启ssh服务器
-    $2 : 项目名
+    $2 : 项目名,为空需要手动输入
     return : 会在本目录下创建 {项目名}.git 目录
 
 github : github相关操作
@@ -183,11 +183,18 @@ esac
 
 reset() {
     local commit_id=$1
+    if [[ -z $commit_id ]]; then
+        read -p "请输入git日志id,使用git log 查看 : " commit_id
+    fi
     git reset --hard $commit_id
 }
 
 initServer() {
     local project_name=$1
+
+    if [[ -z $project_name ]]; then
+        read -p "请输入项目名: " project_name
+    fi
 
     if ! grep -E '\.git$' <<< "$project_name" >> /dev/null; then
         project_name="${project_name}.git"

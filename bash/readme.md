@@ -18,6 +18,14 @@ git.sh python.sh mvn.sh
 ```sh
 help() {
     echo '
+
+reset : git回滚到某个版本 
+    git.sh reset [{git_commit_id}]
+
+    如果需要覆盖远程执行 : git push -f , 如果需要放弃回滚 : git pull
+    $2: git提交日志id,使用 git log 查看git_commit_id,为空则需要手动输入
+    return : git回滚到某个版本
+
 github : github相关操作
 
     github repos : git clone github上一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong

@@ -2,6 +2,7 @@
 complete -F _complete_func git.sh
 complete -F _complete_func python.sh
 complete -F _complete_func mvn.sh
+complete -F _complete_func download.sh
 _complete_func() {
 
     # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
@@ -26,6 +27,8 @@ _complete_func() {
         cmd_list=("git.sh --help" "git.sh upstream {上游git地址}" "git.sh github repos" "git.sh github upstreamUrl")
     elif [[ "$original_cmd" == "mvn.sh" ]]; then
         cmd_list=("mvn.sh --help" "mvn.sh find_main {过滤字符1} {过滤字符2}" "mvn.sh run '[mvn.sh find_main src/main]'")
+    elif [[ "$original_cmd" == "download.sh" ]]; then
+        cmd_list=("download.sh --help" "download.sh {url文件存储路径} {下载目录}")
     fi
 
     COMPREPLY=()

@@ -29,7 +29,7 @@ ln -s ${home_path}/config/w3m-config ${HOME}/.w3m/config
 if [ ! -d ${HOME}/.local/bin ]; then
     mkdir -p ${HOME}/.local/bin
 fi
-for sh_file_path in $home_path/bash/* ; do
+for sh_file_path in $home_path/bash/*.sh ; do
     target_ln_path="${HOME}/.local/bin/${sh_file_path##*/}"
     if [ -f $target_ln_path ]; then
         rm $target_ln_path

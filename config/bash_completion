@@ -3,6 +3,7 @@ complete -F _complete_func git.sh
 complete -F _complete_func python.sh
 complete -F _complete_func mvn.sh
 complete -F _complete_func download.sh
+complete -F _complete_func mvn
 _complete_func() {
 
     # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
@@ -24,11 +25,13 @@ _complete_func() {
     if [[ "$original_cmd" == "python.sh" ]]; then
         cmd_list=("python.sh --help" "python.sh setuptools env" "python.sh setuptools init {项目名}" "python.sh setuptools install" "python.sh setuptools build" )
     elif [[ "$original_cmd" == "git.sh" ]]; then
-        cmd_list=("git.sh --help" "git.sh upstream {上游git地址}" "git.sh github repos" "git.sh github upstreamUrl")
+        cmd_list=("git.sh --help" "git.sh upstream {上游git地址}" "git.sh github repos" "git.sh github upstreamUrl" "git.sh reset {git_commit_id}" "git.sh init_server {项目名}")
     elif [[ "$original_cmd" == "mvn.sh" ]]; then
         cmd_list=("mvn.sh --help" "mvn.sh find_main {过滤字符1} {过滤字符2}" "mvn.sh run '[mvn.sh find_main src/main]'")
     elif [[ "$original_cmd" == "download.sh" ]]; then
         cmd_list=("download.sh --help" "download.sh {url文件存储路径} {下载目录}")
+    elif [[ "$original_cmd" == "mvn" ]]; then
+        cmd_list=("mvn clean install -Dmaven.test.skip=true" "mvn dependency:sources -DdownloadJavadocs=true" "mvn dependency:tree")
     fi
 
     COMPREPLY=()

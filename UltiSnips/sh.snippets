@@ -418,13 +418,13 @@ fi
 endsnippet
 
 # #环境信息
-snippet homePath "获取当前执行脚本目录"
+snippet homePath "脚本存放目录"
 home_path=$(readlink -f $(dirname "\$0"))
 $0
 endsnippet
 
 snippet currentPath "获取当前执行脚本目录"
-current_path=$(readlink -f $(dirname "\$0"))
+current_path=$(pwd)
 $0
 endsnippet
 

@@ -49,17 +49,17 @@ setuptools : 关于python构建/打包的相关操作, 如果python版本过低�
 
 
     setuptools init : 初始化一个可打包python项目
-        python.sh setuptools init ${项目名}
+        python.sh setuptools init {项目名}
 
         $3 : 项目名,用来创建一个文件夹
         return : 下当前目录下创建一个python项目/文件夹,其中目录结构如下
-        ${项目名}/
+        {项目名}/
         ├── LICENSE
         ├── pyproject.toml
         ├── README.md
         ├── setup.cfg
         ├── src/
-        │   └── ${项目名}/
+        │   └── {项目名}/
         │       ├── __init__.py
         │       └── example.py
         └── tests/

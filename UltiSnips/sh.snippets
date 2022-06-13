@@ -335,12 +335,12 @@ if grep -E '^[0-9][0-9]*$' <<< "\$${1:var}" >> /dev/null; then
 fi
 endsnippet
 
-snippet ifArrIn "判断元素是否在数组中"
+snippet ifArrIn "判断元素是否在数组中,进入if则在"
 if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
     $0
 fi
 endsnippet
-snippet ifInArr "判断元素是否在数组中"
+snippet ifInArr "判断元素是否在数组中,进入if则在"
 if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
     $0
 fi
@@ -368,6 +368,13 @@ endsnippet
 snippet fori "遍历数组带下标"
 for(( ${1:i}=0; $1<\$\{#${2:数组名}[@]\}; $1++)) do
     $0\$\{$2[$1]\}
+done
+endsnippet
+
+snippet forStr "遍历字符串,遍历元素是char, 'hello' -> ['h','e','l','l','o']"
+for (( ${2:i}=0; $2<=\$\{#${1:str}\}; $2++ )); do
+    ${3:char}=\$\{$1:\$$2:1\}
+	$0
 done
 endsnippet
 	
@@ -461,12 +468,39 @@ dirs -v
 endsnippet
 
 # #输入输出
-snippet read "读取键盘输入"
-read -p "${1:提示信息}" ${2:读取到那个变量}
+# -t : 设置超时时间单位秒,超时后不设置变量
+# -p : 提示信息
+# 5s后就跳过
+# 例子 : read -t 5 -p "提示信息 : " var
+snippet read "读取键盘输入, -t {num} 设置超时时间, 单位秒"
+read -p "${1:提示信息} : " ${2:读取到那个变量}
 $0
 endsnippet
-
-
+snippet readNum "读取键盘输入的正整数,非数值再次输入, -t {num} 设置超时时间, 单位秒 "
+read -p "${1:提示信息} : " ${2:读取到那个变量}
+while [ -z \`grep -E '^[0-9][0-9]*$' <<< "\$$2"\` ]; do
+    read -p "请输入正整数 : " $2
+done
+$0
+endsnippet
+snippet readInArrIndex "输入数组下标以选择元素, -t {num} 设置超时时间, 单位秒 "
+for(( ${1:i}=0; $1<\$\{#${2:数组名}[@]\}; $1++)) do
+    echo "\$$1) \$\{$2[$1]\}"
+done
+read -p "${3:提示信息} : " ${4:读取到那个下标变量}
+while [ -z \`grep -E '^[0-9][0-9]*$' <<< "\$$4"\` ] || [ \$$4 -lt 0 ] || [ \$$4 -gt \$\{#$2[@]\} ]; do
+    read -p "请输入 [0 , \$\{#$2[@]\} - 1] 数字 : " $4
+done
+${5:item}=\$\{$2[\$$4]\}
+$0
+endsnippet
+snippet readInStr "输入字符串数组的元素,字符串数组例子 : str_arr='y Y n N',输入: y ,-t {num} 设置超时时间, 单位秒 "
+read -p "${1:提示信息} , 请输入 [\$\{${3:str_arr}\}] :  " ${2:读取到那个变量}
+while [[ ! "\$\{$3[@]\}" =~ "\$\{$2\}" ]] || [ -z "\$\{$2\}" ]; do
+    read -p "请输入 [\$$3] : " $2
+done
+$0
+endsnippet
 
 # #jq
 # -R : 将json 转字符串

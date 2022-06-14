@@ -501,6 +501,13 @@ while [[ ! "\$\{$3[@]\}" =~ "\$\{$2\}" ]] || [ -z "\$\{$2\}" ]; do
 done
 $0
 endsnippet
+snippet readNotNull "读取键盘输入不允许为空, -t {num} 设置超时时间, 单位秒"
+read -p "${1:提示信息} : " ${2:读取到那个变量}
+while [ -z \$$2 ]; do
+    read -p "不允许输入空请重新输入 : " $2
+done
+$0
+endsnippet
 
 # #jq
 # -R : 将json 转字符串

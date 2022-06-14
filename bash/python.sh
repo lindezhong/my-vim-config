@@ -232,9 +232,9 @@ setuptoolsInit_example_py() {
 setuptoolsInit() {
     local project_name=$1
 
-    if [[ -z $project_name ]]; then
-        read -p "项目名为空,请输入: " project_name
-    fi
+    while [ -z $project_name ]; do
+        read -p "项目名为空,请输入 : " project_name
+    done
 
     if [ -d $project_name ]; then
         echo "当前目录下存在 [$project_name] , 无法初始化python项目"

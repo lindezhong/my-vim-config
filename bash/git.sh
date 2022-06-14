@@ -183,18 +183,18 @@ esac
 
 reset() {
     local commit_id=$1
-    if [[ -z $commit_id ]]; then
-        read -p "请输入git日志id,使用git log 查看 : " commit_id
-    fi
+    while [ -z $commit_id ]; do
+        read -p "git commit_id不允许输入空请重新输入 : " commit_id
+    done
     git reset --hard $commit_id
 }
 
 initServer() {
     local project_name=$1
 
-    if [[ -z $project_name ]]; then
-        read -p "请输入项目名: " project_name
-    fi
+    while [ -z $project_name ]; do
+        read -p "项目名不允许输入空请重新输入 : " project_name
+    done
 
     if ! grep -E '\.git$' <<< "$project_name" >> /dev/null; then
         project_name="${project_name}.git"

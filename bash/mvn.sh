@@ -78,6 +78,9 @@ run() {
         done;
 
         read -p "请选择jar:" jar_index
+        while [ -z `grep -E '^[0-9][0-9]*$' <<< "$jar_index"` ] || [ $jar_index -lt 0 ] || [ $jar_index -gt ${#jar_path_list[@]} ]; do
+            read -p "请输入正确的jar下标 : [0 , ${#jar_path_list[@]}-1] : " jar_index
+        done
         jar_path=${jar_path_list[$jar_index]}
     fi
 
@@ -102,6 +105,11 @@ run() {
     fi
     
     
+    echo ""
+    echo ""
+    echo "select index is [$class_index] , class file path is [$class_file_path]"
+    echo ""
+    echo ""
 
     if [[ -z $class_file_path ]]; then
         java -jar $jar_path

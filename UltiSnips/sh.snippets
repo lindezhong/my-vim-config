@@ -200,6 +200,34 @@ endsnippet
 
 
 # ##函数参数args#变量
+# $# 	传递到脚本的参数个数
+# $* 	以一个单字符串显示所有向脚本传递的参数。如"$*"用「"」括起来的情况、以"$1 $2 … $n"的形式输出所有参数。
+# $$ 	脚本运行的当前进程ID号
+# $! 	后台运行的最后一个进程的ID号
+# $@ 	与$*相同，但是使用时加引号，并在引号中返回每个参数。如"$@"用「"」括起来的情况、以"$1" "$2" … "$n" 的形式输出所有参数。
+# $- 	显示Shell使用的当前选项，与set命令功能相同。
+# $? 	显示最后命令的退出状态。0表示没有错误，其他任何值表明有错误。
+# #!/bin/bash
+# echo "-- \$* 演示 ---"
+# for i in "$*"; do
+#     echo $i
+# done
+# echo "-- \$@ 演示 ---"
+# for i in "$@"; do
+#     echo $i
+# done
+# 执行`test.sh 1 2 3`输出如下:
+# -- $* 演示 ---
+# 1 2 3
+# -- $@ 演示 ---
+# 1
+# 2
+# 3
+snippet argsFor "遍历参数(外部传入参数)"
+for ${1:item} in "$@"; do
+    $0
+done
+endsnippet
 # #!/bin/bash
 # fun() {
 #     local __tmp_map_var=$(declare -p "$1")
@@ -359,6 +387,12 @@ endsnippet
 
 
 # ##for#流程控制
+snippet forArgs "遍历参数(外部传入参数)"
+for ${1:item} in "$@"; do
+    $0
+done
+endsnippet
+
 snippet forin "遍历数组不带下标"
 for ${1:子变量名} in "\$\{${2:父变量名}[@]\}"; do
     $0

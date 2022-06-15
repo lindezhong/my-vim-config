@@ -7,7 +7,7 @@
 # 修改ubuntu合盖动作
 修改文件: sudo vim /etc/systemd/logind.conf
 HandleLidSwitch=poweroff #关闭盖子时关闭电源。
-HandleLidSwitch=hibernate #关闭lid时需要休眠（需要测试hibernate是否工作）-- 可以解决合盖耗电问题。
+HandleLidSwitch=hibernate #关闭lid时需要休眠（需要测试hibernate是否工作
 HandleLidSwitch=ignore  #什么都不做。
 HandleLidSwitch=suspend #(默认值)当盖子关闭时暂停笔记本电脑 -- 耗电。
 重启或执行 sudo systemctl restart systemd-logind.service 生效

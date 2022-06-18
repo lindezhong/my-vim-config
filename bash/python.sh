@@ -244,7 +244,7 @@ setuptoolsInit() {
         read -p "项目名为空,请输入 : " project_name
     done
 
-    if [ -d $project_name ]; then
+    if [ -f $project_name ]; then
         echo "当前目录下存在 [$project_name] , 无法初始化python项目"
         return 1
     fi
@@ -292,7 +292,7 @@ setuptools() {
             setuptoolsBuild
             ;;
         * )
-            echo "参数不全请查看帮助文档, setuptools model is : [$model]"
+            echo "参数错误请查看帮助文档, setuptools action is : [$SETUPTOOLS_ACTION]"
             help
             ;;
     esac

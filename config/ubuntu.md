@@ -21,3 +21,11 @@ HandleLidSwitch=ignore  #什么都不做。
 HandleLidSwitch=suspend #(默认值)当盖子关闭时暂停笔记本电脑 -- 耗电。
 重启或执行 sudo systemctl restart systemd-logind.service 生效
 
+# ubuntu侧边栏自动隐藏
+dconf write /org/gnome/shell/extensions/dash-to-dock/dock-fixed false
+dconf write /org/gnome/shell/extensions/dash-to-dock/intellihide false
+dconf write /org/gnome/shell/extensions/dash-to-dock/autohide true
+
+# ubuntu屏幕不自动旋转
+gsettings set org.gnome.settings-daemon.peripherals.touchscreen orientation-lock true
+

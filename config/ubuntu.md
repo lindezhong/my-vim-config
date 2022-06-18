@@ -6,11 +6,12 @@
 
 # 火狐浏览器触摸兼容
 1. 在火狐浏览器地址栏输入 about:config 回车设置 dom.w3c_touch_events.enabled项改为1（启用），默认为2（自动）
-2. 修改文件 /etc/security/pam_env.conf 添加 MOZ_USE_XINPUT2 DEFAULT=1
+2. 修改文件 /etc/security/pam_env.conf 在文件最后添加 MOZ_USE_XINPUT2 DEFAULT=1
 3. 如果鼠标滚轮滚送速度慢在火狐浏览器地址栏输入 about:config 回车设置三个配置
     - mousewheel.min_line_scroll_amount项为40
     - general.smoothScroll项为true
     - general.smoothScroll.pages项为false
+4. 重启系统
 
 # 修改ubuntu合盖动作
 修改文件: sudo vim /etc/systemd/logind.conf

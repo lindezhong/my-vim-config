@@ -19,7 +19,7 @@ default_map["setuptools_init_description"]="A small example package"
 default_map["setuptools_init_url"]="https://github.com/lindezhong"
 # 项目依赖的python版本
 default_map["setuptools_init_python_version"]="3.6"
-# 项目依赖的第三方包,为数组用空格分割,默认不依赖
+# 项目依赖的第三方包,为数组用空格分割,默认不依赖,后续输入以追加形式存在,不会覆盖默认值
 default_map["setuptools_init_packages"]=""
 # 项目默认开源协议
 default_map["setuptools_init_license"]="MIT License"
@@ -126,7 +126,12 @@ setuptoolsInit_setup_cfg() {
     # 项目依赖的第三方包,为数组用空格分割,默认不依赖
     local packages=${default_map["setuptools_init_packages"]}
     read -p "请输入第三方依赖包，使用空格分割: " packages
-    test -z "$packages" && packages="${default_map['setuptools_init_packages']}"
+    # 对于第三方依赖包需要在默认的基础上添加 
+    if [[ -z $packages ]]; then
+        packages="${default_map['setuptools_init_packages']}"
+    else
+        packages="$packages ${default_map['setuptools_init_packages']}"
+    fi
     
     # 间第三方依赖包转json "a b" -> ["a", "b"]
     local package_list=()
@@ -137,6 +142,9 @@ setuptoolsInit_setup_cfg() {
     local i
     for(( i=0; i<${#package_list[@]}; i++)) do
         local item=${package_list[i]}
+        # 将第三方依赖包追加到requirements.txt文件为后续install依赖作准备
+        # python3 -m pip install -r requirements.txt --index $pypi_index
+        echo $item >> $project_name/requirements.txt
         package_json=$(echo -n ${package_json} | jq --arg value "$item" '.[length]=$value')
     done
     packages=$(echo -e $package_json | jq -e)

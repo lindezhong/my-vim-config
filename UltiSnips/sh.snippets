@@ -119,7 +119,7 @@ fi
 endsnippet
 
 snippet strInit "初始化变量"
-test -z \$${1:变量名} && $1="${2:初始值}"
+test -z "\$${1:变量名}" && $1="${2:初始值}"
 endsnippet
 
 snippet strNull "判断字符串为空"
@@ -264,7 +264,7 @@ endsnippet
 
 # ##变量 var#变量
 snippet varInit "初始化变量"
-test -z \$${1:变量名} && $1="${2:初始值}"
+test -z "\$${1:变量名}" && $1="${2:初始值}"
 endsnippet
 
 snippet varNull "判断字符串为空"

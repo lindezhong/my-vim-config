@@ -37,20 +37,17 @@ help() {
     echo '
 --help : 查看帮助文档
     python.sh --help
-
     return : 帮助文档信息
     
 setuptools : 关于python构建/打包的相关操作, 如果python版本过低需要执行: python.sh setuptools env
 
     setuptools env : 安装构建/打包的相关依赖
         python.sh setuptools env
-
         return : pip3安装setuptools wheel twine
 
 
     setuptools init : 初始化一个可打包python项目
         python.sh setuptools init {项目名}
-
         $3 : 项目名,用来创建一个文件夹
         return : 下当前目录下创建一个python项目/文件夹,其中目录结构如下
         {项目名}/
@@ -66,12 +63,10 @@ setuptools : 关于python构建/打包的相关操作, 如果python版本过低�
 
     setuptools instll : 将本地python项目安装到site-packages
         python.sh setuptools install
-
         return : 在~/.local/lib/python{版本}/site-packages/ 生成文件夹
 
     setuptools build : 打包本地python项目
         python.sh setuptools build
-
         return : 在./dist 生成文件夹
     '
 }

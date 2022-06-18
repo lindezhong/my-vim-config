@@ -11,13 +11,11 @@ help() {
 
 run: 运行maven项目,运行前强制打包编译
     mvn.sh run [{class过滤字符:默认不过滤}]
-    
     $2 : class过滤字符:默认不过滤
     return: 打包运行maven项目
 
 find_main: 扫描本目录下所有的main java
     mvn.s find_main [{路径中要包含的字符:默认不过滤}] [{路径中要包含的字符:默认不过滤}]
-
     $2: 路径中要包含的字符,默认不过滤,一般为src/main或src/test 用来区分是否为测试类
     $3: 路径中要包含的字符,默认不过滤,一般为类名
     return 本目录下所有的main java全路径(package.class_name)

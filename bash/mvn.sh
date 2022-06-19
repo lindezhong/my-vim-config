@@ -54,6 +54,41 @@ findMainClass() {
 
 }
 
+selectClass() {
+
+    local filter_class=$1
+
+    local class_file_path=''
+    local class_file_path_list=($(findMainClass "src/main" $filter_class))
+    for(( i=0;i<${#class_file_path_list[@]};i++)) do
+        class_file_path=${class_file_path_list[i]}
+        echo "$i) $class_file_path"
+    done
+
+    local class_index
+    read -p "请输入运行的class下标或class,如果输入空字符串则使用jar中默认指定的main: " class_index
+
+    if [[ -z $class_index ]]; then
+        echo "输入class为空,使用jar指定的main"
+    elif grep '^[[:digit:]]*$' <<< "$class_index"; then
+        class_file_path=${class_file_path_list[class_index]}
+        echo "输入class_index: $class_index, class: $class_file_path"
+    else
+        class_file_path=$class_index
+        echo "输入class: $class_file_path"
+    fi
+    
+    
+    echo ""
+    echo ""
+    echo "select index is [$class_index] , class file path is [$class_file_path]"
+    echo ""
+    echo ""
+
+    _select_class_result=$class_file_path
+
+}
+
 run() {
 
     local filter_class=$1
@@ -82,32 +117,8 @@ run() {
         jar_path=${jar_path_list[$jar_index]}
     fi
 
-    local class_file_path=''
-    local class_file_path_list=($(findMainClass "src/main" $filter_class))
-    for(( i=0;i<${#class_file_path_list[@]};i++)) do
-        class_file_path=${class_file_path_list[i]}
-        echo "$i) $class_file_path"
-    done
-
-    
-    read -p "请输入运行的class下标或class,如果输入空字符串则使用jar中默认指定的main:" class_index
-
-    if [[ -z $class_index ]]; then
-        echo "输入class为空,使用jar指定的main"
-    elif grep '^[[:digit:]]*$' <<< "$class_index"; then
-        class_file_path=${class_file_path_list[class_index]}
-        echo "输入class_index: $class_index, class: $class_file_path"
-    else
-        class_file_path=$class_index
-        echo "输入class: $class_file_path"
-    fi
-    
-    
-    echo ""
-    echo ""
-    echo "select index is [$class_index] , class file path is [$class_file_path]"
-    echo ""
-    echo ""
+    selectClass $filter_class
+    local class_file_path=$_select_class_result
 
     if [[ -z $class_file_path ]]; then
         java -jar $jar_path

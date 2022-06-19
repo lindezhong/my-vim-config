@@ -9,10 +9,15 @@ help() {
     echo '
 --help: 查看mvn.sh脚本帮助文档
 
-run: 运行maven项目,运行前强制打包编译
-    mvn.sh run [{class过滤字符:默认不过滤}]
+deploy: 运行maven项目,运行前强制打包编译
+    mvn.sh deploy [{class过滤字符:默认不过滤}]
     $2 : class过滤字符:默认不过滤
     return: 打包运行maven项目
+
+run: 运行maven项目,只是编译不打包
+    mvn.sh run [{class过滤字符:默认不过滤}]
+    $2 : class过滤字符:默认不过滤
+    return: 编译运行maven项目
 
 find_main: 扫描本目录下所有的main java
     mvn.sh find_main [{路径中要包含的字符:默认不过滤}] [{路径中要包含的字符:默认不过滤}]
@@ -89,7 +94,7 @@ selectClass() {
 
 }
 
-run() {
+deploy() {
 
     local filter_class=$1
     
@@ -129,9 +134,34 @@ run() {
 
 }
 
+run() {
+    local filter_class=$1
+    mvn compiler:compile
+    local class_path_list=$(find ./ -name "classes" | grep "/target/classes")
+    
+    local class_path=""
+    local i
+    for(( i=0; i<${#class_path_list[@]}; i++)) do
+        local class_path_item=${class_path_list[i]}
+        if (( i>0 )); then
+            class_path="${class_path};"
+        fi
+        class_path="${class_path_item}${class_path}"
+    done
+
+    echo "使用class_path : ${class_path}"
+
+    selectClass $filter_class
+    local main_class_path=$_select_class_result
+    java -classpath $class_path $main_class_path
+}
+
 case $ACTION in
     '--help' )
         help
+        ;;
+    'deploy' )
+        deploy "$2"
         ;;
     'run' )
         run "$2"

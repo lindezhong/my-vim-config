@@ -27,7 +27,7 @@ _complete_func() {
     elif [[ "$original_cmd" == "git.sh" ]]; then
         cmd_list=("git.sh --help" "git.sh upstream {上游git地址}" "git.sh github repos" "git.sh github upstreamUrl" "git.sh reset {git_commit_id}" "git.sh init_server {项目名}")
     elif [[ "$original_cmd" == "mvn.sh" ]]; then
-        cmd_list=("mvn.sh --help" "mvn.sh find_main {过滤字符1} {过滤字符2}" "mvn.sh run '[mvn.sh find_main src/main]'")
+        cmd_list=("mvn.sh --help" "mvn.sh find_main {过滤字符1} {过滤字符2}" "mvn.sh deploy '[mvn.sh find_main src/main]'" "mvn.sh run '[mvn.sh find_main src/main]'")
     elif [[ "$original_cmd" == "download.sh" ]]; then
         cmd_list=("download.sh --help" "download.sh {url文件存储路径} {下载目录}")
     elif [[ "$original_cmd" == "mvn" ]]; then

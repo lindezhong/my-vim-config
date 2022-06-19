@@ -4,6 +4,39 @@ ACTION=$1
 
 test -z $ACTION && ACTION="--help"
 
+declare -A default_map=()
+#####################################################################################################################
+# java 运行通用默认值 : 正常生成的debug值为: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+# transport：监听Socket端口连接方式,常用的dt_socket表示使用socket连接；
+# server：=y表示当前是调试服务端，=n表示当前是调试客户端；
+# suspend：=n表示启动时不中断；
+# address：表示本地监听的地址和端口。
+#####################################################################################################################
+# 远程debug开关: y:开启 n:关闭
+default_map['remote_debug_switch']='y'
+# 是否开启服务端debug: y:服务端 n:客户端
+default_map['remote_debug_server']='y'
+# 远程debug启动时候是否中断 : y:中断 n:不中断
+default_map['remote_debug_suspend']='n'
+# 远程debug表示监听的地址和端口,例子:0.0.0.0:5005 表示可以接受 ip为0.0.0.0的机器远程debug(如果不填写则不限制ip) ,要连接的端口为 5005
+default_map['remote_debug_address']='5005'
+# 监听Socket端口连接方式,常用的dt_socket表示使用socket连接
+default_map['remote_debug_transport']='dt_socket'
+# 开放远程debug端口
+default_map['remote_debug_port']='5005'
+
+
+# 初始默认值,如果有default_map改变需要重新调用
+defaultMapInit() {
+    if [[ "${default_map['remote_debug_switch']}" == "y" ]]; then
+        # 正常使用该值在java运行参数上即可
+        default_map['remote_debug']="-agentlib:jdwp=transport=${default_map['remote_debug_transport']},server=${default_map['remote_debug_server']},suspend=${default_map['remote_debug_suspend']},address=${default_map['remote_debug_address']}"
+    fi
+
+}
+
+defaultMapInit
+
 
 help() {
     echo '
@@ -16,6 +49,7 @@ deploy: 运行maven项目,运行前强制打包编译
 
 run: 运行maven项目,只是编译不打包
     mvn.sh run [{class过滤字符:默认不过滤}]
+    如果为spring boot 项目需要先执行mvn clean install,将resource下的资源打包,编译无法打包resource下的资源
     $2 : class过滤字符:默认不过滤
     return: 编译运行maven项目
 
@@ -126,9 +160,9 @@ deploy() {
     local class_file_path=$_select_class_result
 
     if [[ -z $class_file_path ]]; then
-        java -jar $jar_path
+        java ${default_map['remote_debug']} -jar $jar_path
     else
-        java -cp $jar_path $class_file_path
+        java ${default_map['remote_debug']} -cp $jar_path $class_file_path
     fi
     
 
@@ -172,7 +206,7 @@ run() {
 
     selectClass $filter_class
     local main_class_path=$_select_class_result
-    java -classpath ${class_path}${use_mvn_jar_path} $main_class_path
+    java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path
 }
 
 case $ACTION in

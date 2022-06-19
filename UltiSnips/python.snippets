@@ -641,6 +641,68 @@ endsnippet
 # class DerivedClassName(Model, object):
 #     pass
 # ```
+# #单元测试unittest
+# ```python
+# #!/usr/bin/env python
+# import unittest
+# from unittest import suite
+# from unittest import runner
+# from python_demo import example
+# 
+# class TestExample(unittest.TestCase):
+# 
+#     def setUp(self) -> None:
+#         print("测试每个方法前都会调用")
+#     def tearDown(self) -> None:
+#         print("测试每个方法后都会调用")
+# 
+#     @classmethod
+#     def setUpClass(cls) -> None:
+#         print("整个测试类测试前调用,只是调用一次")
+#     @classmethod
+#     def tearDownClass(cls) -> None:
+#         print("整个测试类测试后调用,只是调用一次")
+# 
+#     # 测试方法,以方法名为"test_" 开头的都是测试方法,会执行
+#     def test_fun(self) -> None:
+#         print("test_fun")
+# 
+#     def test_fun_fail(self) -> None:
+#         self.fail("调用失败")
+# 
+#     @unittest.skip("跳过测试(可以写在类和方法上,写类上跳过整个类的测试),使用注解 @unittest.skip(无条件) @unittest.skipUnless(需要条件) @unittest.skipIf(需要条件)")
+#     # @unittest.skipIf(True, "")
+#     # @unittest.skipUnless(True, "")
+#     def test_skip(self) -> None:
+#         self.fail("跳过测试,这失败记录不会出现")
+# 
+# if __name__ == "__main__" :
+#     unittest.main() # 运行全部
+# 
+#     # 分组测试,只是测试添加的 test_fun 方法
+#     # suite = unittest.TestSuite()
+#     # suite.addTest(TestExample("test_fun"))
+#     # runner = unittest.TextTestRunner()
+#     # runner.run(suite)
+# ```
+# ##复用已有的代码#单元测试unittest
+# ```python
+# # 假定有一个测试函数
+# def testSomething():
+#     something = makeSomething()
+#     assert something.name is not None
+# # 可以创建等价的测试用例如下，其中前置和后置方法是可选的。
+# testcase = unittest.FunctionTestCase(testSomething,setUp=makeSomethingDB,tearDown=deleteSomethingDB)
+# ```
+# ##跳过测试和预计的失败#单元测试unittest
+# 以下的装饰器和异常实现了跳过测试和预期失败两种功能：
+# - @unittest.skip(reason): 跳过被此装饰器装饰的测试。 reason 为测试被跳过的原因。
+# - @unittest.skipIf(condition, reason): 当 condition 为真时，跳过被装饰的测试。
+# - @unittest.skipUnless(condition, reason): 跳过被装饰的测试，除非 condition 为真。
+# - @unittest.expectedFailure: 将测试标记为预期的失败或错误。 如果测试失败或在测试函数自身（而非在某个 test fixture 方法）中出现错误则将认为是测试成功。 如果测试通过，则将认为是测试失败。
+# - exception unittest.SkipTest(reason):引发此异常以跳过一个测试。通常来说，你可以使用 TestCase.skipTest() 或其中一个跳过测试的装饰器实现跳过测试的功能，而不是直接引发此异常。
+# 被跳过的测试的 setUp() 和 tearDown() 不会被运行。被跳过的类的 setUpClass() 和 tearDownClass() 不会被运行。被跳过的模组的 setUpModule() 和 tearDownModule() 不会被运行。
+
 snippet classVar "定义类字段，供ide提示用"
 __slots__ = ("${1: field_name}")
 endsnippet

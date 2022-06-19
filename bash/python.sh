@@ -227,7 +227,48 @@ setuptoolsInit_example_py() {
     local project_name=$1
     echo '#!/usr/bin/env python' > $project_name/src/$project_name/example.py
 
-    echo '#!/usr/bin/env python' > $project_name/tests/$project_name/test_example.py
+    echo '#!/usr/bin/env python
+import unittest
+from unittest import suite
+from unittest import runner
+from '${project_name}' import example
+
+class TestExample(unittest.TestCase):
+
+    def setUp(self) -> None:
+        print("测试每个方法前都会调用")
+    def tearDown(self) -> None:
+        print("测试每个方法后都会调用")
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        print("整个测试类测试前调用,只是调用一次")
+    @classmethod
+    def tearDownClass(cls) -> None:
+        print("整个测试类测试后调用,只是调用一次")
+    
+    # 测试方法,以方法名为"test_" 开头的都是测试方法,会执行
+    def test_fun(self) -> None:
+        print("test_fun")
+
+    def test_fun_fail(self) -> None:
+        self.fail("调用失败")
+    
+    @unittest.skip("跳过测试(可以写在类和方法上,写类上跳过整个类的测试),使用注解 @unittest.skip(无条件) @unittest.skipUnless(需要条件) @unittest.skipIf(需要条件)")
+    # @unittest.skipIf(True, "")
+    # @unittest.skipUnless(True, "")
+    def test_skip(self) -> None:
+        self.fail("跳过测试,这失败记录不会出现")
+
+if __name__ == "__main__" :
+    unittest.main() # 运行全部
+
+    # 分组测试,只是测试添加的 test_fun 方法
+    # suite = unittest.TestSuite()
+    # suite.addTest(TestExample("test_fun"))
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)
+' > $project_name/tests/$project_name/test_example.py
 
 }
 

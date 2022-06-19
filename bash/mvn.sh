@@ -144,7 +144,7 @@ run() {
     for(( i=0; i<${#class_path_list[@]}; i++)) do
         local class_path_item=${class_path_list[i]}
         if (( i>0 )); then
-            class_path="${class_path};"
+            class_path="${class_path}:"
         fi
         class_path="${class_path_item}${class_path}"
     done

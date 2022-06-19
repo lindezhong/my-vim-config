@@ -137,23 +137,42 @@ deploy() {
 run() {
     local filter_class=$1
     mvn compiler:compile
-    local class_path_list=$(find ./ -name "classes" | grep "/target/classes")
+    local class_path_list=($(find ./ -name "classes" | grep "/target/classes"))
     
     local class_path=""
     local i
     for(( i=0; i<${#class_path_list[@]}; i++)) do
         local class_path_item=${class_path_list[i]}
         if (( i>0 )); then
-            class_path="${class_path}:"
+            class_path=":${class_path}"
         fi
         class_path="${class_path_item}${class_path}"
     done
 
-    echo "使用class_path : ${class_path}"
+    # 查找maven依赖的jar
+    local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar"))
+    local mvn_jar_path_list_length=${#main_class_path_list[@]}
+
+    if (( mvn_jar_path_list_length > 1)); then
+        echo "找到数量不对的maven jar路径,mvn jar 路径数量:[$mvn_jar_path_list_length],请检查"
+        local mvn_jar_path_list_index
+        for(( mvn_jar_path_list_index=0; mvn_jar_path_list_index<${#mvn_jar_path_list[@]}; mvn_jar_path_list_index++)) do
+            local mvn_jar_path=${mvn_jar_path_list[mvn_jar_path_list_index]}
+            echo "$mvn_jar_path_list_index) $mvn_jar_path"
+        done
+    fi
+
+    local use_mvn_jar_path=$mvn_jar_path_list
+    if [[ ! -z $use_mvn_jar_path ]]; then
+        use_mvn_jar_path=":$use_mvn_jar_path"
+    fi
+
+    echo "使用的maven jar path : [$use_mvn_jar_path]"
+    echo "使用class_path : [${class_path}]"
 
     selectClass $filter_class
     local main_class_path=$_select_class_result
-    java -classpath $class_path $main_class_path
+    java -classpath ${class_path}${use_mvn_jar_path} $main_class_path
 }
 
 case $ACTION in

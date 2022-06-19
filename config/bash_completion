@@ -31,7 +31,7 @@ _complete_func() {
     elif [[ "$original_cmd" == "download.sh" ]]; then
         cmd_list=("download.sh --help" "download.sh {url文件存储路径} {下载目录}")
     elif [[ "$original_cmd" == "mvn" ]]; then
-        cmd_list=("mvn clean install -Dmaven.test.skip=true" "mvn dependency:sources -DdownloadJavadocs=true" "mvn dependency:tree")
+        cmd_list=("mvn clean install -Dmaven.test.skip=true" "mvn dependency:sources -DdownloadJavadocs=true" "mvn dependency:tree" "mvn compile" "mvn compiler:compile")
     fi
 
     COMPREPLY=()

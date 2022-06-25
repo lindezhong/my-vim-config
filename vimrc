@@ -143,7 +143,7 @@ inoremap <silent><expr> <TAB>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
+let g:coc_global_extensions = ['coc-json','coc-ultisnips', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装
@@ -352,3 +352,56 @@ nmap <silent><ESC><S-i> :CocAction<CR>
 nmap <silent><ESC><ENTER> :CocAction<CR>
 imap <silent><ESC><S-i> <Esc>`^:CocAction<CR>i
 imap <silent><ESC><ENTER> <Esc>`^:CocAction<CR>i
+
+" vimspector 远程debug插件,使用vscode的dap(Debug Adaptor Protocol)实现
+" 支持语言如下(包含开启方法)
+" | Language(s)          | Status      | Switch (for `install_gadget.py`)   | Adapter (for `:VimspectorInstall`)   | Dependencies             |
+" | -------------------- | ----------- | ---------------------------------- | ------------------------------------ | -------------------------|
+" | C, C++, Rust etc.    | Tested      | `--all` or `--enable-c` (or cpp)   | vscode-cpptools                      | mono-core                |
+" | C, C++, Rust etc.    | Supported   | `--enable-rust`                    | CodeLLDB                             | Python 3                 |
+" | Python               | Tested      | `--all` or `--enable-python`       | debugpy                              | Python 2.7 or Python 3   |
+" | Go                   | Tested      | `--enable-go`                      | delve                                | Go 1.16+                 |
+" | TCL                  | Supported   | `--all` or `--enable-tcl`          | tclpro                               | TCL 8.5                  |
+" | Bourne Shell         | Supported   | `--all` or `--enable-bash`         | vscode-bash-debug                    | Bash v??                 |
+" | Lua                  | Tested      | `--all` or `--enable-lua`          | local-lua-debugger-vscode            | Node, Npm,Lua interpreter|
+" | Node.js              | Supported   | `--force-enable-node`              | vscode-node-debug2                   | 6 < Node < 12, Npm       |
+" | Javascript           | Supported   | `--force-enable-chrome`            | debugger-for-chrome                  | Chrome                   |
+" | Javascript           | Supported   | `--force-enable-firefox`           | vscode-firefox-debug                 | Firefox                  |
+" | Java                 | Supported   | `--force-enable-java  `            | vscode-java-debug                    | Compatible LSP plugin    |
+" | PHP                  | Experimental| `--force-enable-php`               | vscode-php-debug                     | Node, PHP, XDEBUG        |
+" | C# (dotnet core)     | Tested      | `--force-enable-csharp`            | netcoredbg                           | DotNet core              |
+" | F#, VB, etc.         | Supported   | `--force-enable-[fsharp,vbnet]`    | netcoredbg                           | DotNet core              |
+" | Go (legacy)          | Legacy      | `--enable-go`                      | vscode-go                            | Node, Go, [Delve][]      |
+" | C# (mono)            | _Retired_   | N/A                                | N/A                                  | N/A                      |
+" | Python.legacy        | _Retired_   | N/A                                | N/A                                  | N/A                      |
+" 支持的API如下
+" | Mapping                                       | Function                                                            | API                                                               |
+" | ---                                           | ---                                                                 | ---                                                               |
+" | `<Plug>VimspectorContinue`                    | When debugging, continue. Otherwise start debugging.                | `vimspector#Continue()`                                           |
+" | `<Plug>VimspectorStop`                        | Stop debugging.                                                     | `vimspector#Stop()`                                               |
+" | `<Plug>VimpectorRestart`                      | Restart debugging with the same configuration.                      | `vimspector#Restart()`                                            |
+" | `<Plug>VimspectorPause`                       | Pause debuggee.                                                     | `vimspector#Pause()`                                              |
+" | `<Plug>VimspectorBreakpoints`                 | Show/hide the breakpoints window                                    | `vimspector#ListBreakpoints()`                                    |
+" | `<Plug>VimspectorToggleBreakpoint`            | Toggle line breakpoint on the current line.                         | `vimspector#ToggleBreakpoint()`                                   |
+" | `<Plug>VimspectorToggleConditionalBreakpoint` | Toggle conditional line breakpoint or logpoint on the current line. | `vimspector#ToggleBreakpoint( { trigger expr, hit count expr } )` |
+" | `<Plug>VimspectorAddFunctionBreakpoint`       | Add a function breakpoint for the expression under cursor           | `vimspector#AddFunctionBreakpoint( '<cexpr>' )`                   |
+" | `<Plug>VimspectorGoToCurrentLine`             | Reset the current program counter to the current line               | `vimspector#GoToCurrentLine()`                                        |
+" | `<Plug>VimspectorRunToCursor`                 | Run to Cursor                                                       | `vimspector#RunToCursor()`                                        |
+" | `<Plug>VimspectorStepOver`                    | Step Over                                                           | `vimspector#StepOver()`                                           |
+" | `<Plug>VimspectorStepInto`                    | Step Into                                                           | `vimspector#StepInto()`                                           |
+" | `<Plug>VimspectorStepOut`                     | Step out of current function scope                                  | `vimspector#StepOut()`                                            |
+" | `<Plug>VimspectorUpFrame`                     | Move up a frame in the current call stack                           | `vimspector#UpFrame()`                                            |
+" | `<Plug>VimspectorDownFrame`                   | Move down a frame in the current call stack                         | `vimspector#DownFrame()`                                          |
+" | `<Plug>VimspectorBalloonEval`                 | Evaluate expression under cursor (or visual) in popup               | *internal*                                                        |
+" F5启动通用debug
+nmap <silent> <F5> <Plug>VimspectorContinue
+" j+F5(先按j)启动java debug
+nmap <silent> j<F5> :CocCommand java.debug.vimspector.start<CR>
+" F7单步跳入
+nmap <silent> <F7> <Plug>VimspectorStepOver
+" F8单步跳过
+nmap <silent> <F8> <Plug>VimspectorStepInto
+" F9添加断点
+nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
+" shift+F9运行到下个断点
+nmap <silent> <S-F9> <Plug>VimspectorRunToCursor

@@ -103,28 +103,42 @@ findMainClass() {
 # 选择main java,需要先扫描main java(执行 findMainClass)
 selectClass() {
 
-    local filter_class=$1
+    local filter_class1=$1
+    local filter_class2=$2
 
     local class_file_path=''
-    local class_file_path_list=($(findMainClass "src/main" $filter_class))
-    for(( i=0;i<${#class_file_path_list[@]};i++)) do
-        class_file_path=${class_file_path_list[i]}
-        echo "$i) $class_file_path"
-    done
-
-    local class_index
-    read -p "请输入运行的class下标或class,如果输入空字符串则使用jar中默认指定的main: " class_index
-
-    if [[ -z $class_index ]]; then
-        echo "输入class为空,使用jar指定的main"
-    elif grep '^[[:digit:]]*$' <<< "$class_index"; then
-        class_file_path=${class_file_path_list[class_index]}
-        echo "输入class_index: $class_index, class: $class_file_path"
-    else
-        class_file_path=$class_index
-        echo "输入class: $class_file_path"
-    fi
+    local class_file_path_list=($(findMainClass "$filter_class1" "$filter_class2"))
     
+    local class_index
+    local i
+    local class_file_path_list_langth=${#class_file_path_list[@]}
+    while /bin/true; do
+        for(( i=0;i<$class_file_path_list_langth;i++)) do
+            class_file_path=${class_file_path_list[i]}
+            if grep "$class_index" <<< "$class_file_path" >> /dev/null; then
+                echo "$i) $class_file_path"
+            fi
+        done
+    
+        # 重置class_file_path防止数据污染
+        class_file_path=""
+
+        read -p "请输入运行的class下标或class(用来过滤class),如果输入'-1'则使用jar中默认指定的main: " class_index
+
+        if grep -E '^[-0-9][0-9]*$' <<< "$class_index" >> /dev/null; then
+            if (( class_index >=0 && class_index < class_file_path_list_langth )); then
+                class_file_path=${class_file_path_list[class_index]}
+                echo "输入class_index: $class_index, class: $class_file_path"
+                break
+            elif [ "$class_index" -lt "0" ]; then
+                echo "输入class_index为负数,使用jar指定的main"
+                class_file_path=""
+                break
+            fi
+        fi
+   
+    done
+        
     
     echo ""
     echo ""
@@ -165,7 +179,7 @@ deploy() {
         jar_path=${jar_path_list[$jar_index]}
     fi
 
-    selectClass $filter_class
+    selectClass "src/main" $filter_class
     local class_file_path=$_select_class_result
 
     if [[ -z $class_file_path ]]; then
@@ -215,8 +229,12 @@ run() {
     echo "使用的maven jar path : [$use_mvn_jar_path]"
     echo "使用class_path : [${class_path}]"
 
-    selectClass $filter_class
+    selectClass "src/main" $filter_class
     local main_class_path=$_select_class_result
+    if [[ -z $main_class_path ]]; then
+        echo "未选择 main java 无法运行"
+        return 1
+    fi
     java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path
 }
 

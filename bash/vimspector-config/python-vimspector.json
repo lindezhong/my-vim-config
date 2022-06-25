@@ -1,19 +1,23 @@
 {
-  "adapters": {
-    "debugpy": {
-      "command": [
-        "/usr/bin/python3",
-        "${gadgetDir}/debugpy/build/lib/debugpy/adapter"
-      ],
+  "configurations": {
+    "run": {
+      "adapter": "debugpy",
+      "default": true,
       "configuration": {
-        "python": "/usr/bin/python3",
-        "subProcess": false
+        "request": "launch",
+        "program": "${workspaceRoot}/${python_file}",
+        "cwd": "${workspaceRoot}",
+        "stopOnEntry": true
       },
-      "name": "debugpy"
-    },
-    "multi-session": {
-      "host": "${host}",
-      "port": "${port}"
+      "breakpoints": {
+        "exception": {
+          "raised": "N",
+          "uncaught": "",
+          "userUnhandled": ""
+        }
+      }
     }
   }
 }
+
+

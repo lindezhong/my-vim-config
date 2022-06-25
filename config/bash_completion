@@ -4,6 +4,7 @@ complete -F _complete_func python.sh
 complete -F _complete_func mvn.sh
 complete -F _complete_func download.sh
 complete -F _complete_func mvn
+complete -F _complete_func vimspector.sh
 _complete_func() {
 
     # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
@@ -32,6 +33,8 @@ _complete_func() {
         cmd_list=("download.sh --help" "download.sh {url文件存储路径} {下载目录}")
     elif [[ "$original_cmd" == "mvn" ]]; then
         cmd_list=("mvn clean install -Dmaven.test.skip=true" "mvn dependency:sources -DdownloadJavadocs=true" "mvn dependency:tree" "mvn compile" "mvn compiler:compile")
+    elif [[ "$original_cmd" == "vimspector.sh" ]]; then
+        cmd_list=("vimspector.sh --help" "vimspector.sh language" "vimspector.sh config '[vimspector.sh language]'")
     fi
 
     COMPREPLY=()

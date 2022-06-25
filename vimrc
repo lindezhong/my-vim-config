@@ -403,5 +403,5 @@ nmap <silent> <F7> <Plug>VimspectorStepOver
 nmap <silent> <F8> <Plug>VimspectorStepInto
 " F9添加断点
 nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
-" shift+F9运行到下个断点
-nmap <silent> <S-F9> <Plug>VimspectorRunToCursor
+" F6运行到下个断点
+nmap <silent> <F6> <Plug>VimspectorRunToCursor

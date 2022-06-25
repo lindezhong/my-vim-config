@@ -459,9 +459,18 @@ fi
 endsnippet
 
 # #环境信息
-snippet homePath "脚本存放目录"
+snippet homePath "脚本存放目录,如果该文件是个软连接不会去真实脚本获取"
 home_path=$(readlink -f $(dirname "\$0"))
 $0
+endsnippet
+snippet homePathReal "脚本存放目录,如果该文件是个软连接,会获取真实脚本路径"
+script_path=\$0
+while [ -L $script_path ]; do
+    # 如果是软连接要处理真实路径
+    script_path=$(ls -al $script_path)
+    script_path=${script_path##*->}
+done
+home_path=$(readlink -f $(dirname "$script_path"))
 endsnippet
 
 snippet currentPath "获取当前执行脚本目录"

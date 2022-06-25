@@ -9,6 +9,7 @@ if [[ -z $ACTION ]]; then
     exit 1
 fi
 
+# 帮助文档
 help() {
     echo '
 upstream : Git进行fork后跟原仓库同步
@@ -176,6 +177,7 @@ case "$GITHUB_ACTION" in
 esac
 }
 
+# git回滚到某个版本
 reset() {
     local commit_id=$1
     while [ -z $commit_id ]; do
@@ -184,6 +186,7 @@ reset() {
     git reset --hard $commit_id
 }
 
+# 初始化git服务端项目,供git clone user@ip:/项目路径
 initServer() {
     local project_name=$1
 

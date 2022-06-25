@@ -32,7 +32,7 @@ test -z $ACTION && ACTION="--help"
 
 current_path=$(readlink -f $(dirname "$0"))
 
-
+# 帮助文档
 help() {
     echo '
 --help : 查看帮助文档

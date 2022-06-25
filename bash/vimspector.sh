@@ -28,6 +28,7 @@ defaultMapInit() {
 
 defaultMapInit
 
+# 帮助文档
 help() {
     echo '
 --help : 查看帮助文档
@@ -45,6 +46,7 @@ config : 复制对应语言的配置到本目录下
     '
 }
 
+# 查看支持的语言
 language() {
     local vimspector_config_path_list=($(ls ${default_map['config_path']}))
     local vimspector_config=""
@@ -60,6 +62,8 @@ language() {
     echo $vimspector_config
 }
 
+
+# 复制对应语言的配置到本目录下
 config() {
     local language=$1
     local language_list=$(language)

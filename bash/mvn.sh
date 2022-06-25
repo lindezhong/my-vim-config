@@ -37,12 +37,12 @@ defaultMapInit() {
 
 defaultMapInit
 
-
+# 帮助文档
 help() {
     echo '
 --help: 查看mvn.sh脚本帮助文档
 
-deploy: 运行maven项目,运行前强制打包编译
+deploy: 部署maven项目,运行前强制打包编译
     mvn.sh deploy [{class过滤字符:默认不过滤}]
     $2 : class过滤字符:默认不过滤
     return: 打包运行maven项目
@@ -67,7 +67,7 @@ find_main: 扫描本目录下所有的main java
     '
 }
 
-
+# 编译mvn项目,跳过测试类(只编译不打包)
 install() {
     # 不运行测试类，但打包
     mvn clean install -DskipTests=true
@@ -77,6 +77,7 @@ install() {
     fi
 }
 
+# 扫描本目录下所有的main java
 findMainClass() {
 
     
@@ -99,6 +100,7 @@ findMainClass() {
 
 }
 
+# 选择main java,需要先扫描main java(执行 findMainClass)
 selectClass() {
 
     local filter_class=$1
@@ -134,6 +136,7 @@ selectClass() {
 
 }
 
+# 部署maven项目,运行前强制打包编译
 deploy() {
 
     local filter_class=$1
@@ -174,6 +177,8 @@ deploy() {
 
 }
 
+
+# 运行maven项目,只是编译不打包,开启远程debug,远程端口5005 
 run() {
     local filter_class=$1
     mvn compiler:compile

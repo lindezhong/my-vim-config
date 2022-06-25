@@ -48,7 +48,7 @@ config : 复制对应语言的配置到本目录下
 
 # 查看支持的语言
 language() {
-    local vimspector_config_path_list=($(ls ${default_map['config_path']}))
+    local vimspector_config_path_list=($(ls ${default_map['config_path']}/*-vimspector.json))
     local vimspector_config=""
     local i
     for(( i=0; i<${#vimspector_config_path_list[@]}; i++)) do
@@ -57,6 +57,7 @@ language() {
             vimspector_config="$vimspector_config "
         fi
         local language=${vimspector_config_path%%${default_map['config_file_suffix']}*}
+        language=${language##*/}
         vimspector_config="$vimspector_config $language"
     done
     echo $vimspector_config

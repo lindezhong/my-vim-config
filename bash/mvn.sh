@@ -47,8 +47,14 @@ deploy: 运行maven项目,运行前强制打包编译
     $2 : class过滤字符:默认不过滤
     return: 打包运行maven项目
 
-run: 运行maven项目,只是编译不打包
+run: 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
     mvn.sh run [{class过滤字符:默认不过滤}]
+    如果为spring boot 项目需要先执行mvn clean install,将resource下的资源打包,编译无法打包resource下的资源
+    $2 : class过滤字符:默认不过滤
+    return: 编译运行maven项目
+
+debug: 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
+    mvn.sh debug [{class过滤字符:默认不过滤}]
     如果为spring boot 项目需要先执行mvn clean install,将resource下的资源打包,编译无法打包resource下的资源
     $2 : class过滤字符:默认不过滤
     return: 编译运行maven项目
@@ -217,6 +223,11 @@ case $ACTION in
         deploy "$2"
         ;;
     'run' )
+        run "$2"
+        ;;
+    'debug' )
+        default_map['remote_debug_suspend']='y'
+        defaultMapInit
         run "$2"
         ;;
     'find_main' )

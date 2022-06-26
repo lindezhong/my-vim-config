@@ -398,9 +398,9 @@ nmap <silent> <F5> <Plug>VimspectorContinue
 " j+F5(先按j)启动java debug
 nmap <silent> j<F5> :CocCommand java.debug.vimspector.start<CR>
 " F7单步跳入
-nmap <silent> <F7> <Plug>VimspectorStepOver
+nmap <silent> <F7> <Plug>VimspectorStepInto
 " F8单步跳过
-nmap <silent> <F8> <Plug>VimspectorStepInto
+nmap <silent> <F8> <Plug>VimspectorStepOver
 " F9添加断点
 nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
 " F6运行到下个断点

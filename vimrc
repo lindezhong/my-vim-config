@@ -36,8 +36,11 @@ filetype plugin indent on
 "
 " NERDTree配置 打开侧边目录
 nmap <silent><ESC><C-n> :NERDTreeToggle<CR>
+" 快速定位到当前文件
 nmap <silent><ESC><S-n> :NERDTreeFind<CR>
+" NERDTree配置 打开侧边目录
 imap <silent><ESC><C-n> <Esc>`^:NERDTreeToggle<CR>
+" 快速定位到当前文件
 imap <silent><ESC><S-n> <Esc>`^:NERDTreeFind<CR>
 " NERDTree防止在窗口打开
 " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.

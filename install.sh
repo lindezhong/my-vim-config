@@ -48,8 +48,6 @@ fi
 # w3m命令行查看图片
 # sudo apt install -y  w3m-inline-image
 sudo apt install -y w3m w3m-img
-# 爬取视频工具
-pip3 install you-get
 
 sudo apt install -y jq
 sudo apt install -y nodejs npm
@@ -58,6 +56,19 @@ sudo n stable
 sudo apt install -y python3-pip
 sudo apt install -y python3-venv
 sudo apt install -y gcc g++ make cmake
+
+
+#####################################################
+####     可选安装(由自己执行这里只是作记录)      ####
+#####################################################
+
+# 爬取视频工具
+# pip3 install you-get
+
+#####################################################
+####     可选安装(由自己执行这里只是作记录)      ####
+#####################################################
+
 
 # 下载vim插件
 for (( i=0; i<10; i++ )); do

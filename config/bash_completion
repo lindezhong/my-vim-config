@@ -24,17 +24,43 @@ _complete_func() {
     # 4. 如果cmd_item带空格可以用''(单引号)包裹
     local cmd_list=()
     if [[ "$original_cmd" == "python.sh" ]]; then
-        cmd_list=("python.sh --help" "python.sh setuptools env" "python.sh setuptools init {项目名}" "python.sh setuptools install" "python.sh setuptools build" )
+        cmd_list=("python.sh --help" # 查看帮助文档 
+            "python.sh setuptools env" # 安装构建/打包的相关依赖
+            "python.sh setuptools init {项目名}" # 初始化一个可打包python项目
+            "python.sh setuptools install" # 将本地python项目安装到site-packages
+            "python.sh setuptools build" # 打包本地python项目,在./dist 生成文件夹
+        )
     elif [[ "$original_cmd" == "git.sh" ]]; then
-        cmd_list=("git.sh --help" "git.sh upstream {上游git地址}" "git.sh github repos" "git.sh github upstreamUrl" "git.sh reset {git_commit_id}" "git.sh init_server {项目名}")
+        cmd_list=("git.sh --help" # 查看帮助文档
+            "git.sh upstream {上游git地址}" # Git进行fork后跟原仓库同步,会添加一个上游的主干分支 upstream/master
+            "git.sh github repos" # git clone github上一个组织(organizations)下的所有存储库
+            "git.sh github upstreamUrl" # 解析github项目上游url
+            "git.sh reset {git_commit_id}" # git回滚到某个版本
+            "git.sh init_server {项目名}" # 初始化git服务端项目,供git clone user@ip:/项目路径
+        )
     elif [[ "$original_cmd" == "mvn.sh" ]]; then
-        cmd_list=("mvn.sh --help" "mvn.sh find_main {过滤字符1} {过滤字符2}" "mvn.sh deploy '[mvn.sh find_main src/main]'" "mvn.sh run '[mvn.sh find_main src/main]'" "mvn.sh debug '[mvn.sh find_main src/main]'")
+        cmd_list=("mvn.sh --help" # 查看mvn.sh脚本帮助文档
+            "mvn.sh find_main {过滤字符1} {过滤字符2}" # 扫描本目录下所有的main java
+            "mvn.sh deploy '[mvn.sh find_main src/main]'" # 部署maven项目,运行前强制打包编译
+            "mvn.sh run '[mvn.sh find_main src/main]'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
+            "mvn.sh debug '[mvn.sh find_main src/main]'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
+        )
     elif [[ "$original_cmd" == "download.sh" ]]; then
-        cmd_list=("download.sh --help" "download.sh {url文件存储路径} {下载目录}")
+        cmd_list=("download.sh --help" # 脚本帮助文档
+            "download.sh {url文件存储路径} {下载目录}" # 下载多个文件到某个目录
+        )
     elif [[ "$original_cmd" == "mvn" ]]; then
-        cmd_list=("mvn clean install -Dmaven.test.skip=true" "mvn dependency:sources -DdownloadJavadocs=true" "mvn dependency:tree" "mvn compile" "mvn compiler:compile")
+        cmd_list=("mvn clean install -Dmaven.test.skip=true" # 编译打包maven项目,跳过测试类(不执行测试用例，也不编译测试用例类),不执行测试用例，也不编译测试用例类
+            "mvn dependency:sources -DdownloadJavadocs=true" # 下载maven依赖pom的源码和doc
+            "mvn dependency:tree" # 查看pom依赖树
+            "mvn compile" # 编译maven项目
+            "mvn compiler:compile" # 编译maven项目
+        )
     elif [[ "$original_cmd" == "vimspector.sh" ]]; then
-        cmd_list=("vimspector.sh --help" "vimspector.sh language" "vimspector.sh config '[vimspector.sh language]'")
+        cmd_list=("vimspector.sh --help" # 查看帮助文档
+            "vimspector.sh language" # 查看支持的语言
+            "vimspector.sh config '[vimspector.sh language]'" # 复制对应语言的配置到本目录下,在本地生成 .vimspector.json 文件
+        )
     fi
 
     COMPREPLY=()

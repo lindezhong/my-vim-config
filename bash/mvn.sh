@@ -210,15 +210,27 @@ run() {
 
     # 查找maven依赖的jar
     local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar"))
-    local mvn_jar_path_list_length=${#main_class_path_list[@]}
+    local mvn_jar_path_list_length=${#mvn_jar_path_list[@]}
 
+    let local push_num=0
+    # 认为父子项目只有一级
     if (( mvn_jar_path_list_length > 1)); then
-        echo "找到数量不对的maven jar路径,mvn jar 路径数量:[$mvn_jar_path_list_length],请检查"
-        local mvn_jar_path_list_index
-        for(( mvn_jar_path_list_index=0; mvn_jar_path_list_index<${#mvn_jar_path_list[@]}; mvn_jar_path_list_index++)) do
-            local mvn_jar_path=${mvn_jar_path_list[mvn_jar_path_list_index]}
-            echo "$mvn_jar_path_list_index) $mvn_jar_path"
+        echo "找到数量不对的maven jar路径,mvn jar 路径数量:[$mvn_jar_path_list_length],该项目是否为父项目?"
+        local maven_dir_list=($(ls -d */))
+        local maven_dir_index
+        for(( maven_dir_index=0; maven_dir_index<${#maven_dir_list[@]}; maven_dir_index++)) do
+            echo "$maven_dir_index) ${maven_dir_list[maven_dir_index]}"
         done
+        read -p "选择进入的子项目 : " maven_dir_index
+        while [ -z `grep -E '^[0-9][0-9]*$' <<< "$maven_dir_index"` ] || [ $maven_dir_index -lt 0 ] || [ $maven_dir_index -gt ${#maven_dir_list[@]} ]; do
+            read -p "请输入 [0 , ${#maven_dir_list[@]}-1] 数字,选择目录 : " maven_dir_index
+        done
+        local maven_dir=${maven_dir_list[$maven_dir_index]}
+        echo "选择 [$maven_dir_index] , 进入目录 : [$maven_dir],重新解析mvn jar 依赖路径"
+        pushd $maven_dir
+        # 记录pushd的次数,用作后面的popd返回原始位置
+        let push_num++
+        local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar")) 
     fi
 
     local use_mvn_jar_path=$mvn_jar_path_list
@@ -235,6 +247,11 @@ run() {
         echo "未选择 main java 无法运行"
         return 1
     fi
+
+    # 回到原始位置
+    for(( i=0; i<push_num; i++)) do
+        popd
+    done
     java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path
 }
 

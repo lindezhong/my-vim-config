@@ -48,6 +48,9 @@ fi
 # w3m命令行查看图片
 # sudo apt install -y  w3m-inline-image
 sudo apt install -y w3m w3m-img
+# 爬取视频工具
+pip3 install you-get
+
 sudo apt install -y jq
 sudo apt install -y nodejs npm
 sudo npm install -g n

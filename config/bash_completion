@@ -5,6 +5,7 @@ complete -F _complete_func mvn.sh
 complete -F _complete_func download.sh
 complete -F _complete_func mvn
 complete -F _complete_func vimspector.sh
+complete -F _complete_func you-get # 爬取视频工具,使用 `pip3 install you-get` 安装
 _complete_func() {
 
     # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
@@ -61,6 +62,10 @@ _complete_func() {
             "vimspector.sh language" # 查看支持的语言
             "vimspector.sh config '[vimspector.sh language]'" # 复制对应语言的配置到本目录下,在本地生成 .vimspector.json 文件
         )
+    elif [[ "$original_cmd" == "you-get" ]]; then
+        cmd_list=("you-get -l {视频网址}" # 下载视频列表(下载多个)
+            "you-get {视频网址}" # 下载单个视频
+            )
     fi
 
     COMPREPLY=()

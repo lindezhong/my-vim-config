@@ -365,7 +365,7 @@ endsnippet
 # strcpy(str, "hello world"); // 用malloc分配出来的字符串不是不可变的，可以被修改
 # ```
 snippet memoryMalloc "内存分配(分配在堆中),不会初始化内存,这个内存块会一直占用到程序运行结束,分配内存有可能分配失败，这时返回常量 NULL。"
-void* ${2:var} = malloc(${1:size});
+${1:type}* ${2:var} = malloc(sizeof($1));
 $0
 endsnippet
 snippet memoryFree "用于释放`malloc()`函数分配的内存，，不释放内存块会一直占用到程序运行结束。分配的内存块一旦释放，就不应该再次操作已经释放的地址，包括重新`free()`"
@@ -423,8 +423,196 @@ endsnippet
 # int* q = p;
 # *q = 0; //不报错，但现在该内存有`p`和`q`两种访问方式, 后面通过`*q`对该内存区域赋值，会导致未定义行为。
 # ```
+# #struct
+# `struct`关键字，允许自定义复合数据类型，将不同类型的值组合在一起,`struct`结构占用的存储空间(存储空间连续)，不是各个属性存储空间的总和，而是最大内存占用属性的存储空间的倍数，其他属性会添加空位与之对齐。这样可以提高读写效率。
+# ```c
+# struct foo {
+#   int a;
+#   char* b;
+#   char c;
+# };
+# printf("%d\n", sizeof(struct foo)); // 24
+# // 上面示例中，struct foo 有三个属性，在64位计算机上占用的存储空间分别是：int a 占4个字节，指针char* b 占8个字节，char c 占1个字节。它们加起来，一共是13个字节（4 + 8 + 1）。但是实际上，struct foo 会占用24个字节，原因是它最大的内存占用属性是char* b 的8个字节，导致其他属性的存储空间也是8个字节，这样才可以对齐，导致整个struct foo 就是24个字节（8 * 3）。
+# // 多出来的存储空间，都采用空位填充，所以上面的struct foo 真实的结构其实是下面这样
+# struct foo {
+#   int a;        // 4
+#   char pad1[4]; // 填充4字节
+#   char *b;      // 8
+#   char c;       // 1
+#   char pad2[7]; // 填充7字节
+# };
+# printf("%d\n", sizeof(struct foo)); // 24
+# // 为什么浪费这么多空间进行内存对齐呢？这是为了加快读写速度，把内存占用划分成等长的区块，就可以快速在 Struct 结构体中定位到每个属性的起始地址。
+# // 由于这个特性，在有必要的情况下，定义 Struct 结构体时，可以采用存储空间递增的顺序，定义每个属性，这样就能节省一些空间。
+# struct foo {
+#   char c;
+#   int a;
+#   char* b;
+# };
+# printf("%d\n", sizeof(struct foo)); // 16
+# // 上面示例中，占用空间最小的char c 排在第一位，其次是int a ，占用空间最大的char* b 排在最后。整个strct foo 的内存占用就从24字节下降到16字节。
+# 
+# // 使用
+# struct foo f1 = {'c',3,"hello"};
+# // struct 的数据类型声明语句与变量的声明语句，可以合并为一个语句。
+# struct book {
+#   char title[500];
+#   char author[100];
+#   float value;
+# } b1;
+# // 上面的语句同时声明了数据类型book 和该类型的变量b1 。如果类型标识符book 只用在这一个地方，后面不再用到，这里可以将类型名省略(struct 声明了一个匿名数据类型，然后又声明了这个类型的变量b1)。
+# struct {
+#   char title[500];
+#   char author[100];
+#   float value;
+# } b1;
+# // 与其他变量声明语句一样，可以在声明变量的同时，对变量赋值。
+# struct {
+#   char title[500];
+#   char author[100];
+#   float value;
+# } b1 = {"Harry Potter", "J. K. Rowling", 10.0},
+#   b2 = {"Cancer Ward", "Aleksandr Solzhenitsyn", 7.85};
+# // 指针变量也可以指向struct 结构。
+# struct book {
+#   char title[500];
+#   char author[100];
+#   float value;
+# }* b1;
+# // 或者写成两个语句
+# struct book {
+#   char title[500];
+#   char author[100];
+#   float value;
+# };
+# struct book* b1;
+# ```
+snippet structDefinition "定义一个struct结构,1.结构名:如果为空为匿名结构,匿名结构一定需要变量名 2.变量名:如果不为空则表示定义了一个struce变量,可以在变量名后直接赋值 = {} 3. 可以使用指针变量 * 变量名"
+struct ${1:[结构名]} \{
+$0
+\} ${2:[变量名]};
+endsnippet
+snippet structInit "初始化一个struct类型的变量(给struct类型赋初始值) 如 : struct Book b1 = {'name'}"
+struct ${1:结构名} ${2:变量名} = \{${3:按顺序的变量值}\};
+endsnippet
+# ##struct复制#struct
+# struct 变量可以使用赋值运算符（= ），复制给另一个变量，这时会生成一个全新的副本。系统会分配一块新的内存空间，大小与原来的变量相同，把每个属性都复制过去，即原样生成了一份数据。这一点跟数组的复制不一样，务必小心。
+# ```c
+# struct cat { char name[30]; short age; } a, b;
+# strcpy(a.name, "Hula");
+# a.age = 3;
+# b = a;
+# b.name[0] = 'M';
+# printf("%s\n", a.name); // Hula
+# printf("%s\n", b.name); // Mula
+# // 但 如果cat.name类型char*(字符指针)这时a 赋值给b ，导致b.name 也是同样的字符指针，指向同一个地址，也就是说两个属性共享同一个地址。因为这时，struct 结构内部保存的是一个指针，而不是上一个例子的数组，这时复制的就不是字符串本身，而是它的指针。并且，这个时候也没法修改字符串，因为字符指针指向的字符串是不能修改的
+# ```
+# ##struct指针#struct
+# 如果将 struct 变量传入函数，函数内部得到的是一个原始值的副本,对于 struct 变量名，使用点运算符（. ）获取属性；对于 struct 变量指针，使用箭头运算符（-> ）获取属性。
+# ```c
+# #include <stdio.h>
+# struct turtle {
+#   char* name;
+#   char* species;
+#   int age;
+# };
+# void happy(struct turtle t) {
+#   t.age = t.age + 1; // 为struct原始值的副本,无法修改传入的struct
+# }
+# void happy(struct turtle* t) {
+#   // (*t).age 不能写成*t.age ，因为点运算符. 的优先级高于* 。*t.age 这种写法会将t.age 看成一个指针，然后取它对应的值，会出现无法预料的结果。
+#   (*t).age = (*t).age + 1; // 为指针可以修改传入struct内部值
+#   t->age = t->age + 1; // (*t).age 这样的写法很麻烦。C 语言就引入了一个新的箭头运算符（-> ），可以从 struct 指针上直接获取属性，大大增强了代码的可读性。
+# }
+# int main() {
+#   struct turtle myTurtle = {"MyTurtle", "sea turtle", 99};
+#   happy(myTurtle);
+#   printf("Age is %i\n", myTurtle.age); // 输出 99
+#   happy(&myTurtle);
+#   printf("Age is %i\n", myTurtle.age); // 输出 101
+#   return 0;
+# }
+# ```
+# ## struct嵌套#struct
+# ```c
+# struct species {
+#   char* name;
+#   int kinds;
+# };
+# struct fish {
+#   char* name;
+#   int age;
+#   struct species breed;
+# };
+# // 初始化带嵌套的struct
+# // 写法1
+# struct fish shark = {"shark", 9, {"Selachimorpha", 500}};
+# struct species myBreed = {"Selachimorpha", 500};
+# // 写法2
+# struct fish shark = {"shark", 9, myBreed};
+# // 写法3
+# struct fish shark = {
+#   .name="shark",
+#   .age=9,
+#   .breed={"Selachimorpha", 500}
+# };
+# // 写法4
+# struct fish shark = {
+#   .name="shark",
+#   .age=9,
+#   .breed.name="Selachimorpha",
+#   .breed.kinds=500
+# };
+# 
+# // 例子
+# struct node {
+#   int data;
+#   struct node* next;
+# };
+# struct node* head;
+# // 生成一个三个节点的列表 (11)->(22)->(33)
+# head = malloc(sizeof(struct node));
+# head->data = 11;
+# head->next = malloc(sizeof(struct node));
+# head->next->data = 22;
+# head->next->next = malloc(sizeof(struct node));
+# head->next->next->data = 33;
+# head->next->next->next = NULL;
+# // 遍历这个列表
+# for (struct node *cur = head; cur != NULL; cur = cur->next) {
+#   printf("%d\n", cur->data);
+# }
+# ```
+# ##位字段#struct
+# ```c
+# struct {
+#   unsigned int field1 : 1;
+#   unsigned int        : 2;
+#   unsigned int field2 : 1;
+#   unsigned int        : 0;
+#   unsigned int field3 : 1;
+# } syntg;
+# synth.field1 = 0;
+# synth.field2 = 1;
+# // 属性后面的:1 ，表示指定这些属性只占用一个二进制位。synth.field1 与synth.field2 之间，有一个宽度为两个二进制位的未命名属性
+# ```
+# ##弹性数组成员#struct
+# 很多时候，不能事先确定数组到底有多少个成员。如果声明数组的时候，事先给出一个很大的成员数，就会很浪费空间。C 语言提供了一个解决方法，叫做弹性数组成员（flexible array member）。
+# ```c
+# struct vstring {
+#   int len;
+#   char chars[];
+# };
+# struct vstring* str = malloc(sizeof(struct vstring) + n * sizeof(char));
+# str->len = n;
+# // chars 数组到底有多少个成员，可以在为vstring 分配内存时确定。
+# // 上面示例中，假定chars 数组的成员数量是n ，只有在运行时才能知道n 到底是多少。然后，就为struct vstring 分配它需要的内存：它本身占用的内存长度，再加上n 个数组成员占用的内存长度。最后，len 属性记录一下n 是多少。
+# // 这样就可以让数组chars 有n 个成员，不用事先确定，可以跟运行时的需要保持一致。
+# // 弹性数组成员有一些专门的规则。首先，弹性成员的数组，必须是 struct 结构的最后一个属性。另外，除了弹性数组成员，struct 结构必须至少还有一个其他属性。
+# ```
 
 
+	
 
 	
 

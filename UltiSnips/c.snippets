@@ -668,6 +668,50 @@ snippet unionInit "初始化union"
 union ${1:结构名} ${2:变量名} = \{.${3:属性名}=${4:value}\};
 $0
 endsnippet
+# #enum(枚举)
+# 如果一种数据类型的取值只有少数几种可能，并且每种取值都有自己的含义，为了提高代码的可读性，可以将它们定义为 Enum 类型，中文名为枚举。
+# 
+# ```c
+# // 举没指定值则自动从0开始递增
+# enum colors {RED, GREEN, BLUE};
+# printf("%d\n", RED); // 0
+# printf("%d\n", GREEN);  // 1
+# printf("%d\n", BLUE);  // 2
+#
+# // 由于 Enum 的属性会自动声明为常量，所以有时候使用 Enum 的目的，不是为了自定义一种数据类型，而是为了声明一组常量
+# enum { ONE, TWO };
+# printf("%d %d", ONE, TWO);  // 0 1
+# 
+# // 还有一种不常见的写法，就是声明 Enum 类型时，在同一行里面为变量赋值。
+# // C 语言也允许为 ENUM 常量指定值，不过只能指定为整数
+# // Enum 常量可以是不连续的值。
+# // Enum 常量也可以是同一个值。
+# // 如果一组常量之中，有些指定了值，有些没有指定。那么，没有指定值的常量会从上一个指定了值的常量，开始自动递增赋值。
+# enum {
+#   SHEEP = 1,
+#   WHEAT = -3,
+#   WOOD = 1,
+#   BRICK,
+#   ORE
+# } r = BRICK, s = WOOD;
+# printf("%d\n",r); // 2
+# ```
+
+snippet enumDefinition "枚举定义:1.枚举没指定值则自动从0开始递增2.枚举可以指定值只能指定整数,可以指定为同一个值3.如果没指定值那么从上一个指定了值的枚举，开始自动递增赋值4.Enum 的属性会自动声明为常量5. typedef enum COLORS {RED, GREEN, BLUE}; enum COLORS r = RED; printf('%d', r);"
+enum ${1:枚举名} \{
+    ${2:枚举属性}
+\};
+endsnippet
+snippet enumDefinitionTypedef "定义enum取别名, typedef enum {RED, GREEN, BLUE} COLORS; COLORS r = RED; printf('%d', r); // 0 printf('%d', GREEN); // 1"
+typedef enum \{
+    $0
+\} ${1:enum别名};
+endsnippet
+snippet enumDefinitionInit "使用初始化enum, enum colors {RED, GREEN, BLUE}; enum colors r = RED;"
+enum ${1:枚举名} ${2:枚举变量名} = ${3:枚举属性};
+$0
+endsnippet
+
 
 
 

@@ -11,7 +11,7 @@ set dictionary=/usr/dict/words,/usr/share/dict/words
 set complete+=k "set complete option
 " 词典补全 使用Ctrl-X Ctrl-T快捷键，将在'thesaurus'选项定义的文件中查找匹配的关键词。
 " 因为在词典文件中，每行会包含多个单词，所以将显示匹配行中的所有单词
-set thesaurus=/usr/dict/words,/usr/share/dict/words,~/.vim/dict/words
+set thesaurus=/usr/dict/words,/usr/share/dict/words
 " 如果觉得<Ctrl-X><Ctrl-K>组合键太麻烦 ，那么也可以直接将字典补全添加到默认补全列表中，在vimrc中添加下面的代码
 set complete-=k complete+=k
 

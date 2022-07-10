@@ -1,0 +1,51 @@
+#######################################
+########sqlalchemy是一个orm框架########
+#######################################
+
+# 安装
+# 1. pip3 install mysql-connector sqlalchemy
+
+
+
+snippet sqlEngineMysql "sqlalchemy 创建一个MySql引擎,1. from sqlalchemy.engine.create import create_engine 2. pip3 install mysql-connector 3. connect_args={'auth_plugin': 'mysql_native_password'} 如果MySQL密码使用mysql_native_password认证"
+${6:engine} = create_engine('mysql+mysqlconnector://${1:账号}:${2:密码}@${3:IP地址}:${4:端口号}/${5:数据库名称}')
+endsnippet
+
+snippet sqlSession "sqlalchemy 创建一个Session,对于数据库的操作要通过Session. 1. 需要sqlEngineMysql(代码片段)生成的engine 2. from sqlalchemy.orm import sessionmaker 3. from sqlalchemy.orm.session import Session  4. orm操作使用session进行,session相当于一个连接 5. 使用完后需要执行 session.commit() 和 session.close() 归还连接给pool"
+${2:DBSession} = sessionmaker(bind=${1:engine})
+${3:session} :Session = $2()
+endsnippet
+
+# tablename 指明了模型对应的数据表名称，在 Player 模型中对采用的变量名进行定义， 变量名需要和数据表中的字段名称保持一致，采用 Column 对字段进行定义
+# 
+# | 类型     | 解释                                         | 用法                                                  |
+# | -------- | -------------------------------------------- | ----------------------------------------------------- |
+# | Integer  | 整数类型                                     | Column(Integer, primary_key=True, autoincrement=True) |
+# | Float    | 浮点类型                                     | Column(Float(3, 2))                                   |
+# | Decimal  | 定点类型                                     |                                                       |
+# | Boolean  | 布尔类型                                     |                                                       |
+# | Date     | datetime.date 日期类型                       |                                                       |
+# | Time     | datetime.time 时间类型                       |                                                       |
+# | String   | 字符类型,使用时候需要指定长度,区别于Text类型 | Column(String(255))                                   |
+# | Text     | 文本类型                                     |                                                       |
+# | enum     | 枚举类型                                     |                                                       |
+# | LONGTEXT | 长文本类型                                   |                                                       |
+# 
+# 除了指定 Column 的数据类型以外， 我们也可以指定 Column 的参数， 这些参数可以帮我们对对象创建列约束：
+# 
+# | 属性          | 解释                       |
+# | ------------- | -------------------------- |
+# | default       | 默认值                     |
+# | nullable      | 是否可有                   |
+# | primary_key   | 是否为主键                 |
+# | unique        | 是否唯一                   |
+# | autoincrement | 是否自动增长               |
+# | onupdate      | 更新的时候执行的函数       |
+# | name          | 该属性在数据库中的字段映射 |
+snippet sqlModel "sqlalchemy 创建一个model用于数据库映射1. from sqlalchemy.sql.schema import Column 2. from sqlalchemy.sql.sqltypes import String, Integer ,Float 3. from sqlalchemy.ext.declarative import declarative_base "
+class ${1:class_name}(declarative_base()):
+    __tablename__ = '${2:table_name}'
+    # 表结构
+    id = Column(Integer, primary_key=True, autoincrement=True)
+	$0
+endsnippet

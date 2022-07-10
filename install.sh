@@ -64,6 +64,8 @@ sudo apt install -y gcc g++ make cmake
 
 # 爬取视频工具
 # pip3 install you-get
+# sqlite3
+# sudo apt install -y sqlite3 sqlite3-doc
 
 #####################################################
 ####     可选安装(由自己执行这里只是作记录)      ####

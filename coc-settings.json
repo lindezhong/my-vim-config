@@ -1,4 +1,5 @@
 {
-  "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/clangd/bin/clangd"
+  "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/clangd/bin/clangd",
+  "translator.engines": ["bing","google","youdao","haici"]
 
 }

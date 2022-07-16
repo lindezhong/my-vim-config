@@ -155,7 +155,7 @@ inoremap <silent><expr> <TAB>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-json','coc-snippets', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
+let g:coc_global_extensions = ['coc-translator', 'coc-json','coc-snippets', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装
@@ -166,6 +166,18 @@ let g:coc_global_extensions = ['coc-json','coc-snippets', 'coc-java',  'coc-java
 " ## coc-jedi
 " coc-jedi 依赖 python3-pip, python3-venv
 " sudo apt install -y python3-pip python3-venv
+
+" coc-translator 翻译插件
+" NOTE: do NOT use `nore` mappings
+" popup
+nmap <Leader>t <Plug>(coc-translator-p)
+vmap <Leader>t <Plug>(coc-translator-pv)
+" echo
+nmap <Leader>e <Plug>(coc-translator-e)
+vmap <Leader>e <Plug>(coc-translator-ev)
+" replace
+nmap <Leader>r <Plug>(coc-translator-r)
+vmap <Leader>r <Plug>(coc-translator-rv)
 
 " 忽略开启警告(比如vim版本问题的警告)
 let g:coc_disable_startup_warning = 1

@@ -437,3 +437,21 @@ nmap <silent> <F8> <Plug>VimspectorStepOver
 nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
 " F6运行到下个断点
 nmap <silent> <F6> <Plug>VimspectorRunToCursor
+
+" vim latex 配置插件 gillescastel/latex-snippets lervag/vimtex KeitaNakamura/tex-conceal.vim 
+" 配置参考: https://github.com/gillescastel/latex-snippets
+" 快捷键 : \ll(<Leader>ll) 快速编译,打开文件 
+let g:tex_flavor='latex'
+" let g:vimtex_view_method='zathura'
+let g:vimtex_quickfix_mode=0
+" 禁用评论中的拼写检查
+let g:vimtex_syntax_nospell_comments=1
+" set conceallevel=1
+" let g:tex_conceal='abdmg'
+" hi Conceal ctermbg=none
+" vim tex拼写检查 会导致中文报错
+" setlocal spell
+" vim tex 拼写检查单词库/语言
+" set spelllang=en_us
+" inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
+

@@ -1,3 +1,4 @@
+#!/bin/bash
 mkdir bundle
 git clone https://github.com/Yggdroot/LeaderF ./bundle/LeaderF
 git clone https://github.com/jiangmiao/auto-pairs ./bundle/auto-pairs
@@ -10,3 +11,8 @@ git clone https://github.com/ap/vim-buftabline ./bundle/vim-buftabline
 git clone https://github.com/iamcco/mathjax-support-for-mkdp ./bundle/mathjax-support-for-mkdp
 git clone https://github.com/iamcco/markdown-preview.vim ./bundle/markdown-preview.vim
 git clone https://github.com/puremourning/vimspector ./bundle/vimspector
+
+# vim latex snippets
+git clone https://github.com/gillescastel/latex-snippets ./bundle/latex-snippets
+git clone https://github.com/lervag/vimtex ./bundle/vimtex
+git clone https://github.com/KeitaNakamura/tex-conceal.vim ./bundle/tex-conceal.vim

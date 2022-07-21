@@ -16,3 +16,6 @@ git clone https://github.com/puremourning/vimspector ./bundle/vimspector
 git clone https://github.com/gillescastel/latex-snippets ./bundle/latex-snippets
 git clone https://github.com/lervag/vimtex ./bundle/vimtex
 git clone https://github.com/KeitaNakamura/tex-conceal.vim ./bundle/tex-conceal.vim
+
+# vim 表格
+git clone https://github.com/dhruvasagar/vim-table-mode ./bundle/vim-table-mode

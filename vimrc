@@ -455,3 +455,41 @@ let g:vimtex_syntax_nospell_comments=1
 " set spelllang=en_us
 " inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 
+" dhruvasagar/vim-table-mode vim 表格创建
+" 1. 处理类似markdown 表格的数据格式 即 : | a | c | (|间需要空格)
+" 2. :TableModeEnable 打开表格模式才能自动处理表格
+" 3. :TableModeDisable 关闭表格模式
+
+function! s:isAtStartOfLine(mapping)
+  let text_before_cursor = getline('.')[0 : col('.')-1]
+  let mapping_pattern = '\V' . escape(a:mapping, '\')
+  let comment_pattern = '\V' . escape(substitute(&l:commentstring, '%s.*$', '', ''), '\')
+  return (text_before_cursor =~? '^' . ('\v(' . comment_pattern . '\v)?') . '\s*\v' . mapping_pattern . '\v$')
+endfunction
+" 在已经有表格的情况下比如 | xx | xx | 在新行输入 || 生成水平线 |----|----|
+inoreabbrev <expr> <bar><bar>
+          \ <SID>isAtStartOfLine('\|\|') ?
+          \ '<c-o>:TableModeEnable<cr><bar><space><bar><left><left>' : '<bar><bar>'
+inoreabbrev <expr> __
+          \ <SID>isAtStartOfLine('__') ?
+          \ '<c-o>:silent! TableModeDisable<cr>' : '__'
+
+" 要获得与 ReST 兼容的表，
+" +-----------------+--------------------------+------------+
+" | name            | address                  | phone      |
+" +=================+==========================+============+
+" | John Adams      | 1600 Pennsylvania Avenue | 0123456789 |
+" +-----------------+--------------------------+------------+
+" | Sherlock Holmes | 221B Baker Street        | 0987654321 |
+" +-----------------+--------------------------+------------+
+" let g:table_mode_corner_corner='+'
+" let g:table_mode_header_fillchar='='
+" 对于 Markdown 兼容的表，请使用 
+" |-----------------|--------------------------|------------|
+" | name            | address                  | phone      |
+" |-----------------|--------------------------|------------|
+" | John Adams      | 1600 Pennsylvania Avenue | 0123456789 |
+" |-----------------|--------------------------|------------|
+" | Sherlock Holmes | 221B Baker Street        | 0987654321 |
+" |-----------------|--------------------------|------------|
+" let g:table_mode_corner='|'

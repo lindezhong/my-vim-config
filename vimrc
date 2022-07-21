@@ -155,7 +155,7 @@ inoremap <silent><expr> <TAB>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-translator', 'coc-json','coc-ultisnips', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
+let g:coc_global_extensions = ['coc-markdown-preview-enhanced','coc-webview','coc-translator', 'coc-json','coc-ultisnips', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装
@@ -178,6 +178,15 @@ vmap <Leader>e <Plug>(coc-translator-ev)
 " replace
 nmap <Leader>r <Plug>(coc-translator-r)
 vmap <Leader>r <Plug>(coc-translator-rv)
+
+" coc-markdown-preview-enhanced coc markdown 预览插件
+" :CocCommand markdown-preview-enhanced.openPreview 打开预览
+" | Command                                    | Functionality              |
+" |--------------------------------------------+----------------------------|
+" | markdown-preview-enhanced.openPreview      | Open preview               |
+" | markdown-preview-enhanced.syncPreview      | Sync preview / Sync source |
+" | markdown-preview-enhanced.runCodeChunk     | Run code chunk             |
+" | markdown-preview-enhanced.runAllCodeChunks | Run all code chunks        |
 
 " 忽略开启警告(比如vim版本问题的警告)
 let g:coc_disable_startup_warning = 1

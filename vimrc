@@ -189,6 +189,8 @@ vmap <Leader>r <Plug>(coc-translator-rv)
 " | markdown-preview-enhanced.syncPreview      | Sync preview / Sync source |
 " | markdown-preview-enhanced.runCodeChunk     | Run code chunk             |
 " | markdown-preview-enhanced.runAllCodeChunks | Run all code chunks        |
+" 快捷键 \v 快速带开markdown预览
+nmap <Leader>v :CocCommand markdown-preview-enhanced.openPreview<CR>
 
 " 忽略开启警告(比如vim版本问题的警告)
 let g:coc_disable_startup_warning = 1

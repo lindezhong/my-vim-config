@@ -180,6 +180,8 @@ nmap <Leader>r <Plug>(coc-translator-r)
 vmap <Leader>r <Plug>(coc-translator-rv)
 
 " coc-markdown-preview-enhanced coc markdown 预览插件
+" 如果需要隐藏头部title(由插件 coc-webview 提供) 修改文件 ~/.config/coc/extensions/node_modules/coc-webview/lib/index.js 中div id = title 元素隐藏
+" <div id="title" style="display: none;visibility: none" >
 " :CocCommand markdown-preview-enhanced.openPreview 打开预览
 " | Command                                    | Functionality              |
 " |--------------------------------------------+----------------------------|

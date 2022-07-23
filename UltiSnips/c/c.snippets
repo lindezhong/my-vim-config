@@ -1030,13 +1030,59 @@ endsnippet
 #   return 0;
 # }
 # ```
-
-snippet fileWirte "一次性写入较大的数据块，主要用途是将数组数据一次性写入文件，适合写入二进制数据。size_t fwrite(const void* ptr,size_t size,size_t nmemb,FILE* fp); ptr：数组指针 size：每个数组成员的大小，单位字节 nmemb：数组成员的数量 fp：要写入的文件指针 1. 返回成功写入的数组成员的数量 2. 可以写入任何数据比如char c[] struct clientData c[10] 3. 可以配合fread() 读取回来 代码片段`fileRead` 4. 打开文件model为`b`"
+snippet fileWirte "一次性写入较大的数据块，主要用途是将数组数据一次性写入文件，适合写入二进制数据。size_t fwrite(const void* ptr,size_t size,size_t nmemb,FILE* fp); ptr：数组指针 size：每个数组成员的大小，单位字节 nmemb：数组成员的数量 fp：要写入的文件指针 1. 返回成功写入的数组成员的数量 2. 可以写入任何数据比如char c[], struct clientData c[10] 3. 可以配合fread() 读取回来 代码片段`fileRead` 4. 打开文件model为`b`"
 fwrite(${1:arr},sizeof($1[0]),sizeof($1) / sizeof($1[0]),${2:file});
 endsnippet
 snippet fileRead "fread()用于一次性从文件读取较大的数据块到数组中适合读取二进制数据,size_t fread(void* ptr,size_t size,size_t nmemb,FILE* fp);ptr：数组指针 size：每个数组成员的大小，单位字节 nmemb：数组成员的数量 fp：要写入的文件指针 1. 返回成功读取的数组成员的数量 2. 可以读取任何数据比如char c[] struct clientData c[10] 3. 可以配合fwrite() 读取回来 代码片段`fileWrite` 4. 打开文件model为`b`"
 fread(${1:arr},sizeof($1[0]),sizeof($1) / sizeof($1[0]),${2:file});
 endsnippet
+snippet fileEof "判断文件的内部指针是否指向文件结尾(返回非0到结尾否则返回0),诸如`fgetc()`这样的文件读取函数，如果返回 EOF，有两种可能，一种可能是已读取到文件结尾，另一种可能是出现读取错误。`feof()`可以用来判断到底是那一种情况。"
+feof(${1:file})
+endsnippet
+# ```c
+# // 下面的示例逆向输出文件的所有字节。
+# for (count = 1L; count <= size; count++) {
+#   fseek(fp, -count, SEEK_END);
+#   ch = getc(fp);
+# }
+# ```
+snippet fileSeek "改变文件的读写位置:文件指针都有一个内部指示器记录当前打开的文件的读写位置（file position），即下一次读写从哪里开始. 参数如下1. file:文件 2. offset:距离基准（第三个参数）的字节数(long 类型),如果为负值向文件开始处移动,最好只用来操作二进制文件因为文本文件的字符有不同的编码，某个位置的准确字节位置不容易确定 3.whence: 位置基准(枚举)`SEEK_SET`（文件开始处）、`SEEK_CUR `（内部指针的当前位置）、`SEEK_END`（文件末尾 4. 返回值为非零值移动失败如移动的距离超出文件的范围"
+fseek(${1:file}, ${2:offset}, ${3:whence})
+endsnippet
+snippet fileTell "返回文件内部指示器的当前位置,即文件开始处到当前位置的字节数，0表示文件开始处。如果发生错误，ftell()返回-1L"
+long int ${2:offset} = fteel(${1:file});
+$0
+endsnippet
+snippet fileRewind "文件的内部指示器回到文件开始处,而且会清除当前文件的错误指示器,基本等价于fseek(fp, 0l, seek_set),但无返回值"
+rewind(${1:file});
+endsnippet
+# ```c
+# // `fseek()`和`ftell()`有一个潜在的问题，那就是它们都把文件大小限制在 long int 类型能表示的范围内。这看起来相当大，但是在32位计算机上，long int 的长度为4个字节，能够表示的范围最大为 4GB。随着存储设备的容量迅猛增长，文件也越来越大，往往会超出这个范围。鉴于此，C 语言新增了两个处理大文件的新定位函数：`fgetpos()`和`fsetpos()`。
+# // `fgetpos()`函数会将文件内部指示器的当前位置，存储在指针变量`pos`。该函数接受两个参数，第一个是文件指针，第二个存储指示器位置的变量。变量`pos`必须是通过调用`fgetpos()`方法获得的
+# 
+# fpos_t file_pos;
+# fgetpos(fp, &file_pos);
+# // 一系列文件操作之后
+# fsetpos(fp, &file_pos);
+# ```
+#  所有的文件操作函数如果执行失败，都会在文件指针里面记录错误状态。后面的操作只要读取错误指示器，就知道前面的操作出错了
+#  `ferror()`函数用来返回错误指示器的状态。如果前面的操作出现错误，`ferror()`就会返回一个非零整数（表示 true），否则返回`0`。
+#  `clearerr()`函数用来重置出错指示器。
+snippet fileClearErr "重置出错指示器,所有的文件操作函数如果执行失败，都会在文件指针里面记录错误状态。后面的操作只要读取错误指示器，就知道前面的操作出错了,`ferror()`函数用来返回错误指示器的状态。如果前面的操作出现错误，`ferror()`就会返回一个非零整数（表示 true），否则返回`0`"
+clearerr(${1:file});
+endsnippet
+snippet fileError "所有的文件操作函数如果执行失败，都会在文件指针里面记录错误状态。后面的操作只要读取错误指示器，就知道前面>     的操作出错了,`ferror()`函数用来返回错误指示器的状态。如果前面的操作出现错误，`ferror()`就会返回一个非零整数（表示 true），否则返回`0`,可用clearerr()重置出错指示器"
+ferror(${1:file})
+endsnippet
+snippet fileRemove "删除文件,`remove()`返回`0`，否则返回非零值。删除文件必须是在文件关闭的状态下。如果是用`fopen()`打开的文件，必须先用`fclose()`关闭后再删除。"
+remove("${1:file_path}");
+$0
+endsnippet 
+snippet fileRename "`rename()`函数用于文件改名，也用于移动文件。如果改名成功，`rename()`返回`0`，否则返回非零值，改名后的文件不能与现有文件同名。另外，如果要改名的文件已经打开了，必须先关闭，然后再改名，对打开的文件进行改名会失败"
+rename("${1:old_file_path}", "${2:new_file_name}");
+$0
+endsnippet
+
 
 
 # # #c语言关键字

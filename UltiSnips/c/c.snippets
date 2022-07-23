@@ -1,3 +1,27 @@
+# 关键字
+snippet keyConst "const说明符表示变量是只读的，不得被修改。"
+const
+endsnippet
+snippet keyStatic "1. 用于局部变量(块作用域内部):表示该变量的值会在函数每次执行后得到保留，下次执行时不会进行初始化 2. 用于全局变量: 表示该变量只用于当前文件，其他源码文件不可以引用该变量，即该变量不会被链接（link）3. `static`修饰的变量，初始化时，值不能等于变量，必须是常量"
+static
+endsnippet
+snippet keyAuto "`auto`说明符表示该变量的存储，由编译器自主分配内存空间，且只存在于定义时所在的作用域，退出作用域时会自动释放。由于只要不是`extern`的变量（外部变量），都是由编译器自主分配内存空间的，这属于默认行为，所以该说明符没有实际作用，一般都省略不写。"
+auto
+endsnippet
+snippet keyExtern "`extern`说明符表示，该变量在其他文件里面声明，没有必要在当前文件里面为它分配空间。通常用来表示，该变量是多个文件共享的。"
+extern
+endsnippet
+snippet keyRegister "`register`说明符向编译器表示，该变量是经常使用的，应该提供最快的读取速度，所以应该放进寄存器。但是，编译器可以忽略这个说明符，不一定按照这个指示行事。"
+register
+endsnippet
+snippet keyVolatile "`volatile`说明符表示所声明的变量，可能会预想不到地发生变化（即其他程序可能会更改它的值），不受当前程序控制，因此编译器不要对这类变量进行优化,每次使用时都应该查询一下它的值。硬件设备的编程中，这个说明符很常用。"
+volatile
+endsnippet
+snippet keyRestrict "`restrict`说明符允许编译器优化某些代码。它只能用于指针，表明该指针是访问数据的唯一方式。"
+restrict
+endsnippet
+
+
 # c语言代码片段
 
 snippet ifei "if else if"

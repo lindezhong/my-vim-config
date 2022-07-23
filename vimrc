@@ -5,7 +5,7 @@ set expandtab
 set autoindent
 set cindent
 set nu
-" 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000
+" 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
 set maxmempattern=2000 
 
 " 字典补全,使用Ctrl-X Ctrl-K快捷键，将在'dictionary'选项定义的文件中查找匹配的关键词。

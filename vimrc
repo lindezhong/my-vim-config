@@ -9,13 +9,13 @@ set nu
 set maxmempattern=2000 
 
 " 字典补全,使用Ctrl-X Ctrl-K快捷键，将在'dictionary'选项定义的文件中查找匹配的关键词。
-set dictionary=/usr/dict/words,/usr/share/dict/words
-set complete+=k "set complete option
+" set dictionary=/usr/dict/words,/usr/share/dict/words
+" set complete+=k "set complete option
 " 词典补全 使用Ctrl-X Ctrl-T快捷键，将在'thesaurus'选项定义的文件中查找匹配的关键词。
 " 因为在词典文件中，每行会包含多个单词，所以将显示匹配行中的所有单词
-set thesaurus=/usr/dict/words,/usr/share/dict/words
+" set thesaurus=/usr/dict/words,/usr/share/dict/words
 " 如果觉得<Ctrl-X><Ctrl-K>组合键太麻烦 ，那么也可以直接将字典补全添加到默认补全列表中，在vimrc中添加下面的代码
-set complete-=k complete+=k
+" set complete-=k complete+=k
 
 " vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
 colorscheme default
@@ -157,7 +157,7 @@ inoremap <silent><expr> <TAB>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-markdown-preview-enhanced','coc-webview','coc-translator', 'coc-json','coc-snippets', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd','coc-dictionary']
+let g:coc_global_extensions = ['coc-word','coc-markdown-preview-enhanced','coc-webview','coc-translator', 'coc-json','coc-snippets', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装
@@ -168,6 +168,9 @@ let g:coc_global_extensions = ['coc-markdown-preview-enhanced','coc-webview','co
 " ## coc-jedi
 " coc-jedi 依赖 python3-pip, python3-venv
 " sudo apt install -y python3-pip python3-venv
+" ## coc-word 单词替换
+" 如果想要有英文翻译将 coc/coc-word 下的所有文件复制到 ~/.config/coc/extensions/node_modules/coc-word
+
 
 " coc-translator 翻译插件
 " NOTE: do NOT use `nore` mappings

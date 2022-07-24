@@ -29,3 +29,9 @@ dconf write /org/gnome/shell/extensions/dash-to-dock/autohide true
 # ubuntu屏幕不自动旋转
 gsettings set org.gnome.settings-daemon.peripherals.touchscreen orientation-lock true
 
+# 关闭软件更新器开机提醒弹窗
+打开终端(Ctrl+Alt+T )，并运行以下命令在Ubuntu系统上禁用Update Manager自动通知：
+gconftool -s --type bool /apps/update-notifier/auto_launch false
+
+要重新启用Update Manager自动通知，请运行以下命令：
+gconftool -s --type bool /apps/update-notifier/auto_launch true

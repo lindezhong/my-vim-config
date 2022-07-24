@@ -157,7 +157,7 @@ inoremap <silent><expr> <TAB>
 
 " coc.vim neoclide/coc.nvim
 " coc.vim 安装的
-let g:coc_global_extensions = ['coc-word','coc-markdown-preview-enhanced','coc-webview','coc-translator', 'coc-json','coc-snippets', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
+let g:coc_global_extensions = ['coc-word','coc-markdown-preview-enhanced','coc-webview','coc-translator', 'coc-json','coc-ultisnips', 'coc-java',  'coc-java-debug', 'coc-java-lombok', 'coc-pyright', 'coc-jedi', 'coc-tsserver', 'coc-clangd']
 " # 插件安装需要做的事
 " ## coc-clangd
 " ### 安装

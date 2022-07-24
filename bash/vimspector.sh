@@ -40,14 +40,14 @@ language : 查看支持的语言
     return : 返回支持的语言
 
 config : 复制对应语言的配置到本目录下
-    vimspector.sh config [${语言}]
+    vimspector.sh config {语言}
     $2 : 语言,复制 $2-vimspector.json 到本地
     return : 在本地生成 .vimspector.json 文件
     '
 }
 
 # 查看支持的语言
-language() {
+_language_() {
     local vimspector_config_path_list=($(ls ${default_map['config_path']}/*-vimspector.json))
     local vimspector_config=""
     local i
@@ -67,7 +67,7 @@ language() {
 # 复制对应语言的配置到本目录下
 config() {
     local language=$1
-    local language_list=$(language)
+    local language_list=$(_language_)
     while [[ ! "${language_list[@]}" =~ "${language}" ]] || [ -z "${language}" ]; do
         read -p "只支持语言 [$language_list] : " language
     done
@@ -86,7 +86,7 @@ case $ACTION in
         config "$2"
         ;;
     language )
-        language
+        _language_
         ;;
     * )
         echo "未知的操作: $ACTION"

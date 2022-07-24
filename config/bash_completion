@@ -34,7 +34,7 @@ _complete_func() {
     elif [[ "$original_cmd" == "git.sh" ]]; then
         cmd_list=("git.sh --help" # 查看帮助文档
             "git.sh upstream {上游git地址}" # Git进行fork后跟原仓库同步,会添加一个上游的主干分支 upstream/master
-            "git.sh github repos" # git clone github上一个组织(organizations)下的所有存储库
+            "git.sh github repos {github组织} {pageSize:30}" # git clone github上一个组织(organizations)下的所有存储库
             "git.sh github upstreamUrl" # 解析github项目上游url
             "git.sh reset {git_commit_id}" # git回滚到某个版本
             "git.sh init_server {项目名}" # 初始化git服务端项目,供git clone user@ip:/项目路径

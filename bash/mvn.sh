@@ -43,24 +43,24 @@ help() {
 --help: 查看mvn.sh脚本帮助文档
 
 deploy: 部署maven项目,运行前强制打包编译
-    mvn.sh deploy [{class过滤字符:默认不过滤}]
+    mvn.sh deploy {class过滤字符:默认不过滤}
     $2 : class过滤字符:默认不过滤
     return: 打包运行maven项目
 
 run: 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
-    mvn.sh run [{class过滤字符:默认不过滤}]
+    mvn.sh run {class过滤字符:默认不过滤}
     如果为spring boot 项目需要先执行mvn clean install,将resource下的资源打包,编译无法打包resource下的资源
     $2 : class过滤字符:默认不过滤
     return: 编译运行maven项目
 
 debug: 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
-    mvn.sh debug [{class过滤字符:默认不过滤}]
+    mvn.sh debug {class过滤字符:默认不过滤}
     如果为spring boot 项目需要先执行mvn clean install,将resource下的资源打包,编译无法打包resource下的资源
     $2 : class过滤字符:默认不过滤
     return: 编译运行maven项目
 
 find_main: 扫描本目录下所有的main java
-    mvn.sh find_main [{路径中要包含的字符:默认不过滤}] [{路径中要包含的字符:默认不过滤}]
+    mvn.sh find_main {路径中要包含的字符:默认不过滤} {路径中要包含的字符:默认不过滤}
     $2: 路径中要包含的字符,默认不过滤,一般为src/main或src/test 用来区分是否为测试类
     $3: 路径中要包含的字符,默认不过滤,一般为类名
     return 本目录下所有的main java全路径(package.class_name)
@@ -78,13 +78,13 @@ install() {
 }
 
 # 扫描本目录下所有的main java
-findMainClass() {
+_findMainClass_() {
 
     
     local filter_class1=$1
     local filter_class2=$2
 
-    local class_file_path_list=($(grep -r -E "^[[:blank:]]+public[[:blank:]]+static[[:blank:]]+void[[:blank:]]+main" | awk -v FS=":" '{print $1}' | grep "$filter_class1" | grep "$filter_class2"))
+    local class_file_path_list=($(find ./ -name "*.java" | xargs grep -E "^[[:blank:]]+public[[:blank:]]+static[[:blank:]]+void[[:blank:]]+main" | awk -v FS=":" '{print $1}' | grep "$filter_class1" | grep "$filter_class2"))
     local class_file_path_list_txt=""
     local class_file_path=""
     for(( i=0;i<${#class_file_path_list[@]};i++)) do
@@ -101,13 +101,13 @@ findMainClass() {
 }
 
 # 选择main java,需要先扫描main java(执行 findMainClass)
-selectClass() {
+_selectClass() {
 
     local filter_class1=$1
     local filter_class2=$2
 
     local class_file_path=''
-    local class_file_path_list=($(findMainClass "$filter_class1" "$filter_class2"))
+    local class_file_path_list=($(_findMainClass_ "$filter_class1" "$filter_class2"))
     
     local class_index
     local i
@@ -165,21 +165,25 @@ deploy() {
         exit 1
     fi
 
+    local i
+    local jar_path_index
     local jar_path=${jar_path_list[0]}
     if (( $jar_num > 1 )); then
 
-        for(( i=0;i<${#jar_path_list[@]};i++)) do
-            echo "$i) : ${jar_path_list[i]}"
-        done;
-
-        read -p "请选择jar:" jar_index
-        while [ -z `grep -E '^[0-9][0-9]*$' <<< "$jar_index"` ] || [ $jar_index -lt 0 ] || [ $jar_index -gt ${#jar_path_list[@]} ]; do
-            read -p "请输入正确的jar下标 : [0 , ${#jar_path_list[@]}-1] : " jar_index
+        while [ -z `grep -E '^[0-9][0-9]*$' <<< "$jar_path_index"` ] || [ $jar_path_index -lt 0 ] || [ $jar_path_index -gt ${#jar_path_list[@]} ]; do
+            for(( i=0; i<${#jar_path_list[@]}; i++)) do
+                if [ -z "$jar_path_index" ] || [ ! -z `grep -E '^[0-9][0-9]*$' <<< "$jar_path_index"`  ] || [ ! -z `grep "${jar_path_index}" <<< "${jar_path_list[i]}"` ]; then
+                    echo "$i) ${jar_path_list[i]}"
+                fi
+            done
+            read -p "选择运行的jar : " jar_path_index
         done
-        jar_path=${jar_path_list[$jar_index]}
+        jar_path=${jar_path_list[$jar_path_index]}
+        echo "输入 [$jar_path_index] , 选择 [$jar_path]"
+        
     fi
 
-    selectClass "src/main" $filter_class
+    _selectClass "src/main" $filter_class
     local class_file_path=$_select_class_result
 
     if [[ -z $class_file_path ]]; then
@@ -218,14 +222,15 @@ run() {
         echo "找到数量不对的maven jar路径,mvn jar 路径数量:[$mvn_jar_path_list_length],该项目是否为父项目?"
         local maven_dir_list=($(ls -d */))
         local maven_dir_index
-        for(( maven_dir_index=0; maven_dir_index<${#maven_dir_list[@]}; maven_dir_index++)) do
-            echo "$maven_dir_index) ${maven_dir_list[maven_dir_index]}"
-        done
-        read -p "选择进入的子项目 : " maven_dir_index
         while [ -z `grep -E '^[0-9][0-9]*$' <<< "$maven_dir_index"` ] || [ $maven_dir_index -lt 0 ] || [ $maven_dir_index -gt ${#maven_dir_list[@]} ]; do
-            read -p "请输入 [0 , ${#maven_dir_list[@]}-1] 数字,选择目录 : " maven_dir_index
+            for(( i=0; i<${#maven_dir_list[@]}; i++)) do
+                if [ -z "$maven_dir_index" ] || [ ! -z `grep -E '^[0-9][0-9]*$' <<< "$maven_dir_index"`  ] || [ ! -z `grep "${maven_dir_index}" <<< "${maven_dir_list[i]}"` ]; then
+                    echo "$i) ${maven_dir_list[i]}"
+                fi
+            done
+            read -p "选择进入的子项目 : " maven_dir_index
         done
-        local maven_dir=${maven_dir_list[$maven_dir_index]}
+        maven_dir=${maven_dir_list[$maven_dir_index]}
         echo "选择 [$maven_dir_index] , 进入目录 : [$maven_dir],重新解析mvn jar 依赖路径"
         pushd $maven_dir
         # 记录pushd的次数,用作后面的popd返回原始位置
@@ -241,7 +246,7 @@ run() {
     echo "使用的maven jar path : [$use_mvn_jar_path]"
     echo "使用class_path : [${class_path}]"
 
-    selectClass "src/main" $filter_class
+    _selectClass "src/main" $filter_class
     local main_class_path=$_select_class_result
     if [[ -z $main_class_path ]]; then
         echo "未选择 main java 无法运行"
@@ -271,7 +276,7 @@ case $ACTION in
         run "$2"
         ;;
     'find_main' )
-        findMainClass "$2" "$3"
+        _findMainClass_ "$2" "$3"
         ;;
     * )
         echo "未知操作"

@@ -7,13 +7,15 @@
 
 
 
-snippet sqlEngineMysql "sqlalchemy 创建一个MySql引擎,1. from sqlalchemy.engine.create import create_engine 2. pip3 install mysql-connector 3. connect_args={'auth_plugin': 'mysql_native_password'} 如果MySQL密码使用mysql_native_password认证"
+snippet sqlEngineMysql "sqlalchemy 创建一个MySql引擎,1. from sqlalchemy.engine.create import create_engine 2. pip3 install mysql-connector 3. connect_args={'auth_plugin': 'mysql_native_password'} 如果MySQL密码使用mysql_native_password认 4. 相当于连接池,也可以定义连接数"
 ${6:engine} = create_engine('mysql+mysqlconnector://${1:账号}:${2:密码}@${3:IP地址}:${4:端口号}/${5:数据库名称}')
+$0
 endsnippet
 
-snippet sqlSession "sqlalchemy 创建一个Session,对于数据库的操作要通过Session. 1. 需要sqlEngineMysql(代码片段)生成的engine 2. from sqlalchemy.orm import sessionmaker 3. from sqlalchemy.orm.session import Session  4. orm操作使用session进行,session相当于一个连接 5. 使用完后需要执行 session.commit() 和 session.close() 归还连接给pool"
+snippet sqlSession "sqlalchemy 创建一个Session,对于数据库的操作要通过Session. 1. 需要sqlEngineMysql(代码片段)生成的engine 2. from sqlalchemy.orm import sessionmaker 3. from sqlalchemy.orm.session import Session  4. 使用完后需要执行 session.commit() 和 session.close() 归还连接给pool 5. orm操作使用session进行,session相当于一个连接"
 ${2:DBSession} = sessionmaker(bind=${1:engine})
 ${3:session} :Session = $2()
+$0
 endsnippet
 
 # tablename 指明了模型对应的数据表名称，在 Player 模型中对采用的变量名进行定义， 变量名需要和数据表中的字段名称保持一致，采用 Column 对字段进行定义

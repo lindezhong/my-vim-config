@@ -492,6 +492,9 @@ inoreabbrev <expr> __
           \ <SID>isAtStartOfLine('__') ?
           \ '<c-o>:silent! TableModeDisable<cr>' : '__'
 
+" vim 打开的时候自动打开表格模式
+autocmd VimEnter * silent TableModeEnable
+
 " 要获得与 ReST 兼容的表，
 " +-----------------+--------------------------+------------+
 " | name            | address                  | phone      |

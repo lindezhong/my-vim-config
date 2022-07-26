@@ -27,7 +27,7 @@
         },
         "coc.source.word.shortcut": {
           "type": "string",
-          "default": "10K"
+          "default": "work"
         },
         "coc.source.word.disableSyntaxes": {
           "type": "array",

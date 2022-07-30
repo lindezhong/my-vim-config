@@ -38,7 +38,7 @@ for sh_file_path in $home_path/bash/*.sh ; do
 done
 
 # 配置,shell tab 提示
-sudo ln -s ${HOME}/config/bash_completion /etc/bash_completion.d
+sudo ln -s ${home_path}/bash/bash_completion /etc/bash_completion.d
 
 
 # python软连接:coc-jedi使用

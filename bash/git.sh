@@ -40,6 +40,10 @@ github : github相关操作
     github upstreamUrl : 解析github项目上游url
         git.sh github upstreamUrl
         return : github项目上游地址
+
+pull : 将当前目录下的所有git项目pull
+    git.sh pull
+    return : 当前文件夹下的所有git项目pull
     '
 }
 
@@ -209,6 +213,18 @@ initServer() {
     echo "请执行git clone命令下项目 : git clone $USER@localhost:${current_path}"
 }
 
+# 将当前目录下的所有git项目pull
+pull() {
+    local dir_list=($(ls -d */))
+    local i
+    for(( i=0; i<${#dir_list[@]}; i++)) do
+        local dir=${dir_list[i]}
+        pushd $dir
+        git pull
+        popd
+    done
+}
+
 case "$ACTION" in
     --help)
         # 显示帮助文档
@@ -233,6 +249,10 @@ case "$ACTION" in
         # 初始化git服务端项目,供git clone user@ip:/项目路径
         # $2 : 项目名
         initServer "$2"
+        ;;
+    pull)
+        # 将当前目录下的所有git项目pull
+        pull
         ;;
     * )
         echo "未知操作,请查看帮助文档"

@@ -170,7 +170,8 @@ let g:coc_global_extensions = ['coc-word','coc-markdown-preview-enhanced','coc-w
 " sudo apt install -y python3-pip python3-venv
 " ## coc-word 单词替换
 " 如果想要有英文翻译将 coc/coc-word 下的所有文件复制到 ~/.config/coc/extensions/node_modules/coc-word
-
+" ## coc-ultisnips-select
+" 如果想要选择snippets后自动展开snippets将 coc/coc-ultisnips-select 下的所有文件复制到 ~/.config/coc/extensions/node_modules/coc-ultisnips-select
 
 " coc-translator 翻译插件
 " NOTE: do NOT use `nore` mappings

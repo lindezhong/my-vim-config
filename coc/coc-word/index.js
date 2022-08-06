@@ -10,9 +10,9 @@ exports.activate = async context => {
   fs.readFile(file, 'utf8', (err, content) => {
     if (err) return
     let fileWords = content.split(/\n/)
-    words = fileWords.map(word => word.split(" ")[0])
+    words = fileWords.map(word => word.split(" : ")[0])
     fileWords.forEach(word => {
-      wordMap[word.split(" ")[0]] = word
+      wordMap[word.split(" : ")[0]] = word
     })
   })
 
@@ -31,7 +31,7 @@ exports.activate = async context => {
           let word = upperCase ? str[0].toUpperCase() + str.slice(1) : str
           return {
             word: word,
-            info: wordMap[word],
+            info: wordMap[str],
             menu: this.menu
           }
         })

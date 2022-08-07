@@ -1,5 +1,10 @@
 {
   "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/clangd/bin/clangd",
-  "translator.engines": ["bing","google","youdao","haici"]
-
+  "translator.engines": ["bing","google","youdao","haici"],
+  "suggest.floatConfig": {
+      "maxWidth": 1000,
+      "border": true,
+      "rounded": true,
+      "highlight": "default"
+  }
 }

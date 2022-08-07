@@ -4,7 +4,6 @@
   "suggest.floatConfig": {
       "maxWidth": 1000,
       "border": true,
-      "rounded": true,
-      "highlight": "default"
+      "rounded": true
   }
 }

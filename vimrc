@@ -19,6 +19,16 @@ set maxmempattern=2000
 
 " vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
 colorscheme default
+" 要选择其他背景颜色，您可以使用 
+" :highlight CocFloating ctermbg=color
+" 并更改错误消息的前景（文本）颜色，请使用
+" :highlight CocErrorFloat ctermfg=color
+" 在哪里 color是颜色名称或颜色编号（通常从 0 到 15）。 阅读有关颜色值的更多信息 
+" :h cterm-colors
+" 如果你想为 vim 使用 GUI，你应该考虑使用 guibg和 guifg
+" :h gui-colors
+" 修改coc 选择框颜色 CocMenuSel 为分组
+autocmd VimEnter * silent highlight CocMenuSel ctermbg=7
 
 " 树莓派兼容
 set backspace=2

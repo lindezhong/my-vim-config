@@ -1,0 +1,183 @@
+# 官方文档 : https://plantuml.com/zh/guide
+# pdf 下载 : https://pdf.plantuml.net/PlantUML_Language_Reference_Guide_zh.pdf
+
+snippet plantUmlInit "初始化plant uml"
+\`\`\`plantuml
+@startuml
+$0
+@enduml
+\`\`\`
+endsnippet
+	
+
+# #类图
+# 支持的类图类型
+# | 类型          | 解释               |
+# | abstract      | abstract           |
+# | abstract clas | abstract clas      |
+# | annotation    | annotation         |
+# | circle        | circle             |
+# | ()            | circle_short_form  |
+# | class         | class              |
+# | diamond       | diamond            |
+# | <>            | diamond_short_form |
+# | entity        | entity             |
+# | enum          | enum               |
+# | interface     | interface          |
+
+# 定义可访问性
+# | Character | Visibility      |
+# | -         | private         |
+# | #         | protected       |
+# | ~         | package private |
+# | +         | public          |
+
+snippet plantUmlClassInit "plant uml 类初始化, 字段/方法定义为标准的java代码"
+class ${1:class_name} {
+$0
+}
+endsnippet
+
+# #类图##类图关系
+#  泛化(继承)，Generalization：<|-- 例子 class1 "说明" <|-- "说明" class2 : 说明
+#  关联，Association：<-- 例子 class1 "说明" <-- "说明" class2 : 说明
+#  组合，Composition：*-- 例子 class1 "说明" *-- "说明" class2 : 说明
+#  聚合，Aggregation：o-- 例子 class1 "说明" o-- "说明" class2 : 说明
+#  实现，Realization：<|.. 例子 class1 "说明" <|.. "说明" class2 : 说明
+#  依赖，Dependency：<.. 例子 class1 "说明" <.. "说明" class2 : 说明
+# 下面这个例子表示 
+# Student ------------ Course
+#              |
+# 			   |
+# 		   Enrollment
+# ```plantuml
+# class Student {}
+# class Course {}
+# Student "0..*" - "1..*" Course
+# (Student, Course) .. Enrollment
+# class Enrollment {}
+# ```
+snippet plantUmlClassGeneralization "类图关系泛化(继承) <|-- , 在 <|-- 两边可以用 '' 标注, 最后 可以用 : 说明"
+${1:class1}  <|-- ${2:class2}
+endsnippet
+snippet plantUmlClassAssociation "类图关系关联 <-- , 在 <-- 两边可以用 '' 标注, 最后 可以用 : 说明"
+${1:class1} <-- ${2:class2}
+endsnippet
+snippet plantUmlClassComposition "类图关系组合 *-- , 在 *-- 两边可以用 '' 标注, 最后 可以用 : 说明"
+${1:class1} *-- ${2:class2}
+endsnippet
+snippet plantUmlClassAggregation "类图关系聚合 o-- , 在 o-- 两边可以用 '' 标注, 最后 可以用 : 说明"
+${1:class1} o-- ${2:class2}
+endsnippet
+snippet plantUmlClassRealization "类图关系实现 <|.. , 在 <|.. 两边可以用 '' 标注, 最后 可以用 : 说明"
+${1:class1} <|.. ${2:class2}
+endsnippet
+snippet plantUmlClassDependency "类图关系依赖 <.. , 在 <.. 两边可以用 '' 标注, 最后 可以用 : 说明"
+${1:class1} <.. ${2:class2}
+endsnippet
+
+# #类图##抽象与静态
+snippet plantUmlClassStatic "通过修饰符 {static} 或者 {abstract}，可以定义静态或者抽象的方法或者属性,例子 {static} String id"
+{static}
+endsnippet
+snippet plantUmlClassAbstract "通过修饰符 {static} 或者 {abstract}，可以定义静态或者抽象的方法或者属性,例子 {abstract} void methods()"
+{abstract}
+endsnippet
+# #类图##高级类体
+# PlantUML 默认自动将方法和属性重新分组，你可以自己定义分隔符来重排方法和属性，下面的分隔符
+# 都是可用的：-- .. == __.
+# 还可以在分隔符中添加标题：
+# @startuml
+# class Foo1 {
+# You can use
+# several lines
+# ..
+# as you want
+# and group
+# ==
+# things together.
+# __
+# You can have as many groups
+# as you want
+# --
+# End of class
+# }
+# class User {
+# .. Simple Getter ..
+# + getName()
+# + getAddress()
+# .. Some setter ..
+# + setName()
+# __ private data __
+# int age
+# -- encrypted --
+# String password
+# }
+# @enduml
+# #类图##备注和模板
+# 想要改变注释相对于标签的位置，你也可以用 note left on link，note right on link，note bottom on link。（对应位置分别在 label 的左边，右边，下边>）
+# ```plantuml
+# @startuml
+# class Object << general >> {
+#     String name
+#     + Strring name()
+# }
+# Object <|--- ArrayList : 一个链接(link)
+# note on link #red: 这个是一个链接的注释而且为红色
+# note top of Object : 在java中，每个类\扩展这个。(Object类注释) 
+# note "这是一个浮动注释(无连接到类)" as N1
+# note "此注释连接到\n几个对象。" as N2
+# Object .. N2
+# N2 .. ArrayList
+# class Foo {}
+# note left: 在类后定义指向Foo 
+# note right of Object::name
+# 注释Object.name字段
+# end note
+# note left of Object::name()
+# 注释Object.name()方法
+# end note
+# Foo --|> Object : 一个链接(link)
+# note right on link #blue
+# 这个是一个链接的注释而且为蓝色
+# end note
+# @enduml
+# ```
+# #类图##包
+# 你可以通过以下的命令来设置默认样式: skinparam packageStyle, 或者对包使用对应的模板
+# scale 750 width
+# package foo1 <<Node>> {}
+# package foo2 <<Rectangle>> {}
+# package foo3 <<Folder>> {}
+# package foo4 <<Frame>> {}
+# package foo5 <<Cloud>> {}
+# package foo1.foo6 <<Database>> {}
+# 你也可以参考下面的示例来定义包之间的连线:
+# foo1 +-- foo1.foo6
+snippet plantUmlClassPackage "类图包,在同一个包下的类需要在包的{}内"
+package "包名" #DDDDDD {
+    $0
+}
+endsnippet
+# #类图##命名空间
+# 在使用包（package）时（区别于命名空间），类名是类的唯一标识。也就意味着，在不同的包（package）中的类，不能使用相同的类名。
+snippet plantUmlClassNamespaces "类图命名空间, 可以使用'set namespaceSeparator .'自动创建命名空间,namespace com.className {}在使用包（package）时（区别于命名空间），类名是类的唯一标识。也就意味着，在不同的包（package）中的类，不能使用相同的类名."
+namespace "命名空间名" #DDDDDD {
+    $0
+}
+endsnippet
+# #类图##辅助布局
+# 有时候，默认布局并不完美...你可以使用 together 关键词将某些类进行分组：布局引擎会尝试将它们捆绑在一起（如同在一个包(package) 内) 你也可以使用建立 隐藏链接的方式来强制布局
+# @startuml
+# class Bar1
+# class Bar2
+# together {
+# class Together1
+# class Together2
+# class Together3
+# }
+# Together1 - Together2
+# Together2 - Together3
+# Together2 -[hidden]--> Bar1
+# Bar1 -[hidden]> Bar2
+# @enduml

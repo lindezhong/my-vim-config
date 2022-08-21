@@ -59,7 +59,7 @@ endsnippet
 # ```
 # 对于继承、实现这两种关系没多少疑问，他们体现的是一种类与类、或者类与接口间的纵向关系；其他的四者关系则体现的是类与类、或者类与接口间的引用、横向关系，是比较难区分的，有很多事物间的关系要想准备定位是很难的，前面也提到，这几种关系都是语义级别的，所以从代码层面并不能完全区分各种关系；
 # 但总的来说，后几种关系所表现的强弱程度依次为：组合>聚合>关联>依赖；聚合跟组合其实都属于关联
-snippet plantUmlClassGeneralization "类图关系泛化(继承,extends) <|-- , 在 <|-- 两边可以用 '' 标注, 最后 可以用 : 说明"
+snippet plantUmlClassGeneralization "类图关系泛化(继承,extends) <|-- (is-a关系) , 在 <|-- 两边可以用 '' 标注, 最后 可以用 : 说明"
 ${1:class1}  <|-- ${2:class2}
 endsnippet
 snippet plantUmlClassAssociation "类图关系关联 <-- (他体现的是两个类、或者类与接口之间语义级别的一种强依赖关系，比如我和我的朋友；这种关系比依赖更强、不存在依赖关系的偶然性、关系也不是临时性的，一般是长期性的，而且双方的关系一般是平等的、关联可以是单向、双向的；表现在代码层面，为被关联类B以类属性的形式出现在关联类A中，也可能是关联类A引用了一个类型为被关联类B的全局变量；) , 在 <-- 两边可以用 '' 标注, 最后 可以用 : 说明"
@@ -122,7 +122,8 @@ endsnippet
 # @startuml
 # class Object << general >> {
 #     String name
-#     + Strring name()
+#     + String name()
+#     + String name(int length)
 # }
 # Object <|--- ArrayList : 一个链接(link)
 # note on link #red: 这个是一个链接的注释而且为红色
@@ -139,9 +140,13 @@ endsnippet
 # note left of Object::name()
 # 注释Object.name()方法
 # end note
+# note left of Object::"name(int length)"
+# 注释Object.name(int length)方法,相同名称用 "" 包裹
+# end note
+
 # Foo --|> Object : 一个链接(link)
 # note right on link #blue
-# 这个是一个链接的注释而且为蓝色
+# 这个是一个链接的注释而且为蓝色,需要在链接后面
 # end note
 # @enduml
 # ```
@@ -157,14 +162,14 @@ endsnippet
 # 你也可以参考下面的示例来定义包之间的连线:
 # foo1 +-- foo1.foo6
 snippet plantUmlClassPackage "类图包,在同一个包下的类需要在包的{}内"
-package "包名" #DDDDDD {
+package "${1:包名}" #DDDDDD {
     $0
 }
 endsnippet
 # #类图##命名空间
 # 在使用包（package）时（区别于命名空间），类名是类的唯一标识。也就意味着，在不同的包（package）中的类，不能使用相同的类名。
 snippet plantUmlClassNamespaces "类图命名空间, 可以使用'set namespaceSeparator .'自动创建命名空间,namespace com.className {}在使用包（package）时（区别于命名空间），类名是类的唯一标识。也就意味着，在不同的包（package）中的类，不能使用相同的类名."
-namespace "命名空间名" #DDDDDD {
+namespace "${1:命名空间名}" #DDDDDD {
     $0
 }
 endsnippet
@@ -183,3 +188,8 @@ endsnippet
 # Together2 -[hidden]--> Bar1
 # Bar1 -[hidden]> Bar2
 # @enduml
+snippet plantUmlClassTogether "有时候，默认布局并不完美...你可以使用 together 关键词将某些类进行分组：布局引擎会尝试将它们捆绑在一起（如同在一个包(package) 内) "
+together {
+    $0
+}
+endsnippet

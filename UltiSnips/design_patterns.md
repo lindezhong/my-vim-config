@@ -214,13 +214,6 @@ public class MiniDuckSimulator {
 
 定义对象之间的一对多依赖,这样一来,当一个对象改变状态时,它的所有依赖都会收到他嗯直并自动更新
 
-### 观察者模式探讨
-
-1. 主题一有状态的变化就通知所有的观察者,但某个状态的变化只是部分观察者关心
-2. 主题为啥不给特定的观察者状态变化而是把所有状态都给出去
-3. 观察者为啥不主动拉取主题状态
-4. 观察者不要依赖特的通知次序
-
 #### 主题/观察者
 
 ```plantuml
@@ -295,6 +288,13 @@ ConcreteSubject --> ConcreteObserver
 
 @enduml
 ```
+
+### 观察者模式探讨
+
+1. 主题一有状态的变化就通知所有的观察者,但某个状态的变化只是部分观察者关心
+2. 主题为啥不给特定的观察者状态变化而是把所有状态都给出去
+3. 观察者为啥不主动拉取主题状态
+4. 观察者不要依赖特的通知次序
 
 ### 观察者例子:气象观测站
 有一个气象观测站需要追踪当前天气并且有个对象WeatherData追踪当前天气状况,WeatherData对象如下
@@ -477,5 +477,84 @@ public class WeatherStation {
         weatherData.setMeasurements(62, 90, 28.1f);
     }
 }
+
+```
+
+### Java 内置的观察者模式
+
+#### ~~Java Observer Observable 类~~
+
+在 java9 中已经废弃不讨论
+
+#### JavaBean PropertyChangeEvent
+
+```java
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.Serializable;
+
+public class PropertyChangeEventMain {
+
+    public static void main(String[] args) {
+        JavaBean bean = new JavaBean();
+
+        bean.setId(1L);
+        bean.setName("java bean 1");
+        bean.setName("java bean 2");
+
+        // id未发生变化不发送事件
+        bean.setId(1L);
+    }
+
+    static class JavaBean implements PropertyChangeListener, Serializable {
+
+        private Long id;
+        private String name;
+
+        private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+        public JavaBean() {
+            // 监听所有变化
+            pcs.addPropertyChangeListener(this);
+            // 只是监听 id 的变化
+            pcs.addPropertyChangeListener("id", this);
+            // 只是监听 name 的变化
+            pcs.addPropertyChangeListener("name", this);
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            System.out.println("property name is : " + evt.getPropertyName());
+            System.out.println("old value is : " + evt.getOldValue());
+            System.out.println("new value is : " + evt.getNewValue());
+            System.out.println("======================");
+        }
+        public Long getId() {
+
+        }
+
+        public void setId(Long id) {
+            Long oldId = this.id;
+            this.id = id;
+
+            // 发送 id 已经变更事件
+            pcs.firePropertyChange("id", oldId, id);
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public void setName(String name) {
+            String oldName = this.name;
+            this.name = name;
+
+            // 发送 name 已经变更事件
+            pcs.firePropertyChange("name", oldName, name);
+        }
+    }
+}
+
 
 ```

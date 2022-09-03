@@ -117,7 +117,7 @@ endsnippet
 # }
 # @enduml
 # #类图##备注和模板
-# 想要改变注释相对于标签的位置，你也可以用 note left on link，note right on link，note bottom on link。（对应位置分别在 label 的左边，右边，下边>）
+# 想要改变注释相对于标签的位置，你也可以用 note left on link，note right on link，note on top ,note bottom on link。（对应位置分别在 label 的左边，右边，上边, 下边>）
 # ```plantuml
 # @startuml
 # class Object << general >> {
@@ -150,6 +150,22 @@ endsnippet
 # end note
 # @enduml
 # ```
+snippet plantUmlNote "plant注释 例子 : note on {left|right|top|bottom|over} of Object #{Color} : {NoteContext}  1. Object : 注释对象 1.1 类图:如果为类字段格式为 Object::field, 如果为方法有相同名用 ''双引号包裹 'name(int length)' 1.2 对于某些uml图来说可以链接到两个对象则用逗号分割 : A,B 2. NoteContet : 注释内容 3. Color: 颜色代码比如 000000 或 blue"
+note on ${1:\{left|right|top|bottom|over\}} of ${2:Object} : ${3:noteContet}
+$0
+endsnippet
+snippet plantUmlNote "浮动注释,可以把注释当成一个对象,然后用link链接,可以用来把注释指向多个对象 : note '{NoteContext}' as {NoteName} \n {NoteName} {Link} {Object} 1. NoteContext: 注释内容 2. NoteName : 注释名 3. Link: 链接可以是 .. , --> 表示不同样式 4. Object: 注释指向的对象"
+note "${1:NoteContext}" as ${2:NoteName}
+$2 .. ${3:Object}
+$0
+endsnippet
+snippet plantUmlNoteClassLink "类图链接(关系)的注释,该注释需要在链接后面,表示上一个链接的注释, note {left|right|top|bottom} on link #{Color} \n end note"
+note ${1:\{left|right|top|bottom|over\}}  on link
+$2
+end note
+$0
+endsnippet
+	
 # #类图##包
 # 你可以通过以下的命令来设置默认样式: skinparam packageStyle, 或者对包使用对应的模板
 # scale 750 width

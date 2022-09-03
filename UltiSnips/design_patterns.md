@@ -1,5 +1,8 @@
 # 设计模式
 
+## 资料
+1. 官方代码 : https://github.com/bethrobson/Head-First-Design-Patterns
+
 
 ## OO(面向对象)基础知识
 
@@ -211,13 +214,20 @@ public class MiniDuckSimulator {
 
 定义对象之间的一对多依赖,这样一来,当一个对象改变状态时,它的所有依赖都会收到他嗯直并自动更新
 
+### 观察者模式探讨
+
+1. 主题一有状态的变化就通知所有的观察者,但某个状态的变化只是部分观察者关心
+2. 主题为啥不给特定的观察者状态变化而是把所有状态都给出去
+3. 观察者为啥不主动拉取主题状态
+4. 观察者不要依赖特的通知次序
+
 #### 主题/观察者
 
 ```plantuml
 @startuml
 
 circle 主题对象 {}
-note top of 主题对象 : 持有状态的对象(状态为8)
+note top of 主题对象 : 持有状态的对象(状态改变为8)
 
 package "观察者" <<Cloud>> #DDDDDD {
     circle mouse {}
@@ -230,6 +240,9 @@ package "观察者" <<Cloud>> #DDDDDD {
 主题对象 --> dog : 8
 主题对象 --> duck : 8
 主题对象 --> cat : 8
+note right on link
+当主题内的数据有改变,就会通知观察者
+end note
 
 @enduml
 ```
@@ -287,18 +300,182 @@ ConcreteSubject --> ConcreteObserver
 有一个气象观测站需要追踪当前天气并且有个对象WeatherData追踪当前天气状况,WeatherData对象如下
 ```plantuml
 @startuml
-class WeatherData {
-    + getTemperature()
-    + getHumidity()
-    + getPressure()
-    + measurementsChanged()
+
+package "主题" #DDDDDD {
+    interface Subject {
+        + registerObserver()
+        + removeObserver()
+        + notifyObservers()
+    }
+    class WeatherData implements Subject {
+        + registerObserver()
+        + removeObserver()
+        + notifyObservers()
+    
+        + getTemperature()
+        + getHumidity()
+        + getPressure()
+        + measurementsChanged()
+    }
+    note "这三个方法返回最近的气候测量,分别为温度,湿度,气压" as N1
+    N1 --> WeatherData::getTemperature #000000
+    N1 --> WeatherData::getHumidity #000000
+    N1 --> WeatherData::getPressure #000000
+    note left of WeatherData::measurementsChanged()
+    无论何时 WeatherData 更新了值
+    measurementsChanged()方法被调用
+    end note
 }
-note "这三个方法返回最近的气候测量,分别为温度,湿度,气压" as N1
-N1 --> WeatherData::getTemperature #000000
-N1 --> WeatherData::getHumidity #000000
-N1 --> WeatherData::getPressure #000000
-note left of WeatherData::measurementsChanged()
-无论何时 WeatherData 更新了值,measurementsChanged()方法被调用
-end note
+
+package "观察者" #DDDDDD {
+    interface DisplayElement {
+        + display()
+    }
+    interface Observer {
+        + update()
+    }
+    note top of Observer : 所有气象组件都实现 Observer 接口\n这样就给了 Subject 一个共同的接口\n当需要更新观察者时调用它
+    Subject --> Observer : observers
+    
+       
+    class CurrentConditionsDisplay implements Observer,DisplayElement {
+        + update()
+        + display() {//显示当前测量值}
+    }
+    CurrentConditionsDisplay --> WeatherData : subject
+    
+    class ThirdPartyDisplay implements Observer,DisplayElement {
+        + update()
+        + display() {//显示基于测量值的其他内容}
+    }
+    class StatisticsDisplay implements Observer,DisplayElement {
+        + update()
+        + display() {//显示平均值,最小值和最大测量值}
+    }
+    class ForecastDisplay implements Observer,DisplayElement {
+        + update()
+        + display() {//显示预报}
+    }
+}
+
 @enduml
+```
+
+```java
+
+public interface Subject {
+    // 这两个方法都用一个Observer作为参数,即要注册或被移除的Observer
+    public void registerObserver(Observer o);
+    public void removeObserver(Observer o);
+    // 当Subject的状态改变时,这个方法会被调用,以通知所有的观察者
+    public void notifyObservers();
+}
+
+public interface Observer {
+    // 这些都是当气象测量数据变化时观察者从Subject获取的状态值
+    public void update(float temp, float humidity, float pressure);
+}
+
+// DisplayElement 接口只包含一个方法 display(), 当显示元素需要显示时,调用此方法
+public interface DisplayElement {
+    public void display();     
+}
+
+
+import java.util.*;
+// WeatherData 实现 Subject 接口
+public class WeatherData implements Subject {
+    // 我们添加一个 List 来持有 Observer
+    private List<Observer> observers;
+    private float temperature;
+    private float humidity;
+    private float pressure;
+
+    public WeatherData() {
+        observers = new ArrayList<Observer>();
+    }
+
+    public void registerObserver(Observer o) {
+        observers.add(o);
+    }
+
+    public void removeObserver(Observer o) {
+        observers.remove(o);
+    }
+
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(temperature, humidity, pressure);
+        }
+    }
+   public void measurementsChanged() {
+        notifyObservers();
+    }
+
+   // 模拟气象站测量到气象数据变化时候嗲用
+    public void setMeasurements(float temperature, float humidity, float pressure) {
+        this.temperature = temperature;
+        this.humidity = humidity;
+        this.pressure = pressure;
+        measurementsChanged();
+    }
+
+    public float getTemperature() {
+        return temperature;
+    }
+
+    public float getHumidity() {
+        return humidity;
+    }
+
+    public float getPressure() {
+        return pressure;
+    }
+
+}
+
+// 这个接口实现了 Observer 方法所以它可以从 WeatherData 对象中获取变化
+// 它也实现了 DisplayElement 因为我们的 API 打算要求所有显示元素实现这个接口
+public class CurrentConditionsDisplay implements Observer, DisplayElement { 
+    private float temperature;
+    private float humidity;
+    private WeatherData weatherData;
+      
+    public CurrentConditionsDisplay(WeatherData weatherData) { 
+        this.weatherData = weatherData;
+        weatherData.registerObserver(this);
+    } 
+      
+    public void update(float temperature, float humidity, float pressure) { 
+        this.temperature = temperature;
+        this.humidity = humidity;
+        display();
+    } 
+      
+    public void display() { 
+        System.out.println("Current conditions: " + temperature 
+            + "F degrees and " + humidity + "% humidity");
+    } 
+}
+
+// 测试程序
+public class WeatherStation {
+      
+    public static void main(String[] args) {
+        WeatherData weatherData = new WeatherData();
+    
+        CurrentConditionsDisplay currentDisplay = 
+            new CurrentConditionsDisplay(weatherData);
+        // StatisticsDisplay statisticsDisplay = new StatisticsDisplay(weatherData); 
+        // ForecastDisplay forecastDisplay = new ForecastDisplay(weatherData);
+
+        weatherData.setMeasurements(80, 65, 30.4f);
+        weatherData.setMeasurements(82, 70, 29.2f);
+        weatherData.setMeasurements(78, 90, 29.2f);
+        
+        weatherData.removeObserver(forecastDisplay);
+        weatherData.setMeasurements(62, 90, 28.1f);
+    }
+}
+
 ```

@@ -26,7 +26,7 @@ default_map["setuptools_init_license"]="MIT License"
 
 
 ACTION=$1
-
+shift 1
 
 test -z $ACTION && ACTION="--help"
 
@@ -314,12 +314,14 @@ setuptoolsBuild() {
 setuptools() {
     local SETUPTOOLS_ACTION=$1
 
+    shift 1
+
     case $SETUPTOOLS_ACTION in
         env )
             setuptoolsEnv
             ;;
         init )
-            setuptoolsInit "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+            setuptoolsInit $*
             ;;
         install )
             setuptoolsInstall
@@ -339,7 +341,7 @@ case $ACTION in
         help
         ;;
     setuptools )
-        setuptools "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "$10"
+        setuptools $*
         ;;
     * )
         echo "未知操作请查看帮助文档"

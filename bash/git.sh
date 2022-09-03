@@ -2,6 +2,7 @@
 
 
 ACTION=$1
+shift 1
 test -z $ACTION && ACTION="--help"
 
 if [[ -z $ACTION ]]; then
@@ -17,11 +18,18 @@ upstream : Git进行fork后跟原仓库同步
     $2 : fork 前的原仓库地址:默认去github获取
     return : 会添加一个上游的主干分支名称为 : upstream/master
 
-reset : git回滚到某个版本  
-    git.sh reset {git_commit_id:}
-    如果需要覆盖远程执行 : git push -f , 如果需要放弃回滚 : git pull
-    $2: git提交日志id,使用 git log 查看git_commit_id,为空则需要手动输入
-    return : git回滚到某个版本
+reset : git 回滚相关操作
+    
+    reset version : git回滚到某个版本  
+        git.sh reset version {git_commit_id:}
+        如果需要覆盖远程执行 : git push -f , 如果需要放弃回滚 : git pull
+        $3: git提交日志id,使用 git log 查看git_commit_id,为空则需要手动输入
+        return : git回滚到某个版本
+    
+    reset add : git撤销add文件(未commit)
+        git.sh reset add {file_path_list}
+        $3: git文件列表,使用空格分割 比如 a.java b.java
+        return: file_path_list取消add
 
 init_server : 初始化git服务端项目,供git clone user@ip:/项目路径
     git.sh init_server {项目名:}
@@ -120,6 +128,12 @@ _githubGetUpstreamUrl_() {
 # git clone 一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
 githubRepos() {
     local org=$1
+
+    while [ -z $org ]; do
+        read -p "组织不允许为空,请输入 : " org
+    done
+    
+
     local pageSize=$2
     test -z $pageSize && pageSize="30"
 
@@ -165,29 +179,52 @@ githubRepos() {
 
 # 对github的一些操作
 github() {
-local GITHUB_ACTION=$1
-case "$GITHUB_ACTION" in
-    repos)
-        # git clone 一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
-        # $2 : 组织(organizations)
-        # return : clone 组织下的所有存储库
-        githubRepos $2 $3
-        ;;
-    upstreamUrl)
-        # 解析github上游url
-        # return : git上游地址
-        _githubGetUpstreamUrl_
-        ;;
-esac
+    local GITHUB_ACTION=$1
+    case "$GITHUB_ACTION" in
+        repos)
+            # git clone 一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
+            # $2 : 组织(organizations)
+            # return : clone 组织下的所有存储库
+            githubRepos $2 $3
+            ;;
+        upstreamUrl)
+            # 解析github上游url
+            # return : git上游地址
+            _githubGetUpstreamUrl_
+            ;;
+         * )
+            echo "未知操作,请查看帮助文档"
+            help
+            ;;
+    esac
 }
 
 # git回滚到某个版本
-reset() {
+resetVersion() {
     local commit_id=$1
     while [ -z $commit_id ]; do
         read -p "git commit_id不允许输入空请重新输入 : " commit_id
     done
     git reset --hard $commit_id
+}
+
+# git回滚到某个版本,或取消commit
+reset() {
+    local RESET_ACTION=$1
+    shift 1
+    case "$RESET_ACTION" in
+        version )
+            resetVersion $*
+            ;;
+        add )
+            # git 取消 add文件未cmmit
+            git  reset HEAD $*
+            ;;
+        * )
+            echo "未知操作"
+            help
+            ;;
+    esac
 }
 
 # 初始化git服务端项目,供git clone user@ip:/项目路径
@@ -228,35 +265,33 @@ pull() {
 case "$ACTION" in
     --help)
         # 显示帮助文档
-        help
+        help $*
         ;;
     upstream)
         # Git进行fork后跟原仓库同步
         # $2 : fork 前的原仓库地址
         # return : 会添加一个上游的主干分支名称为 : upstream/master
-        upstream "$2"
+        upstream $*
         ;;
     github)
-        # 对github的一些操作,多传递一些参数防止不够用
-        github "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+        github $*
         ;;
     reset)
-        # git回滚到某个版本
-        # $2 : git提交日志id
-        reset "$2"
+        # git回滚到某个版本,或取消add文件
+        reset $*
         ;;
     init_server)
         # 初始化git服务端项目,供git clone user@ip:/项目路径
         # $2 : 项目名
-        initServer "$2"
+        initServer $*
         ;;
     pull)
         # 将当前目录下的所有git项目pull
-        pull
+        pull $*
         ;;
     * )
         echo "未知操作,请查看帮助文档"
-        help
+        help $*
         ;;
 esac
 

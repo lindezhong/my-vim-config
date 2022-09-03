@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ACTION=$1
+shift 1
 
 test -z $ACTION && ACTION="--help"
 
@@ -187,8 +188,10 @@ deploy() {
     local class_file_path=$_select_class_result
 
     if [[ -z $class_file_path ]]; then
+        echo "java ${default_map['remote_debug']} -jar $jar_path"
         java ${default_map['remote_debug']} -jar $jar_path
     else
+        echo "java ${default_map['remote_debug']} -cp $jar_path $class_file_path"
         java ${default_map['remote_debug']} -cp $jar_path $class_file_path
     fi
     
@@ -257,6 +260,7 @@ run() {
     for(( i=0; i<push_num; i++)) do
         popd
     done
+    echo "java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path"
     java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path
 }
 
@@ -265,21 +269,22 @@ case $ACTION in
         help
         ;;
     'deploy' )
-        deploy "$2"
+        deploy $*
         ;;
     'run' )
-        run "$2"
+        run $*
         ;;
     'debug' )
         default_map['remote_debug_suspend']='y'
         defaultMapInit
-        run "$2"
+        run $*
         ;;
     'find_main' )
-        _findMainClass_ "$2" "$3"
+        _findMainClass_ $*
         ;;
     * )
         echo "未知操作"
+        help
         ;;
 esac
 

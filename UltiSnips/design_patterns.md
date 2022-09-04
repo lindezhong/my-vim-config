@@ -1,7 +1,8 @@
 # 设计模式
 
 ## 资料
-1. 官方代码 : https://github.com/bethrobson/Head-First-Design-Patterns
+1. 官方代码: https://wickedlysmart.com/head-first-design-patterns/
+2. github代码仓库: https://github.com/bethrobson/Head-First-Design-Patterns
 
 
 ## OO(面向对象)基础知识
@@ -21,7 +22,12 @@
     > 接口一词在这里有多个含义.  接口是一个概念也是java的一个构造.  针对接口编程不必真的使用java的接口.  
     > 要点是通过针对超类型编程来利用多态,这样实际的运行时对象不会被锁定到代码  
 - 优先使用组合而不是继承
+    > 如果我们依靠继承,那么我们的行为只能在编译时静态地决定.  
+    > 换句话说,我们只得到超类给我们的行为或者覆盖它们.  
+    > 使用组合,我们可以用我们喜欢的方式在运行时混合与匹配
 - 尽量做到交互对象之间的松耦合设计
+- 开放-关闭原则: 类应该对扩展开放(继承,组合,委托等),但对修改关闭(无需修改已有的代码)
+    > 我们的目标是允许类容易扩展以容纳新的行为,而不用修改已有的代码
 
 
 ## 策略模式
@@ -210,7 +216,7 @@ public class MiniDuckSimulator {
 
 ## 观察者模式
 
-### 观察者摸索定义
+### 观察者模式定义
 
 定义对象之间的一对多依赖,这样一来,当一个对象改变状态时,它的所有依赖都会收到他嗯直并自动更新
 
@@ -288,6 +294,18 @@ ConcreteSubject --> ConcreteObserver
 
 @enduml
 ```
+
+### 观察者模式要点
+
+1. 观察者模式定义对象之间的一对多关系
+2. 主题使用通用接口更新观察者
+3. 任何具体类型的观察者都可以参与该模式,只要它们实现观察者接口
+4. 观察者是松耦合的,处理知道它们实现观察者接口之外,主题对它们的其他事情不知情.
+5. 使用该模式时,你可以从主题推或拉数据(拉被认为更 "正确")
+6. Swing 大量使用观察者模式,许多 GUI 框架也是这样
+7. 你也会在其他很多地方发现该模式,包括 RxJava , JavaBeans 和 RMI , 以及其他语言的框架, 像 Cocoa , Swift 和 JavaScript 事件
+8. 观察者模式和出版/订阅模式相关.出版/订阅模式用于更复杂得多主题和/或多消息类型的情形.
+9. 观察者模式是一个常用的模式,当我们学习模型-视图-控制器(MVC)时,还会看到它
 
 ### 观察者模式探讨
 
@@ -556,5 +574,438 @@ public class PropertyChangeEventMain {
     }
 }
 
+```
+
+## 装饰者模式
+
+### 装饰者模式定义
+
+***装饰者模式*** 动态地将额外责任附加到对象上.对于扩展功能,装饰者提供子类化之外的弹性替代方案
+
+### 装饰者模式要点
+
+1. 继承是扩展形式之一,但未必是达到弹性设计的最佳方式
+2. 在我们的设计中,允许行为可以被扩展,而无需修改已有代码
+3. 组合和委托经常可以用来运行时添加新行为
+4. 装饰者模式提供了子类化扩展行为的替代品
+5. 装饰者模式涉及一群装饰者类,这些类用来包装具体组件
+6. 装饰者类反映了它们所装饰组件类型(事实上,它们和所装饰的组件类型相同,都经过了继承或接口实现)
+7. 装饰者通过对组件的方法调用之前(或/和之后,甚至在那一刻)添加功能改变其组件的行为
+8. 你可以用任意数目装饰者来包裹一个组件
+9. 装饰者一般对组件的客户是透明的,除非客户依赖于组件的具体类型
+10. 装饰者会导致设计中出现许多小对象,过度使用会让代码变得复杂
+
+### 装饰者模式探讨
+
+- 装饰者有着和所装饰对象相同的超类型
+- 你可以用一个或多个装饰者包裹一个对象
+- 鉴于装饰者有着和所装饰对象相同的超类型,在需要原始对象的场合,我们可以传递一个被装饰的对象
+- ***装饰者在委托给所装饰对象之前或之后添加自己的行为,来在做剩下的工作***
+- 对象可以在任何时候被装饰,因此我们可以在运行时用任意数量的装饰者动态地装饰对象,只要我们乐意
+- 被装饰的对象尽量使用组合而不是继承,这样我们可以用我们喜欢的方式在运行时混合与匹配装饰者,而不是在编译时静态地决定
+- 装饰者模式容易造成大量的小类(参考 java.io 类)
+- 装饰者模式有类型问题:如果代码中依赖特定类型,如果引入装饰者就会出问题
+    > 比如在starbuzz咖啡中如果 HouseBlend 作了类似打折的事情,一旦我用装饰者包裹 HouseBlend , 代码就不工作了  
+    > 只是知道最外层的装饰者,比如对于starbuzz咖啡中如果一个带 Mocha,Soy,Whip的DarkRoast,编码时荣誉引用到Soy而不是Whip,这意味者订单中不包含Whip  
+    > 无法户欧链条上的其他装饰,比如对于starbuzz咖啡中如果一个带 Mocha,Soy,Whip的DarkRoast,只是知道最外层
+- 装饰者模式会增加实例化组件所需代码的复杂度,一旦用了装饰者,你不只要实例化组件,还要把它包裹进装饰者中
+- 组件: 查看 [starbuzz咖啡类图](#starbuzz咖啡类图) 的Beverage注释和package咖啡/具体组件
+
+### 与代理模式区别
+
+TODO 代补充
+
+### 装饰者模式例子: starbuzz咖啡
+
+#### starbuzz咖啡类图
+
+```plantuml
+@startuml
+
+abstract class Beverage {
+    - String description
+
+    + getDescription()
+    + {abstract} cost()
+    // 其他有用的方法()
+}
+note top of Beverage : Beverage 作为抽象组件
+
+package "咖啡/具体组件" #DDDDDD {
+    
+    class HouseBlend extends Beverage {
+        + cost()
+    }
+    note bottom of HouseBlend : 品类: 家常综合 \n 价格: $ .89
+
+    class DarkRoast extends Beverage {
+        + cost()
+    }
+    note bottom of DarkRoast : 品类: 深度烘培 \n 价格: $ .99
+    
+    class Espresso extends Beverage {
+        + cost()
+    }
+    note bottom of Espresso : 品类: 低咖啡因 \n 价格: $ 1.05
+    
+    class Decaf extends Beverage {
+        + cost()
+    }
+    note bottom of Decaf : 品类: 浓缩 \n 价格: $ 1.99
+}
+
+package "调料/装饰者" #DDDDDD {
+    abstract class CondimentDecorator extends Beverage {
+        - Beverage beverage
+        
+        + {abstract} getDescription()
+    }
+    note top of CondimentDecorator : 调料装饰者\n装饰者有着和所装饰对象相同的超类型
+    note right of CondimentDecorator::beverage
+    这里是对装饰者将包裹的 Beverage 的引用
+    被装饰的对象尽量使用组合而不是继承
+    这样我们可以用我们喜欢的方式在运行时混合与匹配装饰者
+    而不是在编译时静态地决定
+    end note
+    note right of CondimentDecorator::getDescription
+    我们打算要求所有调料装饰者都重新实现 getDescription() 方法
+    我们希望描述不仅包含饮料也包含装饰饮料的每一样东西
+    end note
+    CondimentDecorator --> Beverage : 组件
+
+    class Milk extends CondimentDecorator {
+        + cost()
+        + getDescription()
+    }
+    note bottom of Milk : 品类: 热奶 \n 价格: $ 0.10
+    
+    class Mocha extends CondimentDecorator {
+        + cost()
+        + getDescription()
+    }
+    note bottom of Mocha : 品类: 摩卡 \n 价格: $ 0.20
+
+    class Soy extends CondimentDecorator {
+        + cost()
+        + getDescription()
+    }
+    note bottom of Soy : 品类: 豆奶 \n 价格: $ 0.15
+
+    class Whip extends CondimentDecorator {
+        + cost()
+        + getDescription()
+    }
+    note bottom of Whip : 品类: 奶泡 \n 价格: $ 0.10
+
+}
+
+@enduml
+```
+#### 深度烘培摩卡奶泡 代码
+
+```java
+
+// 饮料
+public abstract class Beverage {
+    String description = "未知饮料";
+  
+    public String getDescription() {
+        return description;
+    }   
+ 
+    public abstract double cost();
+}
+
+// 家常综合咖啡
+public class HouseBlend extends Beverage {
+    public HouseBlend() {
+        description = "家常综合咖啡";
+    }
+
+    public double cost() {
+        return .89;
+    }
+}
+
+// 深度烘培咖啡
+public class DarkRoast extends Beverage {
+    public DarkRoast() {
+        description = "深度烘培咖啡";
+    }
+
+    public double cost() {
+        return .99;
+    }
+}
+
+// 低咖啡因咖啡
+public class Espresso extends Beverage {
+
+    public Espresso() {
+        description = "低咖啡因咖啡";
+    }
+
+    public double cost() {
+        return 1.99;
+    }
+}
+
+// 浓缩咖啡
+public class Decaf extends Beverage {
+    public Decaf() {
+        description = "浓缩咖啡";
+    }
+
+    public double cost() {
+        return 1.05;
+    }
+}
+
+// 调料装饰者
+public abstract class CondimentDecorator extends Beverage {
+    Beverage beverage;
+
+    // 我们打算要求所有调料装饰者都重新实现 getDescription() 方法
+    // 我们希望描述不仅包含饮料也包含装饰饮料的每一样东西
+    public abstract String getDescription();
+}
+
+// 热奶
+public class Milk extends CondimentDecorator {
+    public Milk(Beverage beverage) {
+        this.beverage = beverage;
+    }
+
+    public String getDescription() {
+        return beverage.getDescription() + ", 热奶";
+    }
+
+    public double cost() {
+        return .10 + beverage.cost();
+    }
+}
+
+// 摩卡
+public class Mocha extends CondimentDecorator {
+    public Mocha(Beverage beverage) {
+        this.beverage = beverage;
+    }
+
+    public String getDescription() {
+        return beverage.getDescription() + ", 摩卡";
+    }
+
+    public double cost() {
+        return .20 + beverage.cost();
+    }
+}
+
+// 豆奶
+public class Soy extends CondimentDecorator {
+    public Soy(Beverage beverage) {
+        this.beverage = beverage;
+    }
+
+    public String getDescription() {
+        return beverage.getDescription() + ", 豆奶";
+    }
+
+    public double cost() {
+        return .15 + beverage.cost();
+    }
+}
+
+// 奶泡
+public class Whip extends CondimentDecorator {
+    public Whip(Beverage beverage) {
+        this.beverage = beverage;
+    }
+
+    public String getDescription() {
+        return beverage.getDescription() + ", 奶泡";
+    }
+
+    public double cost() {
+        return .10 + beverage.cost();
+    }
+}
+
+// 下单测试代码
+public class StarbuzzCoffee {
+
+    public static void main(String args[]) {
+
+        // 要一杯浓缩咖啡,不加调料,打印出他的描述和价格
+        Beverage beverage = new Espresso();
+        System.out.println(beverage.getDescription()
+                + " $" + beverage.cost());
+
+        // 做一个 深度烘培咖啡
+        Beverage beverage2 = new DarkRoast();
+        // 用一个摩卡包裹它
+        beverage2 = new Mocha(beverage2);
+        // 用第二个摩卡包裹它
+        beverage2 = new Mocha(beverage2);
+        // 用一个奶泡包裹它
+        beverage2 = new Whip(beverage2);
+        System.out.println(beverage2.getDescription()
+                + " $" + beverage2.cost());
+
+        // 给我们一份家常豆奶奶泡咖啡
+        Beverage beverage3 = new HouseBlend();
+        beverage3 = new Soy(beverage3);
+        beverage3 = new Mocha(beverage3);
+        beverage3 = new Whip(beverage3);
+        System.out.println(beverage3.getDescription()
+                + " $" + beverage3.cost());
+
+        // 最后给我们一份 深度烘培摩卡奶泡卡咖啡
+        Beverage beverage4 = new DarkRoast();
+        beverage4 = new Mocha(beverage4);
+        beverage4 = new Whip(beverage4);
+        System.out.println(beverage4.getDescription()
+                + " $" + beverage4.cost());
+
+
+    }
+}
+
+```
+
+#### 深度烘培摩卡奶泡咖啡 调用流程
+
+```plantuml
+@startuml
+
+<> cost
+
+package "Whip" <<Cloud>> #DDDDDD {
+    () cost as WhipCost
+    cloud Mocha {
+        () cost as MochaCost
+        package DarkRoast <<Cloud>> {
+            () cost as DarkRoastCost
+        }
+    }
+}
+
+cost --> WhipCost
+note top  on link
+1. 首先,我们调用最外层装饰者 Whip上 的 cost()
+end note
+
+WhipCost --> MochaCost
+note left on link
+2. Whip 调用 Mocha上 的cost()
+end note
+
+MochaCost --> DarkRoastCost
+note left on link
+3.. Mocha 调用 DarkRoast 上的cost()
+end note
+
+MochaCost <-- DarkRoastCost : 0.99
+note left on link
+4. DarkRoast 返回其价值 99 美分
+end note
+
+WhipCost <-- MochaCost : 0.20
+note left on link
+5. Mocha 把自己的价钱 20 美分添加到来自 DarkRoast 的结果,并返回新的总计值 $ 1.19
+end note
+cost <-- WhipCost : 0.10
+note right on link
+6. Whip 把自己的总计 10 美分家到 Mocha 的返回值,并返回最终结果 $ 1.29
+end note
+
+@enduml
+```
+
+### 装饰者模式在java的应用 java.io
+
+以 InputStream 为例
+```plantuml
+@startuml
+
+interface InputStream {}
+
+package "具体实现/具体组件" #DDDDDD {
+    class FileInputStream implements InputStream {}
+    class StringBufferInputStream implements InputStream {}
+    class ByteArrayInputStream implements InputStream {}
+}
+
+package "装饰者" #DDDDDD {
+    abstract FilterInputStream implements InputStream {}
+    note top of FilterInputStream : FilterInputStream 是一个抽象装饰者
+
+    class PushbackInputStream extends FilterInputStream {}
+    class BufferedInputStream extends FilterInputStream {}
+    class DataInputStream extends FilterInputStream {}
+}
+
+@enduml
+```
+
+```java
+import java.io.*;              
+
+// 把输入流中所有的大写字符转成小写
+// 比如读入 "I know the Decorator Pattern therefore I RULE" -> "i know the decorator pattern therefore i rule" 
+public class LowerCaseInputStream extends FilterInputStream {
+  
+    public LowerCaseInputStream(InputStream in) {
+        super(in);             
+    }
+    
+    public int read() throws IOException { 
+        int c = in.read();
+        return (c == -1 ? c : Character.toLowerCase((char)c));
+    } 
+        
+    public int read(byte[] b, int offset, int len) throws IOException {
+        int result = in.read(b, offset, len);
+        for (int i = offset; i < offset+result; i++) {
+            b[i] = (byte)Character.toLowerCase((char)b[i]);
+        }
+        return result;
+    }
+}
+
+import java.io.*;
+
+// 测试类
+public class InputTest {
+    public static void main(String[] args) throws IOException {
+        int c;
+        InputStream in = null;
+        try {
+            in =
+                new LowerCaseInputStream(
+                    new BufferedInputStream(
+                        new FileInputStream("test.txt")));
+
+            while((c = in.read()) >= 0) {
+                System.out.print((char)c);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) { in.close(); }
+        }
+        System.out.println();
+        try (InputStream in2 =
+                new LowerCaseInputStream(
+                    new BufferedInputStream(
+                        new FileInputStream("test.txt"))))
+        {
+            while((c = in2.read()) >= 0) {
+                System.out.print((char)c);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 
 ```

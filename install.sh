@@ -57,6 +57,8 @@ sudo apt install -y python3-pip
 sudo apt install -y python3-venv
 sudo apt install -y gcc g++ make cmake
 
+# LeaderF 搜索目录依赖
+sudo apt install -y ripgrep
 
 #####################################################
 ####     可选安装(由自己执行这里只是作记录)      ####

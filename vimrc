@@ -431,10 +431,10 @@ nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 " nmap <ESC><S-p> :CocCommand<CR>
 " imap <ESC><S-p> <Esc>`^:CocCommand<CR>
 " 代码自动生成
-nmap <silent><ESC><S-i> :CocAction<CR>
-nmap <silent><ESC><ENTER> :CocAction<CR>
-imap <silent><ESC><S-i> <Esc>`^:CocAction<CR>i
-imap <silent><ESC><ENTER> <Esc>`^:CocAction<CR>i
+nmap <silent><ESC><S-i> <Plug>(coc-codeaction-cursor)
+nmap <silent><ESC><ENTER> <Plug>(coc-codeaction-cursor)
+imap <silent><ESC><S-i> <Esc>`^<Plug>(coc-codeaction-cursor)i
+imap <silent><ESC><ENTER> <Esc>`^<Plug>(coc-codeaction-cursor)i
 
 " vimspector 远程debug插件,使用vscode的dap(Debug Adaptor Protocol)实现
 " 支持语言如下(包含开启方法)

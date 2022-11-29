@@ -29,6 +29,8 @@ colorscheme default
 " :h gui-colors
 " 修改coc 选择框颜色 CocMenuSel 为分组
 autocmd VimEnter * silent highlight CocMenuSel ctermbg=7
+autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray
+autocmd VimEnter * silent highlight CocFloating ctermbg=LightMagenta
 
 " 树莓派兼容
 set backspace=2
@@ -77,9 +79,11 @@ autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTr
 " :LeaderfLine 搜索当前文件中有的某个单词
 " :LeaderfFunction 搜索当前文件的函数(这个很有意思，如下图列出该文件中所有的函数和变量)
 nmap <silent><C-p> :LeaderfFile<CR>
-nmap <silent><C-f> :LeaderfLine<CR>
 imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
+nmap <silent><C-f> :LeaderfLine<CR>
 imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
+nmap <silent><ESC><C-p> :Leaderf rg<CR>
+imap <silent><ESC><C-p> <Esc>`^:Leaderf rg<CR>
 
 
 " auto-pairs配置(自动匹配括号) jiangmiao/auto-pairs

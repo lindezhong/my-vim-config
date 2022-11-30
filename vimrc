@@ -301,10 +301,11 @@ nmap <silent> <S-b> <plug>(coc-type-definition)
 nmap <silent> <ESC><c-b> <plug>(coc-implementation)
 nmap <silent> <ESC>b <plug>(coc-references)
 nmap <silent> <C-down> <plug>(coc-definition)
-nmap <silent> <ESC><A-down> <plug>(coc-implementation)
+nmap <silent> <A-down> <plug>(coc-implementation)
 nmap <silent> <C-up> <plug>(coc-references)
 imap <silent> <C-down> <Esc><plug>(coc-definition)
-imap <silent> <ESC><A-down> <Esc><plug>(coc-implementation)
+imap <silent> <C-A-down> <Esc><plug>(coc-implementation)
+imap <silent> <A-down> <Esc><plug>(coc-implementation)
 imap <silent> <C-up> <Esc><plug>(coc-references)
 
 

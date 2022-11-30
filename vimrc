@@ -297,15 +297,15 @@ imap <silent> <C-e> <Esc>`^:CocDiagnostics<CR>
 
 " GoTo code navigation.
 nmap <silent> <c-b> <plug>(coc-definition)
-nmap <silent> <s-b> <plug>(coc-type-definition)
-nmap <silent> <esc><c-b> <plug>(coc-implementation)
-nmap <silent> <esc>b <plug>(coc-references)
-nmap <silent> <c-down> <plug>(coc-definition)
-nmap <silent> <A-down> <plug>(coc-implementation)
-nmap <silent> <c-up> <plug>(coc-references)
-imap <silent> <c-down> <Esc>`^:<C-u>call       CocActionAsync('jumpDefinition')<CR>i
-imap <silent> <A-down> <Esc>`^:<C-u>call       CocActionAsync('jumpImplementation')<CR>i
-imap <silent> <c-up> <Esc>`^:<C-u>call       CocActionAsync('jumpReferences')<CR>i
+nmap <silent> <S-b> <plug>(coc-type-definition)
+nmap <silent> <ESC><c-b> <plug>(coc-implementation)
+nmap <silent> <ESC>b <plug>(coc-references)
+nmap <silent> <C-down> <plug>(coc-definition)
+nmap <silent> <ESC><A-down> <plug>(coc-implementation)
+nmap <silent> <C-up> <plug>(coc-references)
+imap <silent> <C-down> <Esc><plug>(coc-definition)
+imap <silent> <ESC><A-down> <Esc><plug>(coc-implementation)
+imap <silent> <C-up> <Esc><plug>(coc-references)
 
 
 function! s:check_back_space() abort

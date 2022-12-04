@@ -28,6 +28,15 @@
 - 尽量做到交互对象之间的松耦合设计
 - 开放-关闭原则: 类应该对扩展开放(继承,组合,委托等),但对修改关闭(无需修改已有的代码)
     > 我们的目标是允许类容易扩展以容纳新的行为,而不用修改已有的代码
+- 依赖倒置原则: 依赖抽象, 不依赖具体类, 对于实例化方面可以使用 [工厂方法](#工厂方法)
+    > 这个原则很像 '针对接口编程,而不是针对实现编程' .  
+    > 但该原则更强调抽象, 该原则说明, 高层组件不应该依赖于低层组件  
+    > 而它们都依赖于抽象, 比如比萨店 PizzaStore 就是高层组件, 比萨 Pizza 实现就是低层组件  
+    > 具体查看[工厂方法的依赖倒置](#工厂方法的依赖倒置)  
+    > 依赖倒置原则指南  
+    > 1. 变量不应该持有具体类的引用 : 如果使用new, 就会持有具体类, 通过使用工厂方法来绕开
+    > 2. 类不应该派生自具体类 : 如果派生自具体类, 就会依赖具体类. 派生自一个抽象类/接口
+    > 3. 方法不应该覆盖其任何基类的已实现的方法 : 如果覆盖已实现的方法, 那么基类就不是一个真正适合被继承的抽象, 基类中这些已实现的方法, 应该由所有子类共享
 
 
 ## 策略模式
@@ -121,16 +130,22 @@ package "鸭子" #DDDDDD {
 public interface QuackBehavior {
     public void quack();
 }
+
+// 实现鸭子的嘎嘎叫真的嘎嘎叫
 public class Quack implements QuackBehavior {
     public void quack() {
         System.out.println("Quack");
     }
 }
+
+// 橡皮鸭嘎嘎叫名为嘎嘎叫实为啊啊叫
 public class MuteQuack implements QuackBehavior {
     public void quack() {
         System.out.println("<< Silence >>");
     }
 }
+
+// 名为嘎嘎叫其实不出声
 public class Squack implements QuackBehavior {
     public void quack() {
         System.out.println("Squack");
@@ -141,11 +156,15 @@ public class Squack implements QuackBehavior {
 public interface FlyBehavior {
     public void fly();
 }
+
+// 实现鸭子飞行
 public class FlyWithWings implements FlyBehavior {
     public void fly() {
         System.out.println("fly");
     }
 }
+
+// 什么都不做不会飞
 public class FlyNoWay implements FlyBehavior {
     public void fly() {
         System.out.println("not fly");
@@ -254,6 +273,7 @@ end note
 
 ```plantuml
 @startuml
+
 interface Subject {
     + registerObserver()
     + removeObserver()
@@ -525,22 +545,30 @@ public class PropertyChangeEventMain {
         bean.setId(1L);
     }
 
+
+    // 这个例子自身即是主题又是观察者
     static class JavaBean implements PropertyChangeListener, Serializable {
 
         private Long id;
         private String name;
 
+        // 这个是一个主题
         private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
         public JavaBean() {
-            // 监听所有变化
+            // 注册监听所有变化(所有变化观察者)
             pcs.addPropertyChangeListener(this);
-            // 只是监听 id 的变化
+            // 注册只是监听 id 的变化(id变化观察者)
             pcs.addPropertyChangeListener("id", this);
-            // 只是监听 name 的变化
+            // 注册只是监听 name 的变化(name变化观察者)
             pcs.addPropertyChangeListener("name", this);
         }
 
+        /**
+         * 观察者update(),即 Observer.update()
+         *
+         * @param evt 事件/消息
+         */
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             System.out.println("property name is : " + evt.getPropertyName());
@@ -549,14 +577,14 @@ public class PropertyChangeEventMain {
             System.out.println("======================");
         }
         public Long getId() {
-
+            return this.id;
         }
 
         public void setId(Long id) {
             Long oldId = this.id;
             this.id = id;
 
-            // 发送 id 已经变更事件
+            // 发送 id 已经变更事件, 类似于主题notifyObservers(),即Subject.notifyObservers()
             pcs.firePropertyChange("id", oldId, id);
         }
 
@@ -568,7 +596,7 @@ public class PropertyChangeEventMain {
             String oldName = this.name;
             this.name = name;
 
-            // 发送 name 已经变更事件
+            // 发送 name 已经变更事件, 类似于主题notifyObservers(),即Subject.notifyObservers()
             pcs.firePropertyChange("name", oldName, name);
         }
     }
@@ -617,6 +645,37 @@ TODO 代补充
 
 ### 装饰者模式例子: starbuzz咖啡
 
+starbuzz咖啡是以扩张速度最快闻名的咖啡连锁店. 如果你在街角看到它的店, 沿街望去, 还会看到另一家店  
+因为扩张实在太快, 他们着急更新其下单系统, 以匹配他们的饮料供应需求
+
+当他们第一次经如业务时, 类设计像这样, 除了咖啡本身, 你也可以要求各种调料, 如摩卡,奶泡...  
+这样设计简直类爆炸
+```plantuml
+@startuml
+
+abstract class Beverage {
+    - String description;
+
+    + getDescription()
+    + cost()
+}
+
+note top of Beverage : 饮料
+
+class DarkRoast extends Beverage {
+    + cost()
+}
+note bottom of DarkRoast : 深度烘培咖啡
+
+class DarkRoastWithMochaWhip extends Beverage {
+    + cost()
+}
+
+note bottom of DarkRoastWithMochaWhip : 深度烘培摩卡奶泡咖啡
+
+@enduml
+```
+
 #### starbuzz咖啡类图
 
 ```plantuml
@@ -629,7 +688,7 @@ abstract class Beverage {
     + {abstract} cost()
     // 其他有用的方法()
 }
-note top of Beverage : Beverage 作为抽象组件
+note top of Beverage : Beverage/饮料 作为抽象组件
 
 package "咖啡/具体组件" #DDDDDD {
     
@@ -927,6 +986,7 @@ end note
 ```plantuml
 @startuml
 
+skinparam linetype ortho
 interface InputStream {}
 
 package "具体实现/具体组件" #DDDDDD {
@@ -1008,4 +1068,1162 @@ public class InputTest {
     }
 }
 
+```
+
+## 工厂模式
+
+### 背景
+
+当你使用new操作符时, 你无疑是在实例化一个具体类,因此这肯定是一个实现而不是接口.  
+在技术上,new操作符没有错,有问题的是"变化",以及它对使用new的影响.  
+比如你的代码针对接口编写, 那么通过多态它可以和任何这个接口的实现类一起工作.  
+但你的代码利用了大量的具体类时,一旦加入新的具体类, 就必须修改代码  
+怎样把应用中所有实例化具体类的代码拿出来分离,或者封装起来,这样不会影响应用的其他部分  
+> 工厂模式主要用来封装实例化行为, 这样客户在实例化对象时, 只依赖接口, 而不是具体类, 也可以避免代码中的重复
+
+### 工厂模式讨论
+1. 如果只有一个 ConcreteCreator (具体创建者) 工厂方法模式也可以将唱片的实现解耦,也不影响Creator(因为Creator没有和任何ConcreteCreator紧耦合)
+2. 工厂方法模式的每个ConcreteCreator(具体创建者)都类似于简单工厂模式
+3. 工厂方法的Creator类可以时具体的Creator这样就有一个缺省的实现
+
+### 工厂方法要点
+1. 所有工厂方法都封装对象的创建
+2. 简单工厂不是一个真正的设计模式, 但依然可以作为一个简单的方法, 将客户从具体类解耦
+3. 工厂方法靠继承: 对象创建被委托给子类, 子类实现工厂方法来创建对象
+4. 抽象工厂靠对象组合: 对象创建在工厂接口暴露的方法中实现
+5. 所欧工厂模式都通过减少应用对具体类的依赖, 促进了松耦合
+6. 工厂方法的意图, 是允许一个类延迟实例化到其子类
+7. 抽象工厂的意图, 是创建相关对象家族, 不必依赖于其具体类
+8. 依赖倒置原则指导我们避免依赖具体类型, 尽量依赖抽象
+9. 工厂是强有力的技巧, 让我们针对抽象编码, 而不是针对具体类
+
+### 简单工厂
+
+简单工厂不是一个真正的模式,更多是一种编程习惯
+
+#### 简单工厂例子,比萨简单工厂
+
+假设你有一家比萨店, 店里能制作多种比萨, 
+有天你想要添加一些流行风味的比萨: 蛤蜊(Clam)比萨, 素食(Veggie)比萨 ,
+并且希腊(Greek)比萨销售不佳,因此你决定将它从菜单中去除
+所以初始代码如下
+```java
+
+public class PizzaStore {
+    public Pizza orderPizze(String type) {
+        Pizze pizza;
+    
+        if (type.equals("cheese")) {
+            pizza = new CheesePizza();
+        } 
+        /* 希腊(Greek)比萨销售不佳,因此你决定将它从菜单中去除
+        else if (type.equals("greek")) {
+            pizza = new GreekPizza();
+        }
+        **/ 
+        else if (type.equals("pepperoni")) {
+            pizza = PepperoniPizza();
+        } 
+        //  有天你想要添加一些流行风味的比萨: 蛤蜊(Clam)比萨, 素食(Veggie)比萨
+        else if (type.equals("clam")) {
+            pizza = ClamPizza();
+        } else if (type.equals("veggie")) {
+            pizza = VeggiePizza();
+        }
+    
+        // 准备比萨
+        pizza.perpare();
+        // 烘焙比萨
+        pizza.bake();
+        // 切割比萨
+        pizza.cut();
+        // 打包比萨
+        pizza.box();
+        
+        return pizza;
+    }
+}
+```
+
+显然关于哪个具体类被实例化的代码才是真正搞乱 orderPizze() 方法的罪魁祸首  
+如果你添加/减少了具体实现类在所有初始化的地方都需要修改  
+所以需要把对象创建移到 orderPizze() 方法外
+
+##### 比萨简单工厂类图
+
+```plantuml
+@startuml
+
+class PizzaStore {
+    + Pizze orderPizze()
+}
+note top of PizzaStore
+比萨店,这是工厂的客户.
+PizzaStore 现在通过 SimplePizzaFactory 取得比萨的实例
+end note
+
+class SimplePizzaFactory {
+    + {static} Pizza createPizza()
+}
+
+note top of SimplePizzaFactory 
+这是我们创建的比萨的工厂,
+它应该时我们的应用中唯一引用/创建具体Pizza类的部分
+创建方法经常静态声明
+end note
+
+
+abstract class Pizza {
+    + void perpare()
+    + void bake()
+    + void cut()
+    + void box()
+}
+
+note top of Pizza
+这是工厂的产品比萨!
+我们定义Pizza为抽象类, 带有一些有用的实现, 可以被覆盖
+end note
+
+class CheesePizza extends Pizza {
+
+}
+
+class VeggiePizza extends Pizza {
+
+}
+
+class ClamPizza extends Pizza {
+
+}
+
+class PepperoniPizza extends Pizza {
+
+}
+
+
+PizzaStore -right-> SimplePizzaFactory
+SimplePizzaFactory -right-> Pizza
+
+@enduml
+```
+
+##### 比萨简单工厂代码
+```java
+public class PizzaStore {      
+    SimplePizzaFactory factory;
+  
+    public PizzaStore(SimplePizzaFactory factory) { 
+        this.factory = factory;
+    }
+  
+    public Pizza orderPizza(String type) { 
+        Pizza pizza;           
+    
+        pizza = factory.createPizza(type);
+    
+        pizza.prepare();
+        pizza.bake();
+        pizza.cut();
+        pizza.box();           
+
+        return pizza;
+    }
+
+}
+
+public class SimplePizzaFactory {
+
+    public Pizza createPizza(String type) {
+        Pizza pizza = null;
+
+        if (type.equals("cheese")) {
+            pizza = new CheesePizza();
+        } else if (type.equals("pepperoni")) {
+            pizza = new PepperoniPizza();
+        } else if (type.equals("clam")) {
+            pizza = new ClamPizza();
+        } else if (type.equals("veggie")) {
+            pizza = new VeggiePizza();
+        }
+        return pizza;
+    }
+}
+
+abstract public class Pizza {
+    String name;
+    
+    // 面饼
+    String dough;
+    // 调味
+    String sauce;
+    // 陷料
+    List<String> toppings = new ArrayList<String>();
+  
+    public String getName() {  
+        return name;
+    } 
+
+    // 准备比萨 
+    public void prepare() {    
+        System.out.println("Preparing " + name);
+    }
+
+    // 烘焙比萨
+    public void bake() {       
+        System.out.println("Baking " + name);
+    }
+
+    // 切割比萨
+    public void cut() {        
+        System.out.println("Cutting " + name);
+    }
+
+    // 打包比萨
+    public void box() {
+        System.out.println("Boxing " + name);
+    }
+
+    public String toString() {
+        // code to display pizza name and ingredients
+        StringBuffer display = new StringBuffer();
+        display.append("---- " + name + " ----\n");
+        display.append(dough + "\n");
+        display.append(sauce + "\n");
+        for (String topping : toppings) {
+            display.append(topping + "\n");
+        }
+        return display.toString();
+    }
+
+}
+
+public class CheesePizza extends Pizza {
+    public CheesePizza() {
+        name = "Cheese Pizza";
+        dough = "Regular Crust";
+        sauce = "Marinara Pizza Sauce";
+        toppings.add("Fresh Mozzarella");
+        toppings.add("Parmesan");
+    }
+}
+
+
+public class ClamPizza extends Pizza {
+    public ClamPizza() {
+        name = "Clam Pizza";
+        dough = "Thin crust";
+        sauce = "White garlic sauce";
+        toppings.add("Clams");
+        toppings.add("Grated parmesan cheese");
+    }
+}
+
+public class PepperoniPizza extends Pizza {
+    public PepperoniPizza() {
+        name = "Pepperoni Pizza";
+        dough = "Crust";
+        sauce = "Marinara sauce";
+        toppings.add("Sliced Pepperoni");
+        toppings.add("Sliced Onion");
+        toppings.add("Grated parmesan cheese");
+    }
+}
+
+public class VeggiePizza extends Pizza {
+    public VeggiePizza() {
+        name = "Veggie Pizza";
+        dough = "Crust";
+        sauce = "Marinara sauce";
+        toppings.add("Shredded mozzarella");
+        toppings.add("Grated parmesan");
+        toppings.add("Diced onion");
+        toppings.add("Sliced mushrooms");
+        toppings.add("Sliced red pepper");
+        toppings.add("Sliced black olives");
+    }
+}
+```
+
+
+### 工厂方法
+
+定义了一个创建对象的接口, 但由子类决定要实例化那个类. 工厂方法让类把实例化推迟到子类
+
+#### 工厂方法模式类图
+
+```plantuml
+@startuml
+
+skinparam linetype ortho
+abstract class Creator {
+    + factoryMethod()
+    + anOperation()
+}
+note top of Creator 
+Creator 是一个类, 
+包含操纵产品的所欧方法的实现, 
+除了工厂方法 factoryMethod
+end note
+note right of Creator::factoryMethod
+抽象 factoryMethod() 方法是
+所有 Creator 子类必须继承的
+end note
+
+class ConcreteCreator extends Creator {
+    + factoryMethod()
+}
+
+interface Product {
+}
+
+class ConcreteProduct implements Product {
+
+}
+
+note "所有产品必须实现相同的接口,\n这样,使用产品的类可以引用该接口\n而不是具体类" as concrete_product_note
+concrete_product_note .right. ConcreteProduct
+concrete_product_note .right. Product
+
+ConcreteCreator -left--> ConcreteProduct
+Creator -left--> Product
+
+
+note "ConcreteCreator负责创建一个或多个具体产品\n它是唯一直达如何创建这些产品的类" as concrete_creator_note
+concrete_creator_note .up. ConcreteCreator
+concrete_creator_note .up. ConcreteProduct
+
+
+@enduml
+```
+
+#### 工厂方法模式例子比萨工厂
+
+如果比萨店生意很好, 需要开加盟店, 但是每个地区的人的口味不一样,  
+所以需要根据加盟地区提供不同风味的比萨(比如纽约, 芝加哥, 加州)
+
+##### 工厂方法模式例子比萨工厂类图
+
+```plantuml
+@startuml
+
+skinparam linetype ortho
+abstract class PizzaStore {
+    + abstract PizzaStore createPizza()
+    + void orderPizze()
+}
+
+note top of PizzaStore
+这是我们的抽象创建者类
+它定义了一个抽象的工厂方法
+子类实现该方法生产产品
+end note
+note top of PizzaStore
+创建这通常会包含依赖于抽象产品的代码
+而产品有子类生产
+创建者不用真的值的哪种具体产品被生产
+end note
+
+note "因为每个加盟店都有自己的PizzaSore子类,\n所以可以通过实现createPizza)创建自己风味的比萨" as pizza_store_note
+pizza_store_note .. Chicago
+
+note "注意,这些类层次是平行的:\n即两者都有抽象类,具体类扩展抽象类,\n知道特定实现纽约和芝加哥比萨" as product_create_note
+product_create_note .up. PizzaStore
+product_create_note .down. Pizza
+
+abstract class Pizza {
+    + void perpare()
+    + void bake()
+    + void cut()
+    + void box()
+}
+
+package "纽约比萨店" as NY {
+    
+
+    package "纽约比萨" as NYPizza #DDDDDD {
+        class NYStyleCheesePizza extends Pizza {
+    
+        }
+    
+        class NYStyleVeggiePizza extends Pizza {
+    
+        }
+    
+        class NYStyleClamPizza extends Pizza {
+    
+        }
+    
+        class NYStylePepperoniPizza extends Pizza {
+    
+        }
+    }
+
+
+    ' 控制布局, 无意义
+    NYStyleCheesePizza -down[hidden]-> NYStyleVeggiePizza
+    NYStyleVeggiePizza -down[hidden]-> NYStyleClamPizza
+    NYStyleClamPizza -down[hidden]-> NYStylePepperoniPizza
+
+    class NYPizzaStore {
+        + PizzaStore createPizza()
+    }
+    NYPizzaStore -up-|> PizzaStore
+    NYPizzaStore --> NYPizza
+}
+
+package "芝加哥比萨店" as Chicago {
+
+    package "芝加哥比萨" as ChicagoPizza #DDDDDD {
+        class ChicagoStyleCheesePizza extends Pizza {
+    
+        }
+    
+        class ChicagoStyleVeggiePizza extends Pizza {
+    
+        }
+    
+        class ChicagoStyleClamPizza extends Pizza {
+    
+        }
+    
+        class ChicagoStylePepperoniPizza extends Pizza {
+    
+        }
+    }
+
+    ' 控制布局, 无意义
+    ChicagoStyleCheesePizza -down[hidden]-> ChicagoStyleVeggiePizza
+    ChicagoStyleVeggiePizza -down[hidden]-> ChicagoStyleClamPizza
+    ChicagoStyleClamPizza -down[hidden]-> ChicagoStylePepperoniPizza
+
+
+    ChicagoPizzaStore -up-|> PizzaStore
+    ChicagoPizzaStore --> ChicagoPizza
+
+    
+}
+
+@enduml
+```
+
+##### 工厂方法模式例子比萨工厂代码
+
+```java
+public abstract class PizzaStore {
+  
+    abstract Pizza createPizza(String item); 
+    
+    public Pizza orderPizza(String type) { 
+        Pizza pizza = createPizza(type);
+        System.out.println("--- Making a " + pizza.getName() + " ---");
+        pizza.prepare();
+        pizza.bake();
+        pizza.cut();
+        pizza.box();
+        return pizza;
+    }
+}
+
+public abstract class Pizza {
+    String name;
+    
+    // 面饼
+    String dough;
+    // 调味
+    String sauce;
+    // 陷料
+    List<String> toppings = new ArrayList<String>();
+  
+    public String getName() {  
+        return name;
+    } 
+
+    // 准备比萨 
+    public void prepare() {    
+        System.out.println("Preparing " + name);
+    }
+
+    // 烘焙比萨
+    public void bake() {       
+        System.out.println("Baking " + name);
+    }
+
+    // 切割比萨
+    public void cut() {        
+        System.out.println("Cutting " + name);
+    }
+
+    // 打包比萨
+    public void box() {
+        System.out.println("Boxing " + name);
+    }
+
+    public String toString() {
+        // code to display pizza name and ingredients
+        StringBuffer display = new StringBuffer();
+        display.append("---- " + name + " ----\n");
+        display.append(dough + "\n");
+        display.append(sauce + "\n");
+        for (String topping : toppings) {
+            display.append(topping + "\n");
+        }
+        return display.toString();
+    }
+
+}
+
+public class NYPizzaStore extends PizzaStore {
+
+    Pizza createPizza(String item) {
+        if (item.equals("cheese")) {
+            return new NYStyleCheesePizza();
+        } else if (item.equals("veggie")) {
+            return new NYStyleVeggiePizza();
+        } else if (item.equals("clam")) {
+            return new NYStyleClamPizza();
+        } else if (item.equals("pepperoni")) {
+            return new NYStylePepperoniPizza();
+        } else return null;
+    }
+}
+
+public class NYStyleCheesePizza extends Pizza {
+
+    public NYStyleCheesePizza() {
+        name = "NY Style Sauce and Cheese Pizza";
+        dough = "Thin Crust Dough";
+        sauce = "Marinara Sauce";
+
+        toppings.add("Grated Reggiano Cheese");
+    }
+}
+
+public class ChicagoPizzaStore extends PizzaStore {
+
+    Pizza createPizza(String item) {
+        if (item.equals("cheese")) {
+            return new ChicagoStyleCheesePizza();
+        } else if (item.equals("veggie")) {
+            return new ChicagoStyleVeggiePizza();
+        } else if (item.equals("clam")) {
+            return new ChicagoStyleClamPizza();
+        } else if (item.equals("pepperoni")) {
+            return new ChicagoStylePepperoniPizza();
+        } else return null;
+    }
+}
+
+
+public class ChicagoStyleCheesePizza extends Pizza {
+
+    public ChicagoStyleCheesePizza() {
+        name = "Chicago Style Deep Dish Cheese Pizza";
+        dough = "Extra Thick Crust Dough";
+        sauce = "Plum Tomato Sauce";
+
+        toppings.add("Shredded Mozzarella Cheese");
+    }
+
+    // 芝加哥比萨重新切割比萨
+    void cut() {
+        System.out.println("Cutting the pizza into square slices");
+    }
+}
+
+public class PizzaTestDrive {
+
+    public static void main(String[] args) {
+        PizzaStore nyStore = new NYPizzaStore();
+        PizzaStore chicagoStore = new ChicagoPizzaStore();
+
+        Pizza pizza = nyStore.orderPizza("cheese");
+        System.out.println("Ethan ordered a " + pizza.getName() + "\n");
+
+        pizza = chicagoStore.orderPizza("cheese");
+        System.out.println("Joel ordered a " + pizza.getName() + "\n");
+    }
+}
+```
+
+### 工厂方法的依赖倒置
+
+对于使用简单工厂方法的类如下
+
+```java
+public class DependentPizzaStore {
+  
+    public Pizza createPizza(String style, String type) {
+        Pizza pizza = null;    
+        if (style.equals("NY")) {       
+            if (type.equals("cheese")) {
+                pizza = new NYStyleCheesePizza();
+            } else if (type.equals("veggie")) {
+                pizza = new NYStyleVeggiePizza();
+            } else if (type.equals("clam")) { 
+                pizza = new NYStyleClamPizza(); 
+            } else if (type.equals("pepperoni")) { 
+                pizza = new NYStylePepperoniPizza();
+            }
+        } else if (style.equals("Chicago")) {
+            if (type.equals("cheese")) {    
+                pizza = new ChicagoStyleCheesePizza();
+            } else if (type.equals("veggie")) {
+                pizza = new ChicagoStyleVeggiePizza();
+            } else if (type.equals("clam")) { 
+                pizza = new ChicagoStyleClamPizza();
+            } else if (type.equals("pepperoni")) { 
+                pizza = new ChicagoStylePepperoniPizza();
+            }
+        } else {               
+            System.out.println("Error: invalid type of pizza");
+            return null;
+        }
+        pizza.prepare();
+        pizza.bake();
+        pizza.cut();
+        pizza.box();
+        return pizza;
+    }
+}
+
+```
+对象依赖依赖如下
+
+```plantuml
+@startuml
+' 因为布局删除掉NYStyleClamPizza,ChicagoStyleClamPizza
+() PizzaStore
+() NYStyleCheesePizza
+() NYStyleVeggiePizza
+() NYStylePepperoniPizza
+' () NYStyleClamPizza
+() ChicagoStylePepperoniPizza
+' () ChicagoStyleClamPizza
+() ChicagoStyleVeggiePizza
+() ChicagoStyleCheesePizza
+
+' PizzaStore --> NYStyleClamPizza
+PizzaStore --> NYStylePepperoniPizza
+PizzaStore --> NYStyleVeggiePizza
+PizzaStore --> NYStyleCheesePizza
+
+' PizzaStore --> ChicagoStyleClamPizza
+PizzaStore --> ChicagoStylePepperoniPizza
+PizzaStore --> ChicagoStyleVeggiePizza
+PizzaStore --> ChicagoStyleCheesePizza
+
+@enduml
+```
+
+使用工厂方法模式后依赖图如下
+```plantuml
+@startuml
+
+' 因为布局删除掉NYStyleClamPizza,ChicagoStyleClamPizza
+() PizzaStore
+() Pizza
+() NYStyleCheesePizza
+() NYStyleVeggiePizza
+() NYStylePepperoniPizza
+' () NYStyleClamPizza
+() ChicagoStylePepperoniPizza
+' () ChicagoStyleClamPizza
+() ChicagoStyleVeggiePizza
+() ChicagoStyleCheesePizza
+
+note top of PizzaStore : PizzaStore现在只依赖于抽象类Pizza
+
+note top of Pizza
+依赖倒置原则中的 "倒置" 体现在它倒转了通常考虑OO设计方式
+注意低层组件现在依赖于更高层的抽象, 同样高层组件也绑定到同一抽象
+因此自上而下的依赖图自己倒转过来了, 高层和低层模块现在都依赖于抽象
+end note
+note top of Pizza
+具体比萨类也依赖于Pizza抽象
+因为它们实现了Pizza抽象类中的Pizza接口
+我们使用广义上的"接口"概念
+end note
+
+PizzaStore --> Pizza
+
+' NYStyleClamPizza -up-> Pizza
+NYStylePepperoniPizza -up-> Pizza
+NYStyleVeggiePizza -up-> Pizza
+NYStyleCheesePizza -up-> Pizza
+
+' ChicagoStyleClamPizza -up-> Pizza
+ChicagoStylePepperoniPizza -up-> Pizza
+ChicagoStyleVeggiePizza -up-> Pizza
+ChicagoStyleCheesePizza -up-> Pizza
+
+@enduml
+```
+
+### 抽象工厂模式
+
+`抽象工厂模式`: 提供一个接口来创建相关或依赖对象的家族, 而不需要指定具体类
+
+#### 抽象工厂模式类图
+
+```plantuml
+@startuml
+
+skinparam linetype ortho
+interface AbstractFactory {
+    createProductA()
+    createProductB()
+}
+note top of AbstractFactory : 抽象工厂定义了所有具体工厂都必须实现的接口, 这个接口包含一组生产产品的方法
+
+class ConcreteFactory1 implements AbstractFactory {
+    createProductA()
+    createProductB()
+}
+class ConcreteFactory2 implements AbstractFactory {
+    createProductA()
+    createProductB()
+}
+note "具体工厂实现不同的产品家族.\n 客户使用其中一个工厂创建产品,\n 绝对不用实例化产品对象" as ConcreteFactory_note
+ConcreteFactory_note .up. ConcreteFactory1
+ConcreteFactory_note .up. ConcreteFactory2
+
+interface AbstractProductA {
+}
+class ProductA1 implements AbstractProductA {
+}
+class ProductA2 implements AbstractProductA {
+}
+
+interface AbstractProductB {
+}
+class ProductB1 implements AbstractProductB {
+}
+class ProductB2 implements AbstractProductB {
+}
+
+ConcreteFactory1 -right-> ProductA1
+ConcreteFactory1 -right-> ProductB1
+
+ConcreteFactory2 -right-> ProductA2
+ConcreteFactory2 -right-> ProductB2
+
+class Client {
+
+}
+note top of Client : 客户针对抽象工厂编码, 运行时和实际工厂组合
+
+Client --> AbstractFactory
+Client --> AbstractProductA
+Client --> AbstractProductB
+
+@enduml
+```
+
+#### 抽象工厂模式例子比萨店的原料工厂
+
+比萨店的成功在于新鲜,高质量的原料, 为了加盟店遵循你的流程, 规范原料, 你打算建立一个原料工厂(抽象工厂)
+
+为了搞定原料工厂你不得不弄清楚如何处理原料家族
+
+```plantuml
+@startuml
+
+package 纽约 {
+    class FreshClams {
+        (新鲜蛤蜊)
+    }
+    class MarinaraSauce {
+        (意式番茄酱)
+    }
+    class ThinCrustDough {
+        (薄饼面团)
+    }
+    class ReggianoCheese {
+        (Reggiano芝士)
+    }
+}
+
+package 芝加哥 {
+    class FrozenClams {
+        (冷冻蛤蜊)
+    }
+    class PlumTomatoSauce {
+        (李子番茄酱)
+    }
+    class ThickCrustDough {
+        (厚饼面团)
+    }
+    class MozzarellaCheese {
+        (Mozzarella芝士)
+    }
+}
+
+package 加州 {
+    class FreshClams {
+        (新鲜蛤蜊)
+    }
+    class BruschettaSauce {
+        (Bruschetta酱)
+    }
+    class VeryThinCrustDough {
+        (极薄饼面团)
+    }
+    class GoatCheese {
+        (山羊干酪)
+    }
+}
+@enduml
+```
+
+所以对于原料工厂来说, 可以创建所有的原料代码如下
+
+```java
+// 比萨原料工厂
+public interface PizzaIngredientFactory {
+
+    // 面团
+    public Dough createDough();
+    // 酱
+    public Sauce createSauce();
+    // 奶酪
+    public Cheese createCheese();
+    // 蔬菜
+    public Veggies[] createVeggies();
+    // 意大利辣香肠
+    public Pepperoni createPepperoni();
+    // 蛤蜊
+    public Clams createClam();
+
+}
+```
+
+全部代码如下
+
+```java
+
+// 比萨原料工厂
+public interface PizzaIngredientFactory {
+
+    // 面团
+    public Dough createDough();
+    // 酱
+    public Sauce createSauce();
+    // 奶酪
+    public Cheese createCheese();
+    // 蔬菜
+    public Veggies[] createVeggies();
+    // 意大利辣香肠
+    public Pepperoni createPepperoni();
+    // 蛤蜊
+    public Clams createClam();
+
+}
+
+// 纽约原料工厂
+public class NYPizzaIngredientFactory implements PizzaIngredientFactory {
+ 
+    public Dough createDough() {
+        return new ThinCrustDough();    
+    }
+ 
+    public Sauce createSauce() {    
+        return new MarinaraSauce();     
+    }
+ 
+    public Cheese createCheese() {  
+        return new ReggianoCheese();    
+    }
+ 
+    public Veggies[] createVeggies() {
+        Veggies veggies[] = { new Garlic(), new Onion(), new Mushroom(), new RedPepper() };
+        return veggies;
+    }
+ 
+    public Pepperoni createPepperoni() {
+        return new SlicedPepperoni();   
+    }
+
+    public Clams createClam() {
+        return new FreshClams();        
+    }
+}
+
+// 芝加哥原料工厂
+public class ChicagoPizzaIngredientFactory implements PizzaIngredientFactory {
+
+    public Dough createDough() {
+        return new ThickCrustDough();
+    }
+
+    public Sauce createSauce() {
+        return new PlumTomatoSauce();
+    }
+
+    public Cheese createCheese() {
+        return new MozzarellaCheese();
+    }
+
+    public Veggies[] createVeggies() {
+        Veggies veggies[] = { new BlackOlives(),
+                              new Spinach(),
+                              new Eggplant() };
+        return veggies;
+    }
+
+    public Pepperoni createPepperoni() {
+        return new SlicedPepperoni();
+    }
+    public Clams createClam() {
+        return new FrozenClams();
+    }
+}
+
+// 面团
+public interface Dough {
+    public String toString();
+}
+
+// 酱
+public interface Sauce {
+    public String toString();
+}
+
+// 奶酪
+public interface Cheese {
+    public String toString();
+}
+
+// 蔬菜
+public interface Veggies {
+    public String toString();
+}
+
+// 意大利辣香肠
+public interface Pepperoni {
+    public String toString();
+}
+
+// 蛤蜊
+public interface Clams {
+    public String toString();
+}
+
+// 重做比萨, 主要是将 prepare() 声明未抽象的, 这个方法收集比萨所需的原料, 当然这些原料来自原料工厂
+public abstract class Pizza {
+    String name;
+
+    // 比萨所需的原料如下
+    Dough dough;
+    Sauce sauce;
+    Veggies veggies[];
+    Cheese cheese;
+    Pepperoni pepperoni;
+    Clams clam;
+
+    abstract void prepare();   
+
+    void bake() {
+        System.out.println("Bake for 25 minutes at 350");
+    }
+
+    void cut() {
+        System.out.println("Cutting the pizza into diagonal slices");
+    }
+
+    void box() {
+        System.out.println("Place pizza in official PizzaStore box");
+    } 
+    void setName(String name) {
+        this.name = name;
+    }
+
+    String getName() {
+        return name;
+    }
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append("---- " + name + " ----\n");
+        if (dough != null) {
+            result.append(dough);
+            result.append("\n");
+        }
+        if (sauce != null) {
+            result.append(sauce);
+            result.append("\n");
+        }
+        if (cheese != null) {
+            result.append(cheese);
+            result.append("\n");
+        }
+        if (veggies != null) {
+            for (int i = 0; i < veggies.length; i++) {
+                result.append(veggies[i]);
+                if (i < veggies.length-1) {
+                    result.append(", ");
+                }
+            }
+            result.append("\n");
+        }
+        if (clam != null) {
+            result.append(clam);
+            result.append("\n");
+        }
+        if (pepperoni != null) {
+            result.append(pepperoni);
+            result.append("\n");
+        }
+        return result.toString();
+    }
+}
+
+// 奶酪比萨如下
+public class CheesePizza extends Pizza {
+    PizzaIngredientFactory ingredientFactory;
+
+    // 现在要制作比萨, 我们需要一个工厂提供原料
+    public CheesePizza(PizzaIngredientFactory ingredientFactory) {
+        this.ingredientFactory = ingredientFactory;
+    }
+
+    void prepare() {
+        System.out.println("Preparing " + name);
+        dough = ingredientFactory.createDough();
+        sauce = ingredientFactory.createSauce();
+        cheese = ingredientFactory.createCheese();
+    }
+}
+
+public class ClamPizza extends Pizza {
+    PizzaIngredientFactory ingredientFactory;
+
+    public ClamPizza(PizzaIngredientFactory ingredientFactory) {
+        this.ingredientFactory = ingredientFactory;
+    }
+
+    void prepare() {
+        System.out.println("Preparing " + name);
+        dough = ingredientFactory.createDough();
+        sauce = ingredientFactory.createSauce();
+        cheese = ingredientFactory.createCheese();
+        // 蛤蜊比萨多了蛤蜊
+        clam = ingredientFactory.createClam();
+    }
+}
+
+// 纽约比萨店
+public class NYPizzaStore extends PizzaStore {
+
+    protected Pizza createPizza(String item) {
+        Pizza pizza = null;
+        PizzaIngredientFactory ingredientFactory =
+            new NYPizzaIngredientFactory();
+
+        if (item.equals("cheese")) {
+
+            pizza = new CheesePizza(ingredientFactory);
+            pizza.setName("New York Style Cheese Pizza");
+
+        } else if (item.equals("veggie")) {
+
+            pizza = new VeggiePizza(ingredientFactory);
+            pizza.setName("New York Style Veggie Pizza");
+
+        } else if (item.equals("clam")) {
+
+            pizza = new ClamPizza(ingredientFactory);
+            pizza.setName("New York Style Clam Pizza");
+
+        } else if (item.equals("pepperoni")) {
+
+            pizza = new PepperoniPizza(ingredientFactory);
+            pizza.setName("New York Style Pepperoni Pizza");
+
+        }
+        return pizza;
+    }
+}
+
+
+```
+
+类图如下
+```plantuml
+@startuml
+skinparam linetype ortho
+package  "比萨原料工厂" as  PizzaIngredientFactory_together #DDDDDD {
+    interface PizzaIngredientFactory {
+        createDough()
+        createSauce()
+        createCheese()
+        createVeggies()
+        createPepperoni()
+        createClam()
+    }
+    
+    class NYPizzaIngredientFactory implements PizzaIngredientFactory {
+    }
+    
+    class ChicagoPizzaIngredientFactory implements PizzaIngredientFactory {
+    }
+
+}
+class NYPizzaStore {
+    createPizza()
+}
+
+package 比萨原料 as PizzaIngredient_package #DDDDDD {
+    together Dough_together {
+        interface Dough {}
+        class ThickCrustDough implements Dough {}
+        class ThinCrustDough implements Dough {}
+    }
+    
+    together Sauce_together {
+        interface Sauce {}
+        class PlumTomatoSauce implements Sauce {}
+        class MarinaraSauce implements Sauce {}
+    }
+    
+    together Cheese_together {
+        interface Cheese {}
+        class MozzarellaCheese implements Cheese {}
+        class ReggianoCheese implements Cheese {}
+    }
+    
+    together Clams_together {
+        interface Clams {}
+        class FrozenClams implements Clams {}
+        class FreshClams implements Clams {}
+    }
+}
+
+NYPizzaStore --> PizzaIngredientFactory
+NYPizzaStore --> Dough
+NYPizzaStore --> Sauce
+NYPizzaStore --> Cheese
+NYPizzaStore --> Clams
+NYPizzaIngredientFactory -right-> ThinCrustDough
+NYPizzaIngredientFactory -right-> MarinaraSauce
+NYPizzaIngredientFactory -right-> ReggianoCheese
+NYPizzaIngredientFactory -right-> FreshClams
+ChicagoPizzaIngredientFactory -left-> ThickCrustDough
+ChicagoPizzaIngredientFactory -left-> PlumTomatoSauce
+ChicagoPizzaIngredientFactory -left-> MozzarellaCheese
+ChicagoPizzaIngredientFactory -left-> FrozenClams
+
+' 控制布局无意义
+
+
+NYPizzaStore -down[hidden]--> Dough_together
+Dough_together -down[hidden]---> Sauce_together
+Sauce_together -down[hidden]---> Cheese_together
+Cheese_together -down[hidden]---> Clams_together
+
+PizzaIngredientFactory_together -right[hidden]-> Dough_together
+PizzaIngredientFactory_together -right[hidden]-> Sauce_together
+PizzaIngredientFactory_together -right[hidden]-> Cheese_together
+PizzaIngredientFactory_together -right[hidden]-> Clams_together
+
+@enduml
 ```

@@ -8,7 +8,30 @@ $0
 @enduml
 \`\`\`
 endsnippet
-	
+
+# #注释
+snippet plantUmlNote "plant注释 例子 : note {left|right|top|bottom|over} of Object #{Color} : {NoteContext}  1. Object : 注释对象 1.1 类图:如果为类字段格式为 Object::field(到字段要用plantUmlNoteMulti), 如果为方法有相同名用 ''双引号包裹 'name(int length)' 1.2 对于某些uml图来说可以链接到两个对象则用逗号分割 : A,B 2. NoteContet : 注释内容 3. Color: 颜色代码比如 000000 或 blue"
+note ${1:\{left|right|top|bottom|over\}} of ${2:Object} : ${3:noteContet}
+$0
+endsnippet
+snippet plantUmlNoteMulti "plant多行注释,可以用来注释类对象字段, 例子 : note {left|right|top|bottom|over} of Object #{Color}\n {NoteContext} \nend note ,1. Object : 注释对象 1.1 类图:如果为类字段格式为 Object::field, 如果为方法有相同名用 ''双引号包裹 'name(int length)' 1.2 对于某些uml图来说可以链接到两个对象则用逗号分割 : A,B 2. NoteContet : 注释内容 3. Color: 颜色代码比如 000000 或 blue"
+note ${1:\{left|right|top|bottom|over\}} of ${2:Object}
+${3:noteContet}
+end note
+$0
+endsnippet
+snippet plantUmlNoteFloat "浮动注释,可以把注释当成一个对象,然后用link链接,可以用来把注释指向多个对象 : note '{NoteContext}' as {NoteName} \n {NoteName} {Link} {Object} 1. NoteContext: 注释内容 2. NoteName : 注释名 3. Link: 链接可以是 .. , --> 表示不同样式 4. Object: 注释指向的对象"
+note "${1:NoteContext}" as ${2:NoteName}
+$2 .. ${3:Object}
+$0
+endsnippet
+snippet plantUmlNoteLink "类图链接(关系)的注释,该注释需要在链接后面,表示上一个链接的注释, note {left|right|top|bottom} on link #{Color} \n end note"
+note ${1:\{left|right|top|bottom|over\}}  on link
+$2
+end note
+$0
+endsnippet
+
 
 # #类图
 # 支持的类图类型
@@ -195,19 +218,46 @@ together {
 }
 endsnippet
 
-# #注释
-snippet plantUmlNote "plant注释 例子 : note on {left|right|top|bottom|over} of Object #{Color} : {NoteContext}  1. Object : 注释对象 1.1 类图:如果为类字段格式为 Object::field(到字段要调用plantUmlNoteEnd), 如果为方法有相同名用 ''双引号包裹 'name(int length)' 1.2 对于某些uml图来说可以链接到两个对象则用逗号分割 : A,B 2. NoteContet : 注释内容 3. Color: 颜色代码比如 000000 或 blue"
-note on ${1:\{left|right|top|bottom|over\}} of ${2:Object} : ${3:noteContet}
-$0
-endsnippet
-snippet plantUmlNoteEnd "浮动注释,可以把注释当成一个对象,然后用link链接,可以用来把注释指向多个对象 : note '{NoteContext}' as {NoteName} \n {NoteName} {Link} {Object} 1. NoteContext: 注释内容 2. NoteName : 注释名 3. Link: 链接可以是 .. , --> 表示不同样式 4. Object: 注释指向的对象"
-note "${1:NoteContext}" as ${2:NoteName}
-$2 .. ${3:Object}
-$0
-endsnippet
-snippet plantUmlNoteClassLink "类图链接(关系)的注释,该注释需要在链接后面,表示上一个链接的注释, note {left|right|top|bottom} on link #{Color} \n end note"
-note ${1:\{left|right|top|bottom|over\}}  on link
-$2
-end note
-$0
-endsnippet
+
+
+# #时序图(Sequence Diagram)
+
+# ##时序图参与者#时序图
+# - participant (参与者) 如果只有名称耶
+# - actor（角色）
+# - boundary（边界）
+# - control（控制）
+# - entity（实体）
+# - database（数据库）
+# - collections（集合）
+# - queue（队列）
+
+# #时序图##关系
+# | 符号 | 例子                          | 解释 |
+# | ->   | 绘制参与者之间传递的消息/请求 |      |
+# | ->>  | 返回消息                      |      |
+# | --x  |
+
+# #时序图##例子#
+# ```plantuml
+# @startuml
+# 'as用于重命名参与者, 请注意, participant 是在时序图中展示的名称, Foo 是在代码中的唯一标识
+# participant participant as Foo
+# actor Foo1
+# boundary boundary as Foo2
+# control control as Foo3
+# entity entity as Foo4
+# database database as Foo5
+# collections collections as Foo6
+# queue queue as Foo7
+# Foo -> Foo1 : To actor
+# Foo -> Foo2 : To boundary
+# Foo -> Foo3 : To control
+# Foo -> Foo4 : To entity
+# Foo -> Foo5 : To database
+# Foo -> Foo6 : To collections
+# Foo -> Foo7 : To queue
+# Foo ->
+# @enduml
+# ```
+

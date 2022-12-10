@@ -21,7 +21,7 @@
     > 针对接口编程真正的意思是针对超类型编程.  
     > 接口一词在这里有多个含义.  接口是一个概念也是java的一个构造.  针对接口编程不必真的使用java的接口.  
     > 要点是通过针对超类型编程来利用多态,这样实际的运行时对象不会被锁定到代码  
-- 优先使用组合而不是继承
+- 优先使用组合而不是继承(组合优于继承)
     > 如果我们依靠继承,那么我们的行为只能在编译时静态地决定.  
     > 换句话说,我们只得到超类给我们的行为或者覆盖它们.  
     > 使用组合,我们可以用我们喜欢的方式在运行时混合与匹配
@@ -2226,4 +2226,131 @@ PizzaIngredientFactory_together -right[hidden]-> Cheese_together
 PizzaIngredientFactory_together -right[hidden]-> Clams_together
 
 @enduml
+```
+
+## 单例模式/单件模式
+
+`单例模式`: 确保一个类只有一个实例, 并提供一个全局访问点
+
+### 单例模式讨论
+
+1. 如果有多个类加载器会导致, 多次家在同一个类, 就会产生多个单例
+2. 反射和序列化/反序列化可有可能导致多个单例
+3. 单例模式违反松耦合原则/单一责任原则
+4. 单例模式对比全局变量来说可以做到延迟加载
+5. 全局变量怂恿开发人员用大量对小对象的全局引用来污染命名空间
+
+### 单列模式要点
+
+1. 单列模式确保应用中一个类最多只有一个实例
+2. 单例模式也是提供访问次实例的全局点
+3. Java的单例实现用了一个私有构造器, 一个静态方法以及一个静态变量
+4. 检查你的性能和资源, 为多线程应用小心选择一个适当的单例实现(我们英国把所有应用都考虑为时多线程的)
+5. 提供双重检查加锁实现, Java5 之前的版本, 不是线程安全的
+6. 如果你使用多个类加载器, 要小心, 可能倒置单例实现失效, 导致出现多个实例
+7. 你可以使用Java的枚举来简化单列的实现
+
+### 单例模式类图
+
+```plantuml
+@startuml
+
+class Singleton {
+    static uniqueInstance
+    // 其他有用的单例属性
+    ..
+    static Singleton getInstance()
+    // 其他有用的单例方法
+}
+
+note left of Singleton::getInstance
+getInstance() 方法是静态的,这意味着它是一个类方法,
+因此你可以在代码的任何地方,方便地用 Singleton.getInstance()访问它
+就和访问全局变量一样容易,而且单例还有延迟实例化等优点
+end note
+
+note right of Singleton::uniqueInstance
+uniqueInstance类变量持有唯一的单例实例
+end note
+
+note bottom of Singleton
+实现单例模式的类不只是一个单例, 它也是一般的类,
+有自己的一套数据和方法
+end note
+
+
+@enduml
+```
+
+### 单例模式实现
+
+```java
+public class Singleton {
+    private static Singleton uniqueInstance;
+    // 其他有用的单例属性
+
+    private Singleton() {}
+
+    /**
+     * <pre>
+     * 该方式存在多线程问题, 可能会创建多个 Singleton
+     * 但是如果调用 getInstance() 方法没有给你的应用增加很重的负担并且允许有多个实例, 可以使用该方法
+     * </pre>
+     */
+    public static Singleton getInstance() {
+        if (uniqueInstance == null) {
+            uniqueInstance == new Singleton();
+        }
+        return uniqueInstance;
+    }
+
+    // 其他有用的单例方法
+}
+
+public class Singleton {
+    private static Singleton uniqueInstance = new Singleton();
+    // 其他有用的单例属性
+
+    private Singleton() {}
+    
+    /**
+     * 急切的创建实例, 而不用延迟创建
+     */
+    public static Singleton getInstance() {
+        return uniqueInstance;
+    }
+
+    // 其他有用的单例方法
+}
+
+
+public class Singleton {
+    // volatile 关键字确保: 当 uniqueInstance 变量被初始化未单例实例时, 多个线程正确处理 uniqueInstance 变量
+    private volatile static Singleton uniqueInstance;
+    // 其他有用的单例属性
+
+    private Singleton() {}
+
+    /**
+     * <pre>
+     * 双重检查加锁, 初始化实例, 在特定场景下有问题
+     * 当 uniqueInstance 被分配地址但未执行 init 方法时可能会有问题
+     * </pre>
+     */
+    public static Singleton getInstance() {
+        // 检查实例, 如果没有, 进入同步区块
+        if (uniqueInstance == null) {
+            // 注意, 只有第一次才同步
+            synchronized (Singleton.class) {
+                if (uniqueInstance == null) {
+                    // 进入区块后, 再检查一次. 如果依然是空的, 创建一个实例
+                    uniqueInstance == new Singleton();
+                }
+            }
+        }
+        return uniqueInstance;
+    }
+
+    // 其他有用的单例方法
+}
 ```

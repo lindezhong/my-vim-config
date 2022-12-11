@@ -2354,3 +2354,662 @@ public class Singleton {
     // 其他有用的单例方法
 }
 ```
+
+## 命令模式
+
+`命令模式`: 把请求封装为对象, 以便用不同的请求/队列或者日志请求来参数化其它对象, 并支持可以撤销的操作
+
+### 命令模式要点
+
+1. 命令模式把做出请求的对象从知道如何执行请求的对象解耦
+2. 命令对象处在解耦的中心, 封装接收者以及一个(或一组)动作(命令)
+3. 调用者通过调用命令对象的execute()做出请求, 这会使得接收者的动作被调用
+4. 调用者可以用命令参数化, 甚至可以在运行时动态地进行
+5. 通过实现一个undo()方法来把对象重建到最后一次执行execute()前状态, 命令可以支持撤销
+6. 宏命令是命令模式的一种简单延伸. 它允许调用多个命令. 同样, 宏命令很容易支持 undo()
+7. 在实践中, "聪明" 命令对象并不少见. 这些对象自己实现请求, 而不是委托给接收者
+8. 命令也可以用来实现日志和事务系统
+
+### 命令模式类图
+
+```plantuml
+@startuml
+
+skinparam linetype ortho
+
+class Client {
+}
+note bottom of Client
+Client 负责创建一个 ConcreteCommand (具体命令)
+并且设置 Receiver (接收者)
+end note
+
+class Invoker {
+    setCommand()
+    execute() // 或其它方法
+}
+note top of Invoker
+Invoker(调用者)持有一个命令, 并在某个时间点
+通过调用其execute()方法要求命令履行请求
+end note
+
+class Receiver {
+    action()
+}
+note top of Receiver
+Receiver(接收者) 知道如何执行履行请求所需的工作
+任何类都可以作为 Receiver
+在实践中, "聪明" 命令对象并不少见. 这些对象自己实现请求, 而不是委托给接收者
+end note
+
+interface Command {
+    execute()
+    undo()
+}
+note top of Command
+Command(命令)为所有命令声明了一个接口.
+命令通过其 execute() 方法调用, 该方法请求接收者执行动作
+命令通过 undo() 来把对象重建到最后一次执行execute()前状态 
+end note
+
+class ConcreteCommand implements Command {
+    execute()
+    undo()
+}
+note bottom of ConcreteCommand
+// execute() 方法调用履行请求所需接收者的动作
+public void execute() {
+    receiver.action()
+}
+end note
+
+class MacroCommand implements Command {
+}
+note bottom of MacroCommand
+// 宏命令是命令模式的一种简单延伸. 
+// 它允许调用多个命令. 同样, 宏命令很容易支持 undo()
+public class MacroCommand implements Command {
+    Command[] commands;
+    public MacroCommand(Command[] commands) {
+        this.commands = commands;
+    }   
+    public void execute() {
+        for (int i = 0; i < commands.length; i++) {
+            commands[i].execute();
+        }   
+    }   
+ 
+    public void undo() {
+        for (int i = commands.length -1; i >= 0; i--) {
+            commands[i].undo();
+        }   
+    }   
+}
+end note
+
+
+
+Client -right-> Receiver
+Client -right-> ConcreteCommand
+Invoker -right-> Command
+
+@enduml
+```
+### 命令模式流程图
+
+```plantuml
+@startuml
+autonumber
+
+participant Client客户 as client
+participant Invoker调用者 as invoker
+participant Command命令 as command
+participant Receiver接收者 as receiver
+
+client -> command : 客户创建命令对象
+client -> invoker : 客户做一个 setCommand() 来把命令对象存储到调用者中
+client -> invoker : 客户请求调用者执行命令
+invoker -> command : 调用者调用命令对象的execute()方法
+command -> receiver : execute() 方法调用履行请求所需接收者的动作
+
+@enduml
+```
+
+### 命令模式例子遥控器
+
+我们要设计一个遥控器代码, 让每个槽可以被分配控制一个或一组设备  
+请注意, 要能沟控制目前所有的设备以及厂商未来可以能提供的任何设备  
+
+以下是我们需要从控制器控制对象的接口, 这些设备中有些接口差别很大
+
+```plantuml
+@startuml
+' 电灯
+class Light {
+    on()
+    off()
+}
+note top of Light : 电灯
+' 吊扇
+class CeilingFan {
+    high()
+    medium()
+    low()
+    off()
+    getSpeed()
+}
+note top of CeilingFan : 吊扇
+' 电视
+class TV {
+    on()
+    off()
+    setInputChannel()
+}
+note top of TV : 电视
+
+@enduml
+```
+
+```plantuml
+@startuml
+
+package 遥控器 as remote_control {
+    
+    together together1 {
+        () ON1
+        () OFF1
+
+        note right of ON1 : 电灯开
+        note left of OFF1 : 电灯关
+    }
+    
+    together together2 {
+        () ON2
+        () OFF2
+
+        note right of ON2 : 吊扇开到高速\n(由于篇幅问题吊扇低速和中速不展示)
+        note left of OFF2 : 吊扇关
+    }
+    
+    together together3 {
+        () ON3
+        () OFF3
+
+        note right of ON3 : 电视开
+        note left of OFF3 : 电视关
+    }
+  
+    together together4 {
+        () ON4
+        () OFF4
+
+        note right of ON4 : 电灯,电视开,吊扇开到高速
+        note left of OFF4 : 电灯,吊扇,电视关
+    }
+    
+    together together_undo {
+        () undo
+        note right of undo : 对象重建到最后一次执行execute()前状态,\n但电视使用 lambda 无法撤销
+    }
+
+' 控制布局无意义
+
+together1 -down[hidden]-> together2
+together2 -down[hidden]-> together3
+together3 -down[hidden]-> together4
+together4 -down[hidden]-> together_undo
+}
+
+note top of remote_control
+4个槽都有各自的开和关按钮
+每组槽都需要编程. 我们可以在每个槽上放不同设备
+然后通过按钮控制它
+还有一个 undo 槽用来回到把对象重建到最后一次执行execute()前状态
+end note
+
+@enduml
+```
+
+遥控器类图如下
+
+```plantuml
+@startuml
+
+skinparam linetype ortho
+
+class RemoteLoader {
+
+}
+
+class RemoteControl {
+    Command[] onCommands;
+    Command[] offCommands;
+
+    setCommand()
+    onButtonWasPushed()
+    offButtonWasPushed()
+}
+
+interface Command {
+    execute()
+}
+' 电灯
+class Light {
+    on()
+    off()
+}
+note top of Light : 电灯
+class LightOnCommand implements Command {
+    execute()
+}
+class LightOffCommand implements Command {
+    execute()
+}
+
+' 吊扇
+class CeilingFan {
+    high()
+    medium()
+    low()
+    off()
+    getSpeed()
+}
+note top of CeilingFan : 吊扇
+class CeilingFanHighCommand implements Command {
+    execute()
+}
+class CeilingFanOffCommand implements Command {
+    execute()
+}
+
+' 电视
+class TV {
+    on()
+    off()
+    setInputChannel()
+}
+note top of TV : 电视, 使用两个 lambda 表达式生成命令
+
+class MacroCommand implements Command {
+    execute()
+}
+
+RemoteLoader -> Light
+RemoteLoader -> CeilingFan
+RemoteLoader -> TV
+RemoteLoader -> LightOnCommand
+RemoteLoader -> LightOffCommand
+RemoteLoader -> CeilingFanHighCommand
+RemoteLoader -> CeilingFanOffCommand
+
+RemoteControl -> Command
+
+
+
+@enduml
+```
+
+代码如下
+```java
+// This is the invoker(调用者)
+public class RemoteControl {
+    Command[] onCommands;
+    Command[] offCommands;     
+    Command undoCommand;
+ 
+    public RemoteControl() {   
+        onCommands = new Command[4];
+        offCommands = new Command[4];   
+ 
+        Command noCommand = new NoCommand();
+        for(int i=0;i<4;i++) { 
+            onCommands[i] = noCommand;
+            offCommands[i] = noCommand;
+        }
+        undoCommand = noCommand;        
+    }
+  
+    public void setCommand(int slot, Command onCommand, Command offCommand) {
+        onCommands[slot] = onCommand;   
+        offCommands[slot] = offCommand; 
+    }
+    public void onButtonWasPushed(int slot) {
+        onCommands[slot].execute();
+        undoCommand = onCommands[slot];
+    }
+
+    public void offButtonWasPushed(int slot) {
+        offCommands[slot].execute();
+        undoCommand = offCommands[slot];
+    }
+
+    public void undoButtonWasPushed() {
+        undoCommand.undo();
+    }
+
+    public String toString() {
+        StringBuffer stringBuff = new StringBuffer();
+        stringBuff.append("\n------ Remote Control -------\n");
+        for (int i = 0; i < onCommands.length; i++) {
+            stringBuff.append("[slot " + i + "] " + onCommands[i].getClass().getName()
+                + "    " + offCommands[i].getClass().getName() + "\n");
+        }
+        stringBuff.append("[undo] " + undoCommand.getClass().getName() + "\n");
+        return stringBuff.toString();
+    }
+}
+
+// 命令接口
+public interface Command {
+    public void execute();
+    public default void undo() {}
+
+    // 每个命令被执行时, 会存储到磁盘中
+    public default void store() {}
+    // 系统失败后, 这些对象会被重新加载
+    public default Command load() {return null;}
+}
+
+// 默认空实现, 防止空指针异常
+public class NoCommand implements Command {
+    public void execute() { }
+    public void undo() { }
+}
+
+// 宏命令是命令模式的一种简单延伸
+// 它允许调用多个命令. 同样, 宏命令很容易支持 undo()
+public class MacroCommand implements Command {
+    Command[] commands;
+
+    public MacroCommand(Command[] commands) {
+        this.commands = commands;
+    }
+
+    public void execute() {
+        for (int i = 0; i < commands.length; i++) {
+            commands[i].execute();
+        }
+    }
+
+    /**
+     * NOTE:  这些命令必须向后完成，以确保正确的撤消功能
+     */
+    public void undo() {
+        for (int i = commands.length -1; i >= 0; i--) {
+            commands[i].undo();
+        }
+    }
+}
+
+// 电灯
+public class Light {
+    String location = "";
+
+    public Light(String location) {
+        this.location = location;
+    }
+
+    public void on() {
+        System.out.println(location + " light is on");
+    }
+
+    public void off() {
+        System.out.println(location + " light is off");
+    }
+}
+
+
+// 普通的电灯开关(最普通的命令模式)
+public class LightOffCommand implements Command {
+    Light light;
+
+    public LightOffCommand(Light light) {
+        this.light = light;
+    }
+
+    public void execute() {
+        light.off();
+    }
+
+    public void undo() {
+        light.on();
+    }
+}
+
+// 普通的电灯开关(最普通的命令模式)
+public class LightOnCommand implements Command {
+    Light light;
+
+    public LightOnCommand(Light light) {
+        this.light = light;
+    }
+
+    public void execute() {
+        light.on();
+    }
+
+    public void undo() {
+        light.off();
+    }
+}
+
+// 吊扇
+public class CeilingFan {
+    public static final int HIGH = 3;
+    public static final int MEDIUM = 2;
+    public static final int LOW = 1;
+    public static final int OFF = 0;
+    String location;
+    int speed;
+
+    public CeilingFan(String location) {
+        this.location = location;
+    }
+
+    public void high() {
+        // turns the ceiling fan on to high
+        speed = HIGH;
+        System.out.println(location + " ceiling fan is on high");
+    }
+
+    public void medium() {
+        // turns the ceiling fan on to medium
+        speed = MEDIUM;
+        System.out.println(location + " ceiling fan is on medium");
+    }
+
+    public void low() {
+        // turns the ceiling fan on to low
+        speed = LOW;
+        System.out.println(location + " ceiling fan is on low");
+    }
+
+    public void off() {
+        // turns the ceiling fan off
+        speed = OFF;
+        System.out.println(location + " ceiling fan is off");
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+}
+
+// 用状态实现撤销, 吊扇允许有多种转速度, 按钮控制速度为高速
+public class CeilingFanHighCommand implements Command {
+    CeilingFan ceilingFan;
+    // 添加局部变量来跟踪吊扇之前的转速
+    int prevSpeed;
+
+    public CeilingFanHighCommand(CeilingFan ceilingFan) {
+        this.ceilingFan = ceilingFan;
+    }
+    public void execute() {
+        // 在 execute() 中, 改变吊扇的转速之前, 需要先记录它之前的状态, 以便撤销功能时使用
+        prevSpeed = ceilingFan.getSpeed();
+        ceilingFan.high();
+    }
+
+    // 我们把吊扇的转速设置会之前的转速, 达到撤销的目的
+    public void undo() {
+        switch (prevSpeed) {
+            case CeilingFan.HIGH:   ceilingFan.high(); break;
+            case CeilingFan.MEDIUM: ceilingFan.medium(); break;
+            case CeilingFan.LOW:    ceilingFan.low(); break;
+            default:                ceilingFan.off(); break;
+        }
+    }
+}
+
+// 关闭吊扇
+public class CeilingFanOffCommand implements Command {
+    CeilingFan ceilingFan;     
+    int prevSpeed;
+    
+    public CeilingFanOffCommand(CeilingFan ceilingFan) {
+        this.ceilingFan = ceilingFan;   
+    }   
+    public void execute() {    
+        prevSpeed = ceilingFan.getSpeed();
+        ceilingFan.off();      
+    } 
+    public void undo() {       
+        switch (prevSpeed) {
+            case CeilingFan.HIGH:   ceilingFan.high(); break;
+            case CeilingFan.MEDIUM: ceilingFan.medium(); break;
+            case CeilingFan.LOW:    ceilingFan.low(); break;
+            default:                ceilingFan.off(); break;
+        }
+    }
+}
+
+public class TV {
+    String location;
+    int channel;
+
+    public TV(String location) {
+        this.location = location;
+    }
+
+    public void on() {
+        System.out.println(location + " TV is on");
+    }
+
+    public void off() {
+        System.out.println(location + " TV is off");
+    }
+
+    public void setInputChannel() {
+        this.channel = 3;
+        System.out.println(location + " TV channel is set for DVD");
+    }
+}
+
+public class RemoteLoader {
+
+    public static void main(String[] args) {
+
+        RemoteControl remoteControl = new RemoteControl();
+
+        // 普通的电灯开关(最普通的命令模式)
+        Light light = new Light("Living Room");
+        LightOnCommand lightOn = new LightOnCommand(light);
+        LightOffCommand lightOff = new LightOffCommand(light);
+        remoteControl.setCommand(0, lightOn, lightOff);
+        
+        // 吊扇开关(用状态实现撤销)
+        CeilingFan ceilingFan = new CeilingFan("Living Room");
+        CeilingFanHighCommand ceilingFanHigh = new CeilingFanHighCommand(ceilingFan);
+        CeilingFanOffCommand ceilingFanOff = new CeilingFanOffCommand(ceilingFan);
+        remoteControl.setCommand(1, ceilingFanHigh, ceilingFanOff);
+ 
+        // 电视开关, 使用 lambda 表达式, 不支持 undo()
+        TV tv = new TV("Living Room");
+        remoteControl.setCommand(2, () -> tv.on(), tv.off());
+        
+        // 宏命令模式, 同时开启电灯和吊扇高速和电视, 和同时关闭电灯和吊扇和电视
+        Command[] partyOn = { lightOn, ceilingFanHigh};
+        Command[] partyOff = { lightOff, ceilingFanOff};
+        MacroCommand partyOnMacro = new MacroCommand(partyOn);
+        MacroCommand partyOffMacro = new MacroCommand(partyOff);
+        remoteControl.setCommand(3, partyOnMacro, partyOffMacro);
+
+        System.out.println(remoteControl);
+        System.out.println("--- Pushing Macro On---");
+        remoteControl.onButtonWasPushed(0);
+        System.out.println("--- Pushing Macro Off---");
+        remoteControl.offButtonWasPushed(0);
+    }
+}
+
+```
+
+### 命令模式使用场景
+
+#### 请求队列(如线程池)
+
+命令把一小块计算打包(一个接收者和一组动作), 然后把它作为头筹对象传来传去.   
+即使在一些客户应用创建命令对象很久之后, 计算自身依然可能被调用.  
+事实上, 甚至可以被不用线程调用. 我们可以把这个场景应用到许多应用上  
+比如: 日程安排, 线程池, 以及作业队列
+
+
+想象一个作业队列: 你添加命令到队列的一端, 另一端有一组线程.  
+线程运行以下脚本: 从队列移除命令, 调用其 execute() 方法,  
+等待这个调用完成, 然后丢弃该命令对象, 检索新的命令对象......  
+作业对象类完全从做计算的对象解耦. 这一分钟, 线程可能做财务计算,  
+下一分钟可能从网络检索信息.  
+作业队列对象不关心, 它们只检索命令并调用 exectue() 
+同样, 只要你把对象放进去实现命令模式的队列, 当线程可用时, execute() 方法就会被调用
+
+
+#### 日志请求
+
+如果某些应用需要我们把所有动作都记录在日志中, 并能在系统崩溃后, 通过重新调用这些动作来恢复, 我们可以通过添加两个方法 store(), load(), 命令模式能够支持这一点. 在 JAVA 中我们可以使用对象序列化来实现这些方法
+
+那么这样做呢? 单我们执行命令时, 把历史存储在磁盘中, 一旦出现崩溃, 就重新加载命令对象, 并成批地依次调用它们的 execute() 方法
+
+```plantuml
+@startuml
+
+() 调用者 as invoker
+() Command1 as command1
+() Command2 as command2
+() Command3 as command3
+
+[持久化机器] as store
+
+invoker ..> command1 : 1. execute()
+invoker ..> command2 : 2. execute()
+invoker ..> command3 : 3. execute()
+
+command1 --> store : 存储
+command2 --> store : 存储
+command3 --> store : 存储
+
+@enduml
+```
+
+崩溃后从持久化机器上重建
+
+```plantuml
+@startuml
+
+() 调用者 as invoker
+() Command1 as command1
+() Command2 as command2
+() Command3 as command3
+
+[持久化机器] as store
+
+invoker ..> command1 : 1. execute()
+invoker ..> command2 : 2. execute()
+invoker ..> command3 : 3. execute()
+
+command1 <-- store : 加载
+command2 <-- store : 加载
+command3 <-- store : 加载
+
+@enduml
+```
+

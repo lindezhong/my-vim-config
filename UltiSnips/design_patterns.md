@@ -37,6 +37,16 @@
     > 1. 变量不应该持有具体类的引用 : 如果使用new, 就会持有具体类, 通过使用工厂方法来绕开
     > 2. 类不应该派生自具体类 : 如果派生自具体类, 就会依赖具体类. 派生自一个抽象类/接口
     > 3. 方法不应该覆盖其任何基类的已实现的方法 : 如果覆盖已实现的方法, 那么基类就不是一个真正适合被继承的抽象, 基类中这些已实现的方法, 应该由所有子类共享
+- 最少知识原则: 只和你的密友谈话
+    > 当在你设计一个系统时, 对于任何对象, 豆芽注意它所交互类的数量, 以及它和这些类如何交互  
+    > 这个原则防止我们创建有大量的类在一起的设计, 免得系统一部分的变化会连锁影响到其他部分  
+    > 最少知识原则要求只调用以下范围的方法  
+    > 1. 对象自身  
+    > 2. 作为参数传给方法的对象  
+    > 3. 该方法创建或实例化的任何对象  
+    > 4. 对象的任何组件(成员变量)  
+    >  
+    > 比如 a.getB().getC() 该方式就违反了原则
 
 
 ## 策略模式
@@ -622,6 +632,7 @@ public class PropertyChangeEventMain {
 8. 你可以用任意数目装饰者来包裹一个组件
 9. 装饰者一般对组件的客户是透明的,除非客户依赖于组件的具体类型
 10. 装饰者会导致设计中出现许多小对象,过度使用会让代码变得复杂
+11. 适配器包装一个对象以改变其接口, 装饰者包装一个对象以添加新的行为和责任, 而外观 "包装" 一群对象以简化其接口, 三者代码大体一致单意图不一样
 
 ### 装饰者模式探讨
 
@@ -3013,3 +3024,480 @@ command3 <-- store : 加载
 @enduml
 ```
 
+## 适配器模式
+
+`适配器模式`: 将一个类的接口(对象)转换成客户期望夫人另一个接口(对象). 适配器让原本不兼容的类可合作. 这使得客户从所实现的接口解耦
+
+### 适配器模式要点
+
+1. 适配器不一定只能包装一个类, 存在适配器持有两个或以上要实现不标接口的被适配者的情况
+2. 当你需要使用一个已有的类, 而其接口不符合你的需要, 就用适配器
+3. 适配器改变接口以符合客户的期望
+4. 实现一个适配器可能不需要花什么功夫, 也可能花很多功夫, 视目标接口的大小与复杂度而定
+5. 适配器模式有两种形式: 对象适配器和类适配器. 类适配器需要用到多重继承
+6. 适配器包装一个对象以改变其接口, 装饰者包装一个对象以添加新的行为和责任, 而外观 "包装" 一群对象以简化其接口, 三者代码大体一致单意图不一样
+
+### 适配器模式类图
+
+#### 对象适配器类图
+
+```plantuml
+@startuml
+
+class Client {
+}
+
+note bottom of Client : 客户只看到目标接口
+
+interface Target {
+    request()
+}
+
+class Adapter implements Target {
+    request()
+}
+
+note "适配器实现目标接口" as Target_Adapter_note
+Target_Adapter_note .. Target
+Target_Adapter_note .. Adapter
+
+
+Class Adaptee {
+    speciffcRequest()
+}
+
+Client -> Target
+Adapter -> Adaptee : 适配器和被适配者组合\n所有请求都被委托给被适配者
+
+@enduml
+```
+
+#### 类适配器
+
+```plantuml
+@startuml
+
+class Client {
+}
+
+
+class Target {
+    request()
+}
+
+Class Adaptee {
+    speciffcRequest()
+}
+
+class Adapter extends Target, Adaptee {
+    request()
+}
+
+note bottom of Adapter
+适配器现在继承被适配者和目标类(多重继承)
+而不是用组合来适配被适配者(java无多重继承)
+end note
+
+Client -> Target
+
+@enduml
+```
+
+### 适配器模式大体流程
+
+```plantuml
+@startuml
+
+() 客户 as client
+() 适配器 as adapter
+() 被适配者 as adaptee
+
+client -> adapter : request()
+adapter -> adaptee : translatedRequest()
+
+note top of client : 客户针对目标接口实现
+note bottom of adapter : 适配器实现目标接口, 并持有被适配者的实例
+note top of adapter : 目标接口
+note top of adaptee : 被适配者接口
+
+@enduml
+```
+
+```plantuml
+@startuml
+autonumber
+
+participant 客户 as client
+participant 适配器 as adapter
+participant 被适配者 as adaptee
+
+client -> adapter : 客户通过使用不标接口, 调用适配器的方法, 对适配器做出请求
+adapter -> adaptee : 适配器使用被适配者接口, 把请求翻译成被适配者上的一个或多个调用
+adapter --> client : 客户收到调用接口, 但根本不知道时适配器做翻译
+
+note over of client : 注意, 客户和被适配者解耦了,\n 彼此不知道对方
+
+@enduml
+```
+
+
+### 适配器模式例子
+
+我们需要将火鸡伪装成一个鸭子
+
+```java
+
+// 鸭子接口
+public interface Duck {        
+    // 叫声
+    public void quack();
+    // 飞行
+    public void fly();
+}
+
+// 绿头鸭
+public class MallardDuck implements Duck {
+    public void quack() {
+        System.out.println("Quack");
+    }
+
+    public void fly() {
+        System.out.println("I'm flying");
+    }
+}
+
+// 火鸡
+public interface Turkey {      
+    public void gobble();
+    public void fly();
+} 
+
+// 野生的火鸡
+public class WildTurkey implements Turkey {
+    public void gobble() {
+        System.out.println("Gobble gobble");
+    }
+
+    // 火鸡只会短途飞行
+    public void fly() {
+        System.out.println("I'm flying a short distance");
+    }
+}
+
+// 火鸡适配器, 把火鸡伪装成鸭子
+// 首先需要实现适配类型的接口, 这是你的客户期望看到的接口
+public class TurkeyAdapter implements Duck {
+    // 接下来, 需要取得要适配的对象引用, 者可我们通过构造器得到
+    Turkey turkey;
+
+    public TurkeyAdapter(Turkey turkey) {
+        this.turkey = turkey;
+    }
+
+    // 现在我们需要实现接口中的所有方法, quack() 在类之间的翻译很容易, 只要调用 gobble() 方法
+    public void quack() {
+        turkey.gobble();
+    }
+
+    // 即使两个接口都有 fly() 方法, 火鸡的分析只是短距离冲刺, 不能像鸭子那样长途飞行
+    // 要在 Duck 的 fly() 方法和 Turkey 的 fly() 方法之间形成映射, 我们需要调用 Turkey 的 fly() 方法五次来补足
+    public void fly() {
+        for(int i=0; i < 5; i++) {
+            turkey.fly();
+        }
+    }
+}
+
+// 测试
+public class DuckTestDrive {
+    public static void main(String[] args) {
+        Duck duck = new MallardDuck();
+
+        Turkey turkey = new WildTurkey();
+        Duck turkeyAdapter = new TurkeyAdapter(turkey);
+
+        System.out.println("The Turkey says...");
+        turkey.gobble();
+        turkey.fly();
+
+        System.out.println("\nThe Duck says...");
+        testDuck(duck);
+
+        System.out.println("\nThe TurkeyAdapter says...");
+        testDuck(turkeyAdapter);
+
+    }
+
+    static void testDuck(Duck duck) {
+        duck.quack();
+        duck.fly();
+    }
+}
+
+```
+
+## 外观模式
+
+`外观模式`: 为子系统中的一组接口提供了一个统一的接口. 外观定义了一个更高级的接口, 使得子系统更容易使用.
+
+### 外观模式类图
+
+```plantuml
+@startuml
+
+class Client {}
+
+class Facade {}
+
+package 子系统的类 {
+    class Service1 {}
+    class Service2 {}
+    class Service3 {}
+
+    Service1 -> Service3
+}
+
+Client -right-> Facade
+Facade -down-> Service1
+Facade -down-> Service2
+@enduml
+```
+### 外观模式例子
+
+1. 当你需要简化并统一一个大接口, 或者一个复杂的接口集, 就用外观
+2. 外观将客户从一个复杂子系统解耦
+3. 实现外观需要把外观和子系统组合, 使用委托来执行外观的工作
+4. 你可以为一个子系统实现多个外观
+5. 适配器包装一个对象以改变其接口, 装饰者包装一个对象以添加新的行为和责任, 而外观 "包装" 一群对象以简化其接口, 三者代码大体一致单意图不一样
+
+### 外观模式例子: 家庭影院
+
+你在家里观赏一部电影, 你需要以下几个步骤
+
+1. 打开爆米花机
+2. 开始爆米花
+3. 调暗灯光
+4. 放下屏幕
+5. 打开投影机
+6. 设置投影机输入为流媒体播放器
+7. 把投影机设置在宽屏模式
+8. 打开功放
+9. 设置功放为流媒体输入
+10. 设置功放为环绕音响
+11. 设置功放音量为中(5)
+12. 打开流媒体播放器
+13. 开始放电影
+
+这些涉及到 6个类, 13个动作, 但还有更多,   
+电影结束后, 把这些东西关掉, 你不得不反向地把这一切再过一遍  
+听广播是不是也时这样复杂
+
+```plantuml
+@startuml
+skinparam linetype ortho
+
+class 遥控器  {
+    watchMovie()
+    endMovie()
+}
+
+遥控器 -down-> HomeTheaterFacade : 遥控器是子系统外观的客户
+
+note right of 遥控器
+你的客户代码现在调用家庭影院的外观方法, 而不是子系统的方法
+因此现在我们只要调用一个方法 watchMovie() 
+它会和灯,流媒体播放器,投影机,功放,屏幕,爆米花机等沟通
+end note
+
+class HomeTheaterFacade {
+    watchMovie()
+    endMovie()
+    listenToRadio()
+    endRadio()
+}
+
+package 设备子系统 as system {
+    class Tuner {
+        amplifier
+        
+        on()
+        off()
+        setAm()
+        setFrequency()
+        toString()
+    }
+    
+    class Amplifier {
+        Tuner tuner
+        player
+
+        on()
+        off()
+        ' 设置流媒体播放器
+        setStreamingPlayer()
+        ' 设置立体声
+        setStereoSound()
+        ' 设置环绕声
+        setSurroundSoud()
+        setTuner()
+        setVolume()
+        toString()
+    }
+
+    class StreamingPlayer {
+        amplifier
+
+        on()
+        off()
+        pause()
+        play()
+        setSurroundAudio()
+        setTwoChannelAudio()
+        stop()
+        toString()
+    }
+
+    class Screen {
+        on()
+        off()
+        toString()
+    }
+
+    class PopcornPopper {
+        on()
+        off()
+        pop()
+        toString()
+    }
+
+    class TheaterLights {
+        on()
+        off()
+        dim()
+        toString()
+    }
+
+    class Projector {
+        player
+
+        on()
+        off()
+        tvMode()
+        WideScreenMode()
+        toString()
+    }
+
+    Tuner -> Amplifier
+    Amplifier -> Tuner
+    Amplifier -> StreamingPlayer
+    StreamingPlayer -> Amplifier
+    Projector -> StreamingPlayer
+}
+
+note bottom of system
+外观依然保持子系统可以访问,所以你可以直接使用
+如果你需要子系统类的高阶功能, 它们还是可以使用
+end note
+
+HomeTheaterFacade -down-> Tuner
+HomeTheaterFacade -down-> StreamingPlayer
+HomeTheaterFacade -down-> Screen
+HomeTheaterFacade -down-> PopcornPopper
+HomeTheaterFacade -down-> TheaterLights
+HomeTheaterFacade -down-> Projector
+
+@enduml
+```
+
+```java
+public class HomeTheaterFacade {
+    Amplifier amp;             
+    Tuner tuner;               
+    StreamingPlayer player;    
+    CdPlayer cd;               
+    Projector projector;       
+    TheaterLights lights;      
+    Screen screen;             
+    PopcornPopper popper;      
+  
+    public HomeTheaterFacade(Amplifier amp, 
+                 Tuner tuner,  
+                 StreamingPlayer player,
+                 Projector projector,            
+                 Screen screen,
+                 TheaterLights lights,           
+                 PopcornPopper popper) {         
+ 
+        this.amp = amp;
+        this.tuner = tuner;    
+        this.player = player;  
+        this.projector = projector;     
+        this.screen = screen;  
+        this.lights = lights;  
+        this.popper = popper;  
+    }
+    public void watchMovie(String movie) {
+        System.out.println("Get ready to watch a movie...");
+        popper.on();
+        popper.pop();
+        lights.dim(10);
+        screen.down();
+        projector.on();
+        projector.wideScreenMode();
+        amp.on();
+        amp.setStreamingPlayer(player);
+        amp.setSurroundSound();
+        amp.setVolume(5);
+        player.on();
+        player.play(movie);
+    }
+
+    public void endMovie() {
+        System.out.println("Shutting movie theater down...");
+        popper.off();
+        lights.on();
+        screen.up();
+        projector.off();
+        amp.off();
+        player.stop();
+        player.off();
+    }
+
+    public void listenToRadio(double frequency) {
+        System.out.println("Tuning in the airwaves...");
+        tuner.on();
+        tuner.setFrequency(frequency);
+        amp.on();
+        amp.setVolume(5);
+        amp.setTuner(tuner);
+    }
+
+    public void endRadio() {
+        System.out.println("Shutting down the tuner...");
+        tuner.off();
+        amp.off();
+    }
+}
+
+// 是时候观赏电影了(容易方式)
+public class HomeTheaterTestDrive {
+    public static void main(String[] args) {
+        Amplifier amp = new Amplifier("Amplifier");
+        Tuner tuner = new Tuner("AM/FM Tuner", amp);
+        StreamingPlayer player = new StreamingPlayer("Streaming Player", amp);
+        CdPlayer cd = new CdPlayer("CD Player", amp);
+        Projector projector = new Projector("Projector", player);
+        TheaterLights lights = new TheaterLights("Theater Ceiling Lights");
+        Screen screen = new Screen("Theater Screen");
+        PopcornPopper popper = new PopcornPopper("Popcorn Popper");
+
+        HomeTheaterFacade homeTheater =
+                new HomeTheaterFacade(amp, tuner, player,
+                        projector, screen, lights, popper);
+
+        homeTheater.watchMovie("Raiders of the Lost Ark");
+        homeTheater.endMovie();
+    }
+}
+
+```

@@ -47,6 +47,16 @@
     > 4. 对象的任何组件(成员变量)  
     >  
     > 比如 a.getB().getC() 该方式就违反了原则
+- 好莱坞原则: 不要打电话给(调用)我们, 我们会打电话给(调用)你
+    > 好莱坞原则给我们一种防止 "依赖腐烂" 的方法. "依赖腐烂"的例子如高层组件依赖于低层组件, 低层组件又依赖于高层组件, 而高层组件又依赖于横向组件. 当腐烂蔓延时, 没有人能轻易理解系统是这么设计的  
+    > 有了好莱坞原则, 我们允许低层组件把自己挂钩进系统, 但由高层组件决定和三需要它们, 以及怎样需要它们. 换句话说高层组件对低层组件的态度是 "不要打电话给(调用)我们, 我们会打电话给(调用)你"  
+    > 低层组件经常会最终调用在其继承层次之上定义的方法, 但我们要避免创建低层组件和高层组件之间显式的环状依赖  
+    > 依赖倒置原则(避免使用具体类,尽可能利用抽象)和好莱坞原则(建造框架或组件技巧,以便低层组件可以挂钩进计算中,而不产生高层组件和低层组件的循环依赖)都有解耦的目的,但如何避免设计中的依赖上, 依赖倒置原则的陈诉要强烈和通用得多  
+    > 好莱坞原则例子: [好莱坞原则于模板方法](#好莱坞原则于模板方法)  
+    > 以下设计模式采用了好莱坞原则  
+    > 1. 模板方法模式
+    > 2. 工厂方法
+    > 3. 观察者模式
 
 
 ## 策略模式
@@ -3501,3 +3511,435 @@ public class HomeTheaterTestDrive {
 }
 
 ```
+
+## 模板方法模式
+
+`模板方法模式`: 在一个方法中定义一个算法的骨架, 而把一些步骤延迟到子类. 莫把方法使得子类可以在不改变算法结构的情况下, 红星定义算法的某些步骤.
+
+它是一个把算法算法定义为一组步骤的方法. 这些步骤中的一个或多个被定义为抽象的, 由子类实现
+
+### 模板方法模式要点
+
+1. 模板方法定义了算法的步骤把这些步骤的实现延迟到子类
+2. 模板方法模式为我们提供了一种代码复用的重要技巧
+3. 模板方法的抽象类可以定义具体方法,抽象方法和钩子
+4. 抽象方法由子类实现
+5. 钩子是一种方法, 它在抽象类中不做事或者只做缺省的事情, 但子类可以覆盖它
+6. 为防止子类改变模板方法中的算法, 可以把模板方法声明为 `final`
+7. [好莱坞原则](#好莱坞原则于模板方法)告诉我们, 把决策权放在高层模块中(调用者), 以便决定如何以及和是调用低层模块
+8. 你会在现实世界代码中看到模板方法模式大量使用, 但(任何模式都是)不奥期待它们全都是 "按书本" 设计的
+9. 策略模式和模板方法模式都封装算法, 前者通过组合, 后者通过继承
+10. 工厂方法是模板方法的一个特例
+
+### 模板方法模式类图
+
+```plantuml
+@startuml
+
+abstract AbstractClass {
+    + templateMethod()
+    # {abstract} abstract primitiveOperation1()
+    # {abstract} abstract primitiveOperation2()
+    # hook()
+}
+
+note left of AbstractClass::templateMethod
+AbstractClass (抽象类) 包含模板方法
+
+模板方法用原语操作来实现算法
+它从这些操作的实际实现解耦
+primitiveOperation1();
+primitiveOperation12
+end note
+note "以及模板方法所用到的操作的抽象方法\nprimitiveOperation1\nprimitiveOperation2" as primitiveOperation_note
+primitiveOperation_note .left. AbstractClass::primitiveOperation1
+primitiveOperation_note .left. AbstractClass::primitiveOperation2
+
+note left of AbstractClass::hook
+钩子时一个声明在抽象类中的方法, 但它只给出空的或缺省的实现.
+这个给了子类在变化店 "挂钩进" 算法的能力, 
+如果需要子类也有权忽略钩子
+end note
+
+class ConcreteClass extends AbstractClass {
+    # primitiveOperation1()
+    # primitiveOperation2()
+}
+
+note left of ConcreteClass
+可能由很多 ConcreteClass (忽略钩子的具体类)
+每一个都实现模板方法所需的全部操作
+end note
+
+note right of ConcreteClass
+ConcreteClass实现抽象操作
+当 templateMethod() 需要它们时, 就被调用
+end note
+
+
+class ConcreteWithHookClass extends AbstractClass {
+    # primitiveOperation1()
+    # primitiveOperation2()
+    # hook()
+}
+
+note bottom of ConcreteWithHookClass
+实现钩子的具体类
+end note
+
+@enduml
+```
+
+### 模板方法模式例子: 星巴克煮茶和煮咖啡
+
+在星巴克中煮茶和煮咖啡遵循一以下冲泡法
+
+星巴克咖啡冲泡法
+1. 把水煮沸腾
+2. 用沸水冲泡咖啡
+3. 把咖啡倒进杯子
+4. 加糖和奶
+
+星巴克茶冲泡法
+1. 把水煮沸腾
+2. 用沸水冲浸泡茶叶
+3. 把茶倒进杯子
+4. 加柠檬
+
+我们来扮演 "代码师傅", 编写一些创建咖啡和茶的代码
+
+```java
+// 咖啡
+public class Coffee {
+ 
+    void prepareRecipe() {
+        // 1. 把水煮沸腾
+        boilWater();
+        // 2. 用沸水冲泡咖啡
+        brewCoffeeGrinds();
+        // 3. 把咖啡倒进杯子
+        pourInCup();
+        // 4. 加糖和奶
+        addSugarAndMilk();
+    }   
+ 
+    public void boilWater() {
+        System.out.println("Boiling water");
+    }   
+ 
+    public void brewCoffeeGrinds() {
+        System.out.println("Dripping Coffee through filter");
+    }   
+ 
+    public void pourInCup() {
+        System.out.println("Pouring into cup");
+    }   
+ 
+    public void addSugarAndMilk() {
+        System.out.println("Adding Sugar and Milk");
+    }   
+}
+
+// 茶叶
+public class Tea {
+
+    void prepareRecipe() {
+        // 1. 把水煮沸腾
+        boilWater();
+        // 2. 用沸水冲浸泡茶叶
+        steepTeaBag();
+        // 3. 把茶倒进杯子
+        pourInCup();
+        // 4. 加柠檬
+        addLemon();
+    }
+
+    public void boilWater() {
+        System.out.println("Boiling water");
+    }
+
+    public void steepTeaBag() {
+        System.out.println("Steeping the tea");
+    }
+
+    public void addLemon() {
+        System.out.println("Adding Lemon");
+    }
+
+    public void pourInCup() {
+        System.out.println("Pouring into cup");
+    }
+}
+```
+
+比较代码发现步骤1,3 一致, 2, 4 不一样所以抽象为模板方法类图如下
+
+请注意我们
+1. 步骤2 用沸水冲泡咖啡 和 把咖啡倒进杯子 我们统称为酿造(brew)
+2. 步骤4 加柠檬 和 加糖和奶 我们统一称为添加调味(addCondiments)
+3. 添加调味我们添加钩子函数 customerWantsCondiments (消费者想要调料) 来判断是否需要调料
+
+
+
+```plantuml
+@startuml
+
+abstract CaffeineBeverage {
+    + prepareRecipe()
+    - boilWater()
+    # {abstract} abstract brew()
+    - pourInCup()
+    # {abstract} abstract addCondiments()
+    # customerWantsCondiments()
+}
+
+note top of CaffeineBeverage : 咖啡因饮料抽象类
+note left of CaffeineBeverage::prepareRecipe
+咖啡因饮料冲泡模板方法固定流程为
+1. 把水煮沸腾 boilWater()
+2. 酿造饮料 brew()
+3. 把饮料倒进杯子 pourInCup()
+4. 如果消费者想要调料 customerWantsCondiments(为钩子函数默认为需要) 则 添加调味 addCondiments()
+end note
+
+class Coffee extends CaffeineBeverage {
+    # brew()
+    # addCondiments()
+}
+
+class TeaWithHook extends CaffeineBeverage {
+    # brew()
+    # addCondiments()
+    # customerWantsCondiments()
+}
+
+note left of TeaWithHook::customerWantsCondiments
+茶叶重载钩子函数customerWantsCondiments(消费者想要调料)
+去询问消费者是否需要
+如果不重载比如咖啡则默认需要
+end note
+
+note "咖啡和茶叶特定方法留在子类中\n酿造饮料 brew()\n添加调味 addCondiments()" as CaffeineBeverage_note
+CaffeineBeverage_note .up. TeaWithHook
+CaffeineBeverage_note .up. Coffee
+
+' 控制布局无意义
+TeaWithHook .right[hidden]. Coffee
+
+@enduml
+```
+
+代码如下
+
+```java
+public abstract class CaffeineBeverage {
+ 
+    final void prepareRecipe() {
+        // 1. 把水煮沸腾
+        boilWater();
+        // 2. 酿造饮料
+        brew();
+        // 3. 把饮料倒进杯子
+        pourInCup();
+        // 4.  如果消费者想要调料 customerWantsCondiments(为钩子函数默认为需要) 则 添加调味 addCondiments()
+        if (customerWantsCondiments()) {
+            addCondiments();
+        }   
+    }   
+ 
+    abstract void brew();
+ 
+    abstract void addCondiments();
+ 
+    void boilWater() {
+        System.out.println("Boiling water");
+    }   
+ 
+    void pourInCup() {
+        System.out.println("Pouring into cup");
+    }   
+ 
+    boolean customerWantsCondiments() {
+        return true;
+    }   
+}
+
+public class Coffee extends CaffeineBeverage {
+    public void brew() {
+        System.out.println("Dripping Coffee through filter");
+    }
+    public void addCondiments() {
+        System.out.println("Adding Sugar and Milk");
+    }
+}
+
+import java.io.*;
+
+public class TeaWithHook extends CaffeineBeverage {
+
+    public void brew() {
+        System.out.println("Steeping the tea");
+    }
+
+    public void addCondiments() {
+        System.out.println("Adding Lemon");
+    }
+
+    public boolean customerWantsCondiments() {
+
+        String answer = getUserInput();
+
+        if (answer.toLowerCase().startsWith("y")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private String getUserInput() {
+        // get the user's response
+        String answer = null;
+
+        System.out.print("Would you like lemon with your tea (y/n)? ");
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            answer = in.readLine();
+        } catch (IOException ioe) {
+            System.err.println("IO error trying to read your answer");
+        }
+        if (answer == null) {
+            return "no";
+        }
+        return answer;
+    }
+}
+
+```
+
+### 好莱坞原则于模板方法
+
+模板方法模式符合好莱坞原则, 以 茶叶,咖啡冲泡法为例
+
+```plantuml
+@startuml
+
+
+abstract CaffeineBeverage {
+    + prepareRecipe()
+    - boilWater()
+    # {abstract} abstract brew()
+    - pourInCup()
+    # {abstract} abstract addCondiments()
+    # customerWantsCondiments()
+}
+note left of CaffeineBeverage
+CaffeineBeverage 是我们的高层组件. 它控制冲泡的算法
+只有在需要子类实现某个方法时, 才调用子类
+end note
+
+note right of CaffeineBeverage
+饮料的客户依赖 CaffeineBeverage 抽象
+而不依赖具体的 Tea 或 Coffee
+这减少了整个系统中的依赖
+end note
+
+class Coffee extends CaffeineBeverage {
+    # brew()
+    # addCondiments()
+}
+
+class TeaWithHook extends CaffeineBeverage {
+    # brew()
+    # addCondiments()
+    # customerWantsCondiments()
+}
+
+note "子类只简单用来提供实现细节\n如果没先被'调用'Tea和Coffee绝不会直接调用抽象类" as CaffeineBeverage_note
+CaffeineBeverage_note .up. Coffee
+CaffeineBeverage_note .up. TeaWithHook
+
+
+@enduml
+```
+
+### 模板方法模式例子: JAVA排序
+
+java  Arrays排序数组,虽然没按照要求实现一个算法并让子类通过步骤的实现,但正如我们知道的, 真实情况中的模式不可能和教科书中的一致
+
+这个排序实现看起来更像策略模式, 但 Arrays 为 sort 实现的算法并不完整, 所以它更像模板方法
+
+```java
+class Arrays {
+    public static void sort(Object[] a) {
+        Object[] aux = (Object[])a.clone();
+        mergeSort(aux, a, 0, a.length, 0);
+    }
+
+    public void static mergeSort(Object[] src, Object[] dest[] int low, int high, int off) {
+        for (int i = low; i < high; i++) {
+            // 我们需要实现compareTo()方法, 以 "填充" 模板方法
+            for (int j = i; j < low && ((Comparable)desc[j-1]).compareTo(((Comparable)desc[j])) > 0; j--) {
+                // 具体方法, 已经在数组类中定义
+                swap(dest, j, j-1);
+            }
+        }
+    }
+}
+
+public class Duck implements Comparable<Duck> {
+    String name;
+    int weight;
+
+    public Duck(String name, int weight) {
+        this.name = name;
+        this.weight = weight;
+    }
+
+    public String toString() {
+        return name + " weighs " + weight;
+    }
+
+    public int compareTo(Duck otherDuck) {
+
+
+        if (this.weight < otherDuck.weight) {
+            return -1;
+        } else if (this.weight == otherDuck.weight) {
+            return 0;
+        } else { // this.weight > otherDuck.weight
+            return 1;
+        }
+    }
+} 
+
+public class DuckSortTestDrive {
+
+    public static void main(String[] args) {
+        Duck[] ducks = {
+                        new Duck("Daffy", 8),
+                        new Duck("Dewey", 2),
+                        new Duck("Howard", 7),
+                        new Duck("Louie", 2),
+                        new Duck("Donald", 10),
+                        new Duck("Huey", 2)
+         };
+
+        System.out.println("Before sorting:");
+        display(ducks);
+
+        Arrays.sort(ducks);
+
+        System.out.println("\nAfter sorting:");
+        display(ducks);
+    }
+
+    public static void display(Duck[] ducks) {
+        for (Duck d : ducks) {
+            System.out.println(d);
+        }
+    }
+}
+
+```
+

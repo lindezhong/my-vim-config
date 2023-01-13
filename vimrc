@@ -182,7 +182,6 @@ let g:coc_global_extensions = [
             \ 'coc-java-debug',
             \ 'coc-java-lombok',
             \ 'coc-pyright',
-            \ 'coc-jedi',
             \ 'coc-tsserver',
             \ 'coc-clangd'
             \ ]

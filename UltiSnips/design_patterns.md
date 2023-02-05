@@ -17,17 +17,22 @@
 ### OO原则/设计原则
 
 - 封装变化: 识别应用中变化的方面,把它们和不变的方面分开
+
 - 针对接口编程,而不是针对实现编程
     > 针对接口编程真正的意思是针对超类型编程.  
     > 接口一词在这里有多个含义.  接口是一个概念也是java的一个构造.  针对接口编程不必真的使用java的接口.  
     > 要点是通过针对超类型编程来利用多态,这样实际的运行时对象不会被锁定到代码  
+
 - 优先使用组合而不是继承(组合优于继承)
     > 如果我们依靠继承,那么我们的行为只能在编译时静态地决定.  
     > 换句话说,我们只得到超类给我们的行为或者覆盖它们.  
     > 使用组合,我们可以用我们喜欢的方式在运行时混合与匹配
+
 - 尽量做到交互对象之间的松耦合设计
+
 - 开放-关闭原则: 类应该对扩展开放(继承,组合,委托等),但对修改关闭(无需修改已有的代码)
     > 我们的目标是允许类容易扩展以容纳新的行为,而不用修改已有的代码
+
 - 依赖倒置原则: 依赖抽象, 不依赖具体类, 对于实例化方面可以使用 [工厂方法](#工厂方法)
     > 这个原则很像 '针对接口编程,而不是针对实现编程' .  
     > 但该原则更强调抽象, 该原则说明, 高层组件不应该依赖于低层组件  
@@ -37,6 +42,7 @@
     > 1. 变量不应该持有具体类的引用 : 如果使用new, 就会持有具体类, 通过使用工厂方法来绕开
     > 2. 类不应该派生自具体类 : 如果派生自具体类, 就会依赖具体类. 派生自一个抽象类/接口
     > 3. 方法不应该覆盖其任何基类的已实现的方法 : 如果覆盖已实现的方法, 那么基类就不是一个真正适合被继承的抽象, 基类中这些已实现的方法, 应该由所有子类共享
+
 - 最少知识原则: 只和你的密友谈话
     > 当在你设计一个系统时, 对于任何对象, 豆芽注意它所交互类的数量, 以及它和这些类如何交互  
     > 这个原则防止我们创建有大量的类在一起的设计, 免得系统一部分的变化会连锁影响到其他部分  
@@ -47,6 +53,7 @@
     > 4. 对象的任何组件(成员变量)  
     >  
     > 比如 a.getB().getC() 该方式就违反了原则
+
 - 好莱坞原则: 不要打电话给(调用)我们, 我们会打电话给(调用)你
     > 好莱坞原则给我们一种防止 "依赖腐烂" 的方法. "依赖腐烂"的例子如高层组件依赖于低层组件, 低层组件又依赖于高层组件, 而高层组件又依赖于横向组件. 当腐烂蔓延时, 没有人能轻易理解系统是这么设计的  
     > 有了好莱坞原则, 我们允许低层组件把自己挂钩进系统, 但由高层组件决定和三需要它们, 以及怎样需要它们. 换句话说高层组件对低层组件的态度是 "不要打电话给(调用)我们, 我们会打电话给(调用)你"  
@@ -57,6 +64,11 @@
     > 1. 模板方法模式
     > 2. 工厂方法
     > 3. 观察者模式
+
+- 单一责任原则: 一个类应该自由一个变化的原因
+    > 类的每个责任都是一个潜在变化的区域. 超过一个责任,意味着超过一个变化的区域.  
+    > 这个原则指导我们要让每个类保持单一责任  
+    > `内聚`: 当一个模块或一个类围绕一组相关功能来设计时, 我们说它具有高内聚; 反之, 当它围绕一组相关不功能设计时, 我们说它具体有低内聚  
 
 
 ## 策略模式
@@ -3514,7 +3526,7 @@ public class HomeTheaterTestDrive {
 
 ## 模板方法模式
 
-`模板方法模式`: 在一个方法中定义一个算法的骨架, 而把一些步骤延迟到子类. 莫把方法使得子类可以在不改变算法结构的情况下, 红星定义算法的某些步骤.
+`模板方法模式`: 在一个方法中定义一个算法的骨架, 而把一些步骤延迟到子类. 莫把方法使得子类可以在不改变算法结构的情况下, 重新定义算法的某些步骤.
 
 它是一个把算法算法定义为一组步骤的方法. 这些步骤中的一个或多个被定义为抽象的, 由子类实现
 
@@ -3942,4 +3954,926 @@ public class DuckSortTestDrive {
 }
 
 ```
+
+
+## 迭代器模式
+
+`迭代器模式`: 提供一种方式, 可以访问一个聚合对象中的元素而又不暴露其潜在的表示  
+`外部迭代器`: 客户通过调用next()取得下一个元素, 以此控制遍历  
+`内部迭代器`: 内部迭代器由迭代器自己控制, 在这种情况下, 因为迭代器在元素之间游走, 你不得不告诉迭代器在游走时对这些元素做什么时期, 也就是说,你要有办法把操作传递给迭代器
+
+
+这个模式给你了一种遍历聚合元素而又不必知道事物在底层如何表达的方式.
+
+迭代器模式拿走了遍历元素的责任, 把它交给迭代器对象, 而不是聚合对象
+
+
+### 迭代器模式类图
+
+```plantuml
+@startuml
+
+interface Aggregate<T> {
+    Iterator createIterator()
+}
+
+note top of Aggregate
+聚合由一个共同的接口, 这对客户来说是很方便
+它把客户从集合对象的实现解耦
+end note
+
+class ConcreteAggregate<T> implements Aggregate {
+    Iterator createIterator()
+}
+
+note bottom of ConcreteAggregate
+ConcreteAggregate 有一个对象的集合,
+并实现一个方法, 该方法返回集合的迭代器
+每一个 ConcreteAggregate 负责实例化一个能够遍历其对象集合的 ConcreteIterator
+end note
+
+ConcreteAggregate -right--> ConcreteIterator
+
+
+class Clinet {
+
+}
+
+Clinet -left----> Aggregate
+Clinet -right----> Iterator
+
+interface Iterator<T> {
+    boolean hasNext()
+    T next()
+    boolean remove()
+}
+
+note top of Iterator
+Iterator接口提供了所有迭代器都必须实现的接口
+它提供了一个遍历集合元素的方法集
+在这里, 我们用的是java.util.Iterator
+如果你不想用Java的迭代器接口可以创建自己的接口
+end note
+
+class ConcreteIterator<T> implements Iterator {
+    boolean hasNext()
+    T next()
+    boolean remove()
+}
+
+note bottom of ConcreteIterator
+ConcreteIterator 负责管理当前遍历的位置
+end note
+
+note "迭代器模式的类图于工厂模式的类图相似" as all_note
+
+@enduml
+```
+
+### 迭代器模式要点
+
+1. 迭代器允许访问聚合的元素, 而不暴露其内部结构
+2. 迭代器将遍历聚合的工作取出并封装进一个对象
+3. 当使用迭代器时, 在支持遍历数据的操作方面,我们减轻了聚合的责任
+4. 迭代器提供了一个遍历聚合项的共同接口, 当我们编码使用聚项时,就可以使用多态
+5. Iterable接口让我们能够获取迭代器和时哦嗯Java的 enchaced for loop
+6. 我们应该致力于只为一个类分配一个责任
+
+### 迭代器模式例子:餐厅菜单
+
+对象村餐厅和对象村煎饼屋合并, 现在我们可以在同一个地方, 享用煎饼屋美味的煎饼早餐, 以及好吃的餐厅午餐.  
+虽然煎饼屋和餐厅都同意使用MenuItem(菜单项),但是煎饼屋使用 ArrayList<MenuItem> 实现菜单, 餐厅使用 MenuItem[] 实现菜单  
+在遍历打印煎饼屋和餐厅的菜单时候就需要实现两个不同的循环
+
+我们可以封装遍历吗?
+1. 要遍历早餐项, 我们用ArrayList的size()和get()方法
+    > for (intt i = 0; i < breakfastItems.size(); i++) {  
+    >     MenuItem menuItem = breakfastItems.get(i);  
+    > }  
+
+2. 要遍历无餐项, 我们用数组的length字段以及数组下标标记
+    > for (intt i = 0; i < lunchItems.size(); i++) {  
+    >     MenuItem menuItem = lunchItems[]i];  
+    > }  
+
+3. 现在我们创建一个对象, 我们称为迭代器(Iterator), 它封装遍历对象集合的方式, 我们在 ArrayList 上试试
+    > Iterator iterator = breakfastMenu.createIterator();  
+    > while(iterator.hasNext()) {  
+    >    MenuItem menuItem = iterator.next();  
+    > }  
+
+4. 在数组上也试试
+    > Iterator iterator = lunchMenu.createIterator();  
+    > while(iterator.hasNext()) {  
+    >    MenuItem menuItem = iterator.next();  
+    > }  
+
+代码如下:
+
+```java
+
+// 菜单项
+public class MenuItem {
+    String name;
+    String description;
+    boolean vegetarian;
+    double price;
+ 
+    public MenuItem(String name,    
+                    String description,             
+                    boolean vegetarian,             
+                    double price)                   
+    {
+        this.name = name;      
+        this.description = description; 
+        this.vegetarian = vegetarian;   
+        this.price = price;    
+    }
+  
+    public String getName() {
+        return name;
+    }
+  
+    public String getDescription() {
+        return description;    
+    }
+    public double getPrice() {
+        return price;
+    }
+
+    public boolean isVegetarian() {
+        return vegetarian;
+    }
+}
+
+// 菜单
+public interface Menu {
+    public Iterator<MenuItem> createIterator();
+}
+
+
+import java.util.ArrayList;    
+import java.util.Iterator;     
+    
+// 煎饼屋菜单实现
+public class PancakeHouseMenu implements Menu {
+    ArrayList<MenuItem> menuItems;  
+ 
+    public PancakeHouseMenu() {
+        menuItems = new ArrayList<MenuItem>();
+        addItem("K&B's Pancake Breakfast", "Pancakes with scrambled eggs, and toast", true, 2.99);
+        addItem("Regular Pancake Breakfast", "Pancakes with fried eggs, sausage", false,2.99);
+        addItem("Blueberry Pancakes", "Pancakes made with fresh blueberries, and blueberry syrup", true, 3.49);\
+        addItem("Waffles", "Waffles, with your choice of blueberries or strawberries", true, 3.59);
+    }
+
+    public void addItem(String name, String description, boolean vegetarian, double price) {
+        MenuItem menuItem = new MenuItem(name, description, vegetarian, price);
+        menuItems.add(menuItem);
+    }
+
+    public ArrayList<MenuItem> getMenuItems() {
+        return menuItems;
+    }
+
+    public Iterator<MenuItem> createIterator() {
+        return menuItems.iterator();
+    }
+
+}
+
+import java.util.Iterator;
+
+// 餐厅菜单
+public class DinerMenu implements Menu {
+    static final int MAX_ITEMS = 6;
+    int numberOfItems = 0;
+    MenuItem[] menuItems;
+
+    public DinerMenu() {
+        menuItems = new MenuItem[MAX_ITEMS];
+
+        addItem("Vegetarian BLT", "(Fakin') Bacon with lettuce & tomato on whole wheat", true, 2.99);
+        addItem("BLT", "Bacon with lettuce & tomato on whole wheat", false, 2.99);
+        addItem("Soup of the day", "Soup of the day, with a side of potato salad", false, 3.29);
+        addItem("Hotdog", "A hot dog, with saurkraut, relish, onions, topped with cheese", false, 3.05);
+        addItem("Steamed Veggies and Brown Rice", "Steamed vegetables over brown rice", true, 3.99);
+        addItem("Pasta", "Spaghetti with Marinara Sauce, and a slice of sourdough bread", true, 3.89);
+    }
+
+    public void addItem(String name, String description, boolean vegetarian, double price) {
+        MenuItem menuItem = new MenuItem(name, description, vegetarian, price);
+        if (numberOfItems >= MAX_ITEMS) {
+            System.err.println("Sorry, menu is full!  Can't add item to menu");
+        } else {
+            menuItems[numberOfItems] = menuItem;
+            numberOfItems = numberOfItems + 1;
+        }
+    }
+
+    public MenuItem[] getMenuItems() {
+        return menuItems;
+    }
+
+    public Iterator<MenuItem> createIterator() {
+        // 返回餐厅菜单迭代器
+        return new DinerMenuIterator(menuItems);
+        //return new AlternatingDinerMenuIterator(menuItems);
+    }
+
+    // other menu methods here
+}
+
+import java.util.Iterator;
+
+// 餐厅菜单迭代器
+public class DinerMenuIterator implements Iterator<MenuItem> {
+    MenuItem[] list;
+    int position = 0;
+
+    public DinerMenuIterator(MenuItem[] list) {
+        this.list = list;
+    }
+
+    public MenuItem next() {
+        MenuItem menuItem = list[position];
+        position = position + 1;
+        return menuItem;
+    }
+
+    public boolean hasNext() {
+        if (position >= list.length || list[position] == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public void remove() {
+        if (position <= 0) {
+            throw new IllegalStateException
+                ("You can't remove an item until you've done at least one next()");
+        }
+        if (list[position-1] != null) {
+            for (int i = position-1; i < (list.length-1); i++) {
+                list[i] = list[i+1];
+            }
+            list[list.length-1] = null;
+        }
+    }
+
+}
+
+import java.util.List;
+ 
+public class Waitress { 
+    Menu pancakeHouseMenu;
+    Menu dinerMenu;
+ 
+    public Waitress(Menu pancakeHouseMenu, Menu dinerMenu) { 
+        this.pancakeHouseMenu = pancakeHouseMenu;
+        this.dinerMenu = dinerMenu;
+    } 
+      
+    // implicit iteration
+    // 打印合并后的餐厅菜单项目
+    public void printMenu() { 
+        // 未使用迭代器时候需要分别打印
+        List<MenuItem> breakfastItems = ((PancakeHouseMenu) pancakeHouseMenu).getMenuItems();
+        for (int i = 0; i < breakfastItems.size(); i++) { 
+            printMenuItem(breakfastItems.get(i));
+        } 
+          
+        MenuItem[] lunchItems = ((DinerMenu) dinerMenu).getMenuItems();
+        for (int i = 0; lunchItems.length; i++) { 
+            printMenuItem(lunchItems[i]);
+        } 
+
+        // 使用迭代器后统一打印
+        Iterator<MenuItem> pancakeIterator = pancakeHouseMenu.createIterator();
+        Iterator<MenuItem> dinerIterator = dinerMenu.createIterator();
+
+        System.out.println("MENU\n----\nBREAKFAST");
+        printMenu(pancakeIterator);
+        System.out.println("\nLUNCH");
+        printMenu(dinerIterator);
+    }
+
+      
+    public void printMenuItem(MenuItem menuItem) { 
+        System.out.print(menuItem.getName() + ", ");
+        System.out.print(menuItem.getPrice() + " -- ");
+        System.out.println(menuItem.getDescription());
+    }
+
+    private void printMenu(Iterator<MenuItem> iterator) {
+        while (iterator.hasNext()) {
+            MenuItem menuItem = iterator.next();
+            System.out.print(menuItem.getName() + ", ");
+            System.out.print(menuItem.getPrice() + " -- ");
+            System.out.println(menuItem.getDescription());
+        }
+    }
+
+
+}
+```
+
+```plantuml
+@startuml
+
+interface Menu {
+    createIterator()
+}
+
+class PancakeHouseMenu implements Menu {
+    List<MenuItem> menuItems
+
+    createIterator()
+}
+
+note bottom of PancakeHouseMenu
+煎饼屋菜单
+end note
+
+class DinerMenu implements Menu {
+    MenuItem[] menuItems
+
+    createIterator()
+}
+
+note bottom of DinerMenu
+餐厅菜单
+end note
+
+class Waitress {
+    printMenu()
+}
+
+note top of Waitress : 招待员只关心 Menu和Iterator
+
+
+interface Iterator {
+    hasNext()
+    next()
+    remove()
+}
+
+class PancakeHouseMenuIterator implements Iterator {
+    hasNext()
+    next()
+    remove()
+}
+
+note bottom of PancakeHouseMenuIterator
+煎饼屋菜单的迭代器使用java.util提供的 ArrayList 迭代器
+不再使用这个类
+end note
+
+class DinerMenuIterator implements Iterator {
+    hasNext()
+    next()
+    remove()
+}
+
+note bottom of DinerMenuIterator
+餐厅菜单迭代器
+end note
+
+Waitress -left--> Menu
+Waitress -right--> Iterator
+
+@enduml
+```
+
+## 组合模式
+
+`组合模式`: 允许你将对象组合成树形结构来表现 部分-整体 层次结构. 组合让客户可以统一处理 个别对象(叶子节点) 和 对象组合 (非叶子节点)
+
+组合模式允许我们以树的形式创建对象结构, 树的节点包含对象组合和个别对象
+
+使用组合结构, 我们可以对组合和个个别对象应用同样的操作. 换句话说, 在大多数情况下我们可以忽略对象组合和个别对象之间的差别
+
+
+### 组合模式类图
+
+```plantuml
+@startuml
+
+
+class Client {
+
+}
+
+note top of Client
+Client 使用 Component 接口来奥在组合中的对象
+end note
+
+abstract class Component {
+    operation()
+    add(Component component)
+    remove(Component component)
+    getChild(int i)
+}
+
+note top of Component
+Component 为组合中的所有对象定义一个接口, 包括 组合 和 叶子
+Component 可能为 add(), remove(), getChild() 以及它的操作实现缺省行为(比如抛出异常)
+end note
+
+class Left extends Component {
+    operation()
+}
+
+note bottom of Left
+1. 叶子节点也继承像add(),remove(),getChild()这样的方法,这些方法对叶子节点不一定有意义
+2. 叶子节点没有孩子节点
+3. 通过实现 Composite 支持的操作, 叶子为 Composite 内的元素定义行为
+end note
+
+class Composite extends Component {
+    List<Component> childs
+
+    operation()
+    add(Component component)
+    remove(Component component)
+    getChild(int i)
+}
+
+note bottom of Composite
+Composite的角色是定义有孩子的组件的行为
+Composite也实现叶子相关的操作. 主要其中一些操作可能对 Composite没有意义,因此这个情况下可能会产生异常
+end note
+
+Client -right--> Component
+
+Composite --> Component
+
+@enduml
+```
+
+### 组合模式要点
+
+1. 组合模式违反了单一责任原则, 它是用单一责任原则来换取透明性,即通过允许组件接口包含孩子的管理操作和叶子操作,使得客户可以统一地对待组合和叶子,因此客户来说一个元素是组合还是叶子节点,对于客户来说是透明的
+2. 组合模式允许客户统一地处理组合和个别对象
+3. 组合结构内的任意对象称为组件. 组件可以是其他组合或者叶子
+4. 实现组合模式有许多设计上的折衷. 你要根据需要平衡透明和安全
+
+### 组合模式例子: 餐厅菜单
+
+一家餐厅的菜单中存在子菜单(为一颗树), 大概结构如下
+
+意思时如果我们有了树形结构的菜单,子菜单可能还有子子菜单以及菜单项, 那么任何菜单都是一个 '组合' , 因为它可以包含其他菜单和菜单项. 个别对象就是菜单项, 它们不持有其他对象
+
+
+```plantuml
+@startuml
+
+() 所有菜单
+() 煎饼屋菜单
+() 餐厅菜单
+
+() 煎饼屋菜单1
+() 煎饼屋菜单2
+() 煎饼屋菜单3
+
+() 餐厅菜单1
+() 餐厅菜单2
+() 餐厅菜单3
+
+() 甜点菜单
+() 甜点菜单1
+() 甜点菜单2
+() 甜点菜单3
+
+所有菜单 --> 煎饼屋菜单
+所有菜单 --> 餐厅菜单
+
+煎饼屋菜单 --> 煎饼屋菜单1
+煎饼屋菜单 --> 煎饼屋菜单2
+煎饼屋菜单 --> 煎饼屋菜单3
+
+餐厅菜单 --> 餐厅菜单1
+餐厅菜单 --> 餐厅菜单2
+餐厅菜单 --> 餐厅菜单3
+餐厅菜单 --> 甜点菜单
+
+甜点菜单 --> 甜点菜单1
+甜点菜单 --> 甜点菜单2
+甜点菜单 --> 甜点菜单3
+@enduml
+```
+类图如下
+
+```plantuml
+@startuml
+
+class Waitress {
+
+}
+
+note top of Waitress : 服务员
+
+abstract class MenuComponent {
+    getName()
+    getDescription()
+    getPrice()
+    isVegetarian()
+    print()
+    add(MenuComponent component)
+    remove(MenuComponent component)
+    getChild(int i)
+}
+
+note top of MenuComponent : 菜单组件
+
+class MenuItem extends MenuComponent {
+    getName()
+    getDescription()
+    getPrice()
+    isVegetarian()
+    print()
+}
+
+note bottom of MenuItem : 菜单项(具体的菜名)
+
+class Menu extends MenuComponent {
+    getName()
+    getDescription()
+    print()
+    add(MenuComponent component)
+    remove(MenuComponent component)
+    getChild(int i)
+}
+
+note bottom of Menu : 菜单包含一系列菜
+
+
+Waitress -right--> MenuComponent
+
+@enduml
+```
+
+代码如下
+
+```java
+import java.util.*;
+  
+public class CompositeIterator implements Iterator<MenuComponent> {
+    Stack<Iterator<MenuComponent>> stack = new Stack<Iterator<MenuComponent>>();
+   
+    public CompositeIterator(Iterator<MenuComponent> iterator) {
+        stack.push(iterator);
+    }   
+   
+    public MenuComponent next() {
+        if (hasNext()) {
+            Iterator<MenuComponent> iterator = stack.peek();
+            MenuComponent component = iterator.next();
+            stack.push(component.createIterator());
+            return component;
+        } else {
+            return null;
+        }
+    }   
+  
+    public boolean hasNext() {
+        if (stack.empty()) {
+            return false;
+        } else {
+            Iterator<MenuComponent> iterator = stack.peek();
+            if (!iterator.hasNext()) {
+                stack.pop();
+                return hasNext();
+            } else {
+                return true;
+            }
+        }
+    }
+
+    /*
+     * No longer needed as of Java 8
+     * 
+     * (non-Javadoc)
+     * @see java.util.Iterator#remove()
+     *
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
+    */
+}
+
+import java.util.Iterator;
+
+public class NullIterator implements Iterator<MenuComponent> {
+
+    public MenuComponent next() {
+        return null;
+    }
+
+    public boolean hasNext() {
+        return false;
+    }
+
+    /*
+     * No longer needed as of Java 8
+     *
+     * (non-Javadoc)
+     * @see java.util.Iterator#remove()
+     *
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
+    */
+}
+
+import java.util.*;
+
+public abstract class MenuComponent {
+
+    public void add(MenuComponent menuComponent) {
+        throw new UnsupportedOperationException();
+    }
+    public void remove(MenuComponent menuComponent) {
+        throw new UnsupportedOperationException();
+    }
+    public MenuComponent getChild(int i) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+    public String getDescription() {
+        throw new UnsupportedOperationException();
+    }
+    public double getPrice() {
+        throw new UnsupportedOperationException();
+    }
+    public boolean isVegetarian() {
+        throw new UnsupportedOperationException();
+    }
+
+    public abstract Iterator<MenuComponent> createIterator();
+
+    public void print() {
+        throw new UnsupportedOperationException();
+    }
+}
+
+
+import java.util.Iterator;
+
+public class MenuItem extends MenuComponent {
+
+    String name;
+    String description;
+    boolean vegetarian;
+    double price;
+
+    public MenuItem(String name,
+                    String description,
+                    boolean vegetarian,
+                    double price)
+    {
+        this.name = name;
+        this.description = description;
+        this.vegetarian = vegetarian;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public boolean isVegetarian() {
+        return vegetarian;
+    }
+
+    public Iterator<MenuComponent> createIterator() {
+        return new NullIterator();
+    }
+
+    public void print() {
+        System.out.print("  " + getName());
+        if (isVegetarian()) {
+            System.out.print("(v)");
+        }
+        System.out.println(", " + getPrice());
+        System.out.println("     -- " + getDescription());
+    }
+
+}
+
+
+import java.util.Iterator;
+import java.util.ArrayList;
+
+public class Menu extends MenuComponent {
+    Iterator<MenuComponent> iterator = null;
+    ArrayList<MenuComponent> menuComponents = new ArrayList<MenuComponent>();
+    String name;
+    String description;
+
+    public Menu(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    public void add(MenuComponent menuComponent) {
+        menuComponents.add(menuComponent);
+    }
+
+    public void remove(MenuComponent menuComponent) {
+        menuComponents.remove(menuComponent);
+    }
+
+    public MenuComponent getChild(int i) {
+        return menuComponents.get(i);
+    }
+
+        public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+
+    public Iterator<MenuComponent> createIterator() {
+        if (iterator == null) {
+            iterator = new CompositeIterator(menuComponents.iterator());
+        }
+        return iterator;
+    }
+
+    public void print() {
+        System.out.print("\n" + getName());
+        System.out.println(", " + getDescription());
+        System.out.println("---------------------");
+
+        Iterator<MenuComponent> iterator = menuComponents.iterator();
+        while (iterator.hasNext()) {
+            MenuComponent menuComponent = iterator.next();
+            menuComponent.print();
+        }
+    }
+}
+
+
+import java.util.Iterator;
+
+public class Waitress {
+    MenuComponent allMenus;
+
+    public Waitress(MenuComponent allMenus) {
+        this.allMenus = allMenus;
+    }
+
+    public void printMenu() {
+        allMenus.print();
+    }
+
+    public void printVegetarianMenu() {
+        Iterator<MenuComponent> iterator = allMenus.createIterator();
+
+        System.out.println("\nVEGETARIAN MENU\n----");
+        while (iterator.hasNext()) {
+            MenuComponent menuComponent = iterator.next();
+            try {
+                if (menuComponent.isVegetarian()) {
+                    menuComponent.print();
+                }
+            } catch (UnsupportedOperationException e) {}
+        }
+    }
+}
+
+
+
+public class MenuTestDrive {
+    public static void main(String args[]) {
+
+        MenuComponent pancakeHouseMenu =
+            new Menu("PANCAKE HOUSE MENU", "Breakfast");
+        MenuComponent dinerMenu =
+            new Menu("DINER MENU", "Lunch");
+        MenuComponent cafeMenu =
+            new Menu("CAFE MENU", "Dinner");
+        MenuComponent dessertMenu =
+            new Menu("DESSERT MENU", "Dessert of course!");
+
+        MenuComponent allMenus = new Menu("ALL MENUS", "All menus combined");
+
+        allMenus.add(pancakeHouseMenu);
+        allMenus.add(dinerMenu);
+        allMenus.add(cafeMenu);
+
+        pancakeHouseMenu.add(new MenuItem(
+            "K&B's Pancake Breakfast",
+            "Pancakes with scrambled eggs and toast",
+            true,
+            2.99));
+        pancakeHouseMenu.add(new MenuItem(
+            "Regular Pancake Breakfast",
+            "Pancakes with fried eggs, sausage",
+            false,
+            2.99));
+        pancakeHouseMenu.add(new MenuItem(
+            "Blueberry Pancakes",
+            "Pancakes made with fresh blueberries and blueberry syrup",
+            true,
+            3.49));
+        pancakeHouseMenu.add(new MenuItem(
+            "Waffles",
+            "Waffles with your choice of blueberries or strawberries",
+            true,
+            3.59));
+
+        dinerMenu.add(new MenuItem(
+            "Vegetarian BLT",
+            "(Fakin') Bacon with lettuce & tomato on whole wheat",
+            true,
+            2.99));
+                dinerMenu.add(new MenuItem(
+            "BLT",
+            "Bacon with lettuce & tomato on whole wheat",
+            false,
+            2.99));
+        dinerMenu.add(new MenuItem(
+            "Soup of the day",
+            "A bowl of the soup of the day, with a side of potato salad",
+            false,
+            3.29));
+        dinerMenu.add(new MenuItem(
+            "Hot Dog",
+            "A hot dog, with saurkraut, relish, onions, topped with cheese",
+            false,
+            3.05));
+        dinerMenu.add(new MenuItem(
+            "Steamed Veggies and Brown Rice",
+            "A medly of steamed vegetables over brown rice",
+            true,
+            3.99));
+
+        dinerMenu.add(new MenuItem(
+            "Pasta",
+            "Spaghetti with marinara sauce, and a slice of sourdough bread",
+            true,
+            3.89));
+
+        dinerMenu.add(dessertMenu);
+       dessertMenu.add(new MenuItem(
+            "Apple Pie",
+            "Apple pie with a flakey crust, topped with vanilla icecream",
+            true,
+            1.59));
+        dessertMenu.add(new MenuItem(
+            "Cheesecake",
+            "Creamy New York cheesecake, with a chocolate graham crust",
+            true,
+            1.99));
+        dessertMenu.add(new MenuItem(
+            "Sorbet",
+            "A scoop of raspberry and a scoop of lime",
+            true,
+            1.89));
+
+        cafeMenu.add(new MenuItem(
+            "Veggie Burger and Air Fries",
+            "Veggie burger on a whole wheat bun, lettuce, tomato, and fries",
+            true,
+            3.99));
+        cafeMenu.add(new MenuItem(
+            "Soup of the day",
+            "A cup of the soup of the day, with a side salad",
+            false,
+            3.69));
+        cafeMenu.add(new MenuItem(
+            "Burrito",
+            "A large burrito, with whole pinto beans, salsa, guacamole",
+            true,
+            4.29));
+
+        Waitress waitress = new Waitress(allMenus);
+
+        waitress.printVegetarianMenu();
+        waitress.printMenu();
+
+    }
+}
+
+
+
+```
+
 

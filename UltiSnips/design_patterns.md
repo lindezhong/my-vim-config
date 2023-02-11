@@ -74,6 +74,33 @@
 ## 策略模式
 策略模式: 定义了一个算法族,分别封装起来,是的他们之间可以相互变换.策略让算法的变化独立使用它的客户
 
+### 策略模式类图
+
+```plantuml
+@startuml
+
+class Context {
+    Strategy strategy
+    executeStrategy()
+    setStrategy(Strategy)
+}
+
+interface Strategy {
+    doOperation()
+}
+
+class ConcreteStrategyA implements Strategy {
+    doOperation()
+}
+class ConcreteStrategyB implements Strategy {
+    doOperation()
+}
+
+Context -right--> Strategy : Context(上下文)这个类的executeStrategy()被调用\n会委托给Strategy.doOperation()来处理
+
+@enduml
+```
+
 ### 策略模式例子:鸭塘模拟游戏
 下面例子中鸭子(客户)使用了算法(飞行行为,鸭子行为),不同实现用于替换
 
@@ -4872,8 +4899,488 @@ public class MenuTestDrive {
     }
 }
 
-
-
 ```
 
+## 状态模式
 
+`状态模式`: 允许对象(Context)在内部状态改变时改变其行为. 对象(Context)看起来好像改变了它的类
+
+### 状态模式类图
+
+```plantuml
+@startuml
+
+class Context {
+    State currentState
+    State state1
+    State state2
+    request()
+}
+
+note left of Context::currentState
+当前状态,无论和时Context上的request()被调用,
+就会被委托给状态(当前状态)来处理
+end note
+note left of Context::state1
+Context(上下文)这个类有很多内部状态.
+end note
+
+
+abstract class State {
+    handle()
+}
+
+note top of State
+State接口定义了一个所有具体状态的共同接口
+所有状态都实现了这个相同的接口, 这一就可以互换
+end note
+
+
+
+class ConcreteStateA extends State {
+    handle()
+}
+class ConcreteStateB extends State {
+    handle()
+}
+
+note "ConcreteState(具体状态)处理来自Context的请求.\n每一个ConcreteState都提供它自己对于请求的实现.\n这样,当Context改变状态时,行为也跟着改变" as ConcreteState_note
+ConcreteState_note .left. ConcreteStateA
+ConcreteState_note .left. ConcreteStateB
+
+
+Context -right-> State
+
+@enduml
+```
+
+### 状态模式讨论
+
+1. 状态和策略模式有相同的类图, 但它们的意图不同
+    > 对于状态模式, 我们把一组行为封装进状态对象, context 随时(把责任)委托给这些状态之一. 随着时间的推移, 当前状态不断在各个状态对象之间改变, 以反映context的内部状态, 因此, context 的行为也随着时间的推移而改变. 客户通常对状态对象知道得很少, 甚至不知道  
+    > 对于策略模式, 客户通常指定context要组合的策略对象. 现在, 虽然模式提供了弹性, 可以在运行时改变策略对象, 但对于一个context对象来说, 经常有一个最合适的策略对象  
+    > 一般来说, 把策略模式想成子类化的一个弹性替代方案; 如何你使用继承定义了一个类的行为, 那么你就和这个行为粘在一起了, 很难改变  
+    > 把状态模式想成在context中放进于多条件的一个替代方案, 通过把行为封装进状态对象, 你可以简单地在context中改变状态对象来改变其行为  
+
+2. 状态迁移可以由State类或Context类控制: 一般状态迁移固定时适合由Context控制, 动态时由State控制, 但由State控制会造成状态类之间的依赖
+3. 状态由Context使用,代表其内部状态和行为, 客户不直接跟状态交互
+
+### 状态模式要点
+
+1. 状态模式允许一个对象基于内部状态拥有许多不同的行为
+2. 和过程式状态机不同, 状态模式用真正的类代表每个状态
+3. Context把行为委托给所组合的当前状态对象
+4. 通过把每个状态封装进一个类, 我们把以后需要做的任何变化局部化了.
+5. 状态和策略模式有相同的类图, 但它们的意图不同
+6. 策略模式通常会用行为或算法来配置Context类
+7. 状态模式允许Context随这状态改变而改变行为
+8. 状态迁移可以由State类或Context类控制.
+9. 状态类可以在多个Context实例之间共享
+
+### 状态模式例子: 糖果机
+
+糖果机有以下几个状态
+
+1. 没有25分钱
+2. 有25分钱
+3. 赢家
+4. 糖果已售出
+5. 糖果已售馨
+
+操作如下
+
+1. 投入25分钱: insertQuarter()
+2. 吐25分钱: ejectQuarter()
+3. 转动曲柄: turnCrank()
+4. 发放糖果(发放更多时候时糖果机自己调用自己的内部方法) : dispense()
+5. 补充糖果 : refill()
+
+其中状态机如下
+
+```plantuml
+@startuml
+
+
+[*] -> 没有25分钱
+没有25分钱 --> 有25分钱 : 投入25分钱 \n insertQuarter()
+有25分钱 --> 没有25分钱 : 吐25分钱 \n ejectQuarter()
+
+state 是否有赢家 <<choice>>
+有25分钱 --> 是否有赢家 : 转动曲柄 \n turnCrank()
+是否有赢家 --> 赢家 : [我们有一个赢家]
+是否有赢家 --> 糖果已售出 : [我们没有一个赢家]
+
+state 是否糖果已售馨 <<choice>>
+糖果已售出 --> 是否糖果已售馨 : 发放糖果 \n dispense()
+是否糖果已售馨 --> 没有25分钱 : [糖果数目>0]
+是否糖果已售馨 --> 糖果已售馨 : [糖果数目=0]
+
+state 赢家是否糖果已售馨 <<choice>>
+赢家 --> 赢家是否糖果已售馨 : 赢家发放2颗糖果 \n dispense()
+赢家是否糖果已售馨 --> 没有25分钱 : [糖果数目>0]
+赢家是否糖果已售馨 --> 糖果已售馨 : [糖果数目=0]
+糖果已售馨 --> 没有25分钱 : 补充糖果 \n refill()
+
+@enduml
+```
+
+代码如下
+
+```java
+
+// 糖果机
+public class GumballMachine {
+ 
+    // 转态: 售罄
+    State soldOutState;
+    // 转态: 没有25分钱
+    State noQuarterState;
+    // 转态: 有25分钱
+    State hasQuarterState;
+    // 转态: 售出
+    State soldState;
+    // 转态: 赢家
+    State winnerState;
+ 
+    // 当前状态
+    State state = soldOutState;
+    int count = 0;
+ 
+    public GumballMachine(int numberGumballs) {
+        // 将上下文(GumballMachine/糖果机)存储到, 状态机上以便后续处理
+        soldOutState = new SoldOutState(this);
+        noQuarterState = new NoQuarterState(this);
+        hasQuarterState = new HasQuarterState(this);
+        soldState = new SoldState(this);
+        winnerState = new WinnerState(this);
+
+        this.count = numberGumballs;
+        if (numberGumballs > 0) {
+            state = noQuarterState;
+        }   
+    }   
+ 
+    // 投入25分钱
+   public void insertQuarter() {
+        state.insertQuarter();
+    }
+
+    // 吐25分钱
+    public void ejectQuarter() {
+        state.ejectQuarter();
+    }
+
+    // 转动曲柄
+    public void turnCrank() {
+        state.turnCrank();
+        // 发放糖果(发放更多时候时糖果机自己调用自己的内部方法)
+        state.dispense();
+    }
+
+    void setState(State state) {
+        this.state = state;
+    }
+
+    // 这个机器支持一个releaseBall()的helper方法, 该方法放出糖果, 并将 count 实例变量的值减1
+    void releaseBall() {
+        System.out.println("A gumball comes rolling out the slot...");
+        if (count > 0) {
+            count = count - 1;
+        }
+    }
+
+    int getCount() {
+        return count;
+    }
+
+    // 补充糖果
+    void refill(int count) {
+        this.count += count;
+        System.out.println("The gumball machine was just refilled; its new count is: " + this.count);
+        state.refill();
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public State getSoldOutState() {
+        return soldOutState;
+    }
+
+    public State getNoQuarterState() {
+        return noQuarterState;
+    }
+
+    public State getHasQuarterState() {
+        return hasQuarterState;
+    }
+
+        public State getSoldState() {
+        return soldState;
+    }
+
+    public State getWinnerState() {
+        return winnerState;
+    }
+
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append("\nMighty Gumball, Inc.");
+        result.append("\nJava-enabled Standing Gumball Model #2004");
+        result.append("\nInventory: " + count + " gumball");
+        if (count != 1) {
+            result.append("s");
+        }
+        result.append("\n");
+        result.append("Machine is " + state + "\n");
+        return result.toString();
+    }
+}
+
+// 状态
+public interface State {
+
+    // 投入25分钱
+    public void insertQuarter();
+    // 吐25分钱
+    public void ejectQuarter();
+    // 转动曲柄
+    public void turnCrank();
+    // 发放糖果
+    public void dispense();
+    // 补充糖果
+    public void refill();
+}
+
+// 没有25分钱状态
+public class NoQuarterState implements State {
+    GumballMachine gumballMachine;
+
+    public NoQuarterState(GumballMachine gumballMachine) {
+        this.gumballMachine = gumballMachine;
+    }
+
+    public void insertQuarter() {
+        System.out.println("You inserted a quarter");
+        gumballMachine.setState(gumballMachine.getHasQuarterState());
+    }
+
+    public void ejectQuarter() {
+        System.out.println("You haven't inserted a quarter");
+    }
+
+    public void turnCrank() {
+        System.out.println("You turned, but there's no quarter");
+     }
+
+    public void dispense() {
+        System.out.println("You need to pay first");
+    }
+
+        public void refill() { }
+
+    public String toString() {
+        return "waiting for quarter";
+    }
+}
+
+// 有25分钱状态
+public class HasQuarterState implements State {
+    Random randomWinner = new Random(System.currentTimeMillis());
+    GumballMachine gumballMachine;
+
+    public HasQuarterState(GumballMachine gumballMachine) {
+        this.gumballMachine = gumballMachine;
+    }
+
+    public void insertQuarter() {
+        System.out.println("You can't insert another quarter");
+    }
+
+    public void ejectQuarter() {
+        System.out.println("Quarter returned");
+        gumballMachine.setState(gumballMachine.getNoQuarterState());
+    }
+    public void turnCrank() {
+        System.out.println("You turned...");
+        int winner = randomWinner.nextInt(10);
+        if ((winner == 0) && (gumballMachine.getCount() > 1)) {
+            gumballMachine.setState(gumballMachine.getWinnerState());
+        } else {
+            gumballMachine.setState(gumballMachine.getSoldState());
+        }
+    }
+
+    public void dispense() {
+        System.out.println("No gumball dispensed");
+    }
+
+    public void refill() { }
+
+    public String toString() {
+        return "waiting for turn of crank";
+    }
+}
+
+// 赢家状态
+public class WinnerState implements State {
+    GumballMachine gumballMachine;
+
+    public WinnerState(GumballMachine gumballMachine) {
+        this.gumballMachine = gumballMachine;
+    }
+
+    public void insertQuarter() {
+        System.out.println("Please wait, we're already giving you a Gumball");
+    }
+
+    public void ejectQuarter() {
+        System.out.println("Please wait, we're already giving you a Gumball");
+    }
+
+    public void turnCrank() {
+        System.out.println("Turning again doesn't get you another gumball!");
+    }
+
+        public void dispense() {
+        gumballMachine.releaseBall();
+        if (gumballMachine.getCount() == 0) {
+            gumballMachine.setState(gumballMachine.getSoldOutState());
+        } else {
+            gumballMachine.releaseBall();
+            System.out.println("YOU'RE A WINNER! You got two gumballs for your quarter");
+            if (gumballMachine.getCount() > 0) {
+                gumballMachine.setState(gumballMachine.getNoQuarterState());
+            } else {
+                System.out.println("Oops, out of gumballs!");
+                gumballMachine.setState(gumballMachine.getSoldOutState());
+            }
+        }
+    }
+
+    public void refill() { }
+
+    public String toString() {
+        return "despensing two gumballs for your quarter, because YOU'RE A WINNER!";
+    }
+}
+
+
+// 售出状态
+public class SoldState implements State {
+    GumballMachine gumballMachine;
+
+    public SoldState(GumballMachine gumballMachine) {
+        this.gumballMachine = gumballMachine;
+    }
+
+    public void insertQuarter() {
+        System.out.println("Please wait, we're already giving you a gumball");
+    }
+
+    public void ejectQuarter() {
+        System.out.println("Sorry, you already turned the crank");
+    }
+
+    public void turnCrank() {
+        System.out.println("Turning twice doesn't get you another gumball!");
+    }
+
+        public void dispense() {
+        gumballMachine.releaseBall();
+        if (gumballMachine.getCount() > 0) {
+            gumballMachine.setState(gumballMachine.getNoQuarterState());
+        } else {
+            System.out.println("Oops, out of gumballs!");
+            gumballMachine.setState(gumballMachine.getSoldOutState());
+        }
+    }
+
+    public void refill() { }
+
+    public String toString() {
+        return "dispensing a gumball";
+    }
+}
+
+// 售罄状态
+public class SoldOutState implements State {
+    GumballMachine gumballMachine;
+
+    public SoldOutState(GumballMachine gumballMachine) {
+        this.gumballMachine = gumballMachine;
+    }
+
+    public void insertQuarter() {
+        System.out.println("You can't insert a quarter, the machine is sold out");
+    }
+
+    public void ejectQuarter() {
+        System.out.println("You can't eject, you haven't inserted a quarter yet");
+    }
+
+    public void turnCrank() {
+        System.out.println("You turned, but there are no gumballs");
+    }
+
+    public void dispense() {
+        System.out.println("No gumball dispensed");
+    }
+
+    public void refill() {
+        gumballMachine.setState(gumballMachine.getNoQuarterState());
+    }
+
+    public String toString() {
+        return "sold out";
+    }
+}
+
+// 测试
+public class GumballMachineTestDrive {
+
+    public static void main(String[] args) {
+        GumballMachine gumballMachine =
+            new GumballMachine(10);
+
+        System.out.println(gumballMachine);
+
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+
+        System.out.println(gumballMachine);
+
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+
+        System.out.println(gumballMachine);
+
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+
+        System.out.println(gumballMachine);
+
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+
+        System.out.println(gumballMachine);
+
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+        gumballMachine.insertQuarter();
+        gumballMachine.turnCrank();
+
+        System.out.println(gumballMachine);
+    }
+}
+
+```

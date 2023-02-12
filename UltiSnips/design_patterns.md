@@ -5384,3 +5384,671 @@ public class GumballMachineTestDrive {
 }
 
 ```
+
+## 代理模式
+
+`代理模式`: 为另一个对象提供一个替身或占位符来控制对这个对象的访问
+
+使用代理模式创建代表对象. 代表对象控制对另一个对象的访问, 被代表对象的对象可以是远程对象,创建开销大的对象和需要安全控制的对象
+
+### 代理模式类型
+
+1. `远程代理`: 作为另一个JVM上对象的本地代理. 调用代理的方法, 会通过网络转发到远程来调用, 结果返回i给代理, 再欧代理将结果转给客户
+2. `虚拟代理`: 控制对创建开销大的资源的访问, 作为创建开销大的对象的代表. 虚拟代理经常延迟对象的创建知道真正需要. 在对象创建前和创建是, 虚拟带来也会扮演对象的替身. 对象创建后, 带来就会将请求委托给RealSubject
+3. `保护代理`: 基于权限控制对象资源的访问
+4. `防火墙代理(Firewall Proxy)`: 控制网络资源的访问, 保护主题免于 "坏" 客户的侵害
+5. `智能引用代理(Smart Reference Proxy)`: 当主题被引用是, 提供额外的动作, 例如计算一个对象被引用的次数
+6. `缓存代理(caching Proxy)`: 为开销大的操作结果提供暂时存储: 它也允许多个客户共享结果, 以减少计算或网络延迟
+7. `同步代理(Synchronization Proxy)`: 在多线程的情况下为主题提供安全访问
+8. `复杂隐藏代理(Complexity Hiding Proxy)`: 用来隐藏一个类的复杂集合的复杂度, 并控制访问. 有时候也称为外观代理(Facade Proxy), 这不难理解. 复杂代理和外观模式的区别是: 代理控制访问, 而外观模式只是提供了另外的一组接口
+9. `写入时复制代理(Complexityopy-On-Write Proxy)`: 控制对象的复制, 做法是延迟对象的复制, 直到客户需要为止. 这是 虚拟代理 的变体
+
+### 代理模式类图
+
+```plantuml
+@startuml
+
+interface Subject {
+    request()
+}
+
+note top of Subject
+Proxy和RealSubject都实现了Subject接口
+这允许任何客户都可以像RealSubject对象一样对待代理
+end note
+
+class RealSubject implements Subject {
+    request()
+}
+
+note bottom of RealSubject
+RealSubject通常是真正做事的对象
+Proxy 控制对它的访问
+end note
+
+class Proxy implements Subject {
+    Subject subject
+    request()
+}
+
+note bottom of Proxy
+Proxy持有Subject的引用, 应此必要是它可以将请求转发给Subjects
+Proxy通常实例化或处理RealSubject对象的创建和销毁
+end note
+
+Proxy -left--> RealSubject : subject
+
+@enduml
+```
+
+
+### 代理模式讨论
+
+1. 代理模式和装饰者模式, 区别为目的不一样
+    > 装饰者模式: 为对象添加行为  
+    > 代理模式: 控制对象的访问
+
+### 代理模式要点
+
+1. 代理模式为另一个对象提供代表, 以便控制客户对对象的的访问, 管理访问的方式有许多种
+2. 远程代理管理客户和远程对象之间的交互
+3. 虚拟带来控制访问实例化开销大的对象
+4. 包含代理基于调用者控制对对象方法的访问
+5. 代理模式有许多其他变体, 例如 缓存带来, 同步代理, 防火墙带来, 写入时复制代理等
+6. 代理在结构上类似于装饰者, 但是目的不同
+7. 装饰者模式为对象加上行为, 而代理则是控制访问
+8. JAVA内建的代理支持, 可以根据需要建立动态代理类, 并将所有调用分配到所选的处理器
+9. 和其他的包装者一样, 代理会造成你的设计中类和对象的数目增加
+
+
+### 远程代理
+
+`远程代理`: 作为另一个JVM上对象的本地代理. 调用代理的方法, 会通过网络转发到远程来调用, 结果返回i给代理, 再欧代理将结果转给客户
+
+#### 远程代理概念图
+
+```plantuml
+@startuml
+
+
+cloud 本地JVM堆 {
+    () 客户对象
+    () 客户辅助对象
+    note bottom of 客户辅助对象 : RMI桩
+}
+
+cloud 远程JVM堆 {
+    () 服务辅助对象
+    () 服务对象
+    note bottom of 服务辅助对象 : RMI骨架
+}
+
+客户对象 -right--> 客户辅助对象 : 1.request()
+客户辅助对象 -right--> 服务辅助对象 : 2. 打包调用信息并通过网络运送给服务辅助对象
+服务辅助对象 -right--> 服务对象 : 3. 解包来自客户辅助对象信息调用真正的服务对象上的真正方法
+
+
+@enduml
+```
+
+```plantuml
+@startuml
+
+autonumber
+
+客户对象 -> 客户辅助对象 : request()
+客户辅助对象 -> 服务辅助对象 : 打包调用信息(参量,方法签名等)并通过网络运送给服务辅助对象
+服务辅助对象 -> 服务对象 : 服务辅助对象解包来自客户辅助对象信息 \n 并找出被调用的方法,并调用真正的服务对象上的真正方法
+服务对象 --> 服务辅助对象 : 结果
+服务辅助对象 --> 客户辅助对象 : 打包后的结果
+客户辅助对象 --> 客户对象 : 拆包结果
+
+@enduml
+```
+
+#### 远程代理例子: JAVA RMI
+
+```java
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+/**
+ * <pre>
+ * Remote 时一个 '记号' 接口, 一是时它没有方法
+ * </pre>
+ */
+public interface MyRemote extends Remote {
+
+
+    /** 
+     * <pre>
+     * 远程方法的参量和返回值都必须时原语(primitive)类型或Serializable类型
+     * 因为远程方法的任何参量和返回值都必须打包并通过网络传输
+     * <pre>
+     * @throws RemoteException : 每次远程方法调用都必须考虑成有风险的, 
+     *                           在每个方法中声明 RemoteException 强制客户注意并承认可能会出错
+     *
+     * @return 远程方法的参量和返回值都必须时原语(primitive)类型或Serializable类型
+     */
+    public String sayHello(String hello) throws RemoteException;
+}
+
+
+import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+import com.ldz.demo.service.MyRemote;
+
+/**
+ * 为了成为远程服务对象, 你的对象需要某些和 "远程" 有关的功能, 最简单的法方式是扩展 {@link UnicastRemoteObject}
+ */
+public class MyRemoteServiceImpl extends UnicastRemoteObject implements MyRemote {
+
+    // UnicastRemoteObject实现 Serializable, 所以我们需要 serialVersionUID 字段
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * <pre>
+     * 你的新超类, {@link UnicastRemoteObject} , 有个小问题, 它的构造器会抛出 {@link RemoteException}
+     * 解决这个问题的为一方法是为你的远程实现声明一个构造器, 这一就有了一个地方来声明 {@link RemoteException}
+     * </pre>
+     */
+    protected MyRemoteServiceImpl() throws RemoteException {
+        // 初始化的是把自己注册到RMI Registry
+        // registry();
+    }
+
+    /**
+     * <pre>
+     * 将自己注册到 RMI Registry 上(RMI Registry 必须正在运行, 在命令行执行 `rmiregistry -J-Djava.class.path=./target/rmi-demo-1.0-SNAPSHOT.jar` 即
+可)
+     * 当注册这个实现对象时, RMI 系统器是注册的是RMI桩(客户辅助对象),因为这是客户真正需要的.
+     * 注册服务是用 {@link java.rmi.Naming}类的静态rebing()方法
+     * </pre>
+     * @throws RemoteException
+     */
+    private void registry() throws RemoteException {
+        try {
+            Naming.rebind("RemoteHello", this);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            throw e;
+        }
+    }
+
+
+    public String sayHello(String hello) throws RemoteException {
+        return "Server says : " + hello;
+    }
+
+    public static void main(String[] args) throws MalformedURLException, AlreadyBoundException, RemoteException {
+        MyRemote service = new MyRemoteServiceImpl();
+        Naming.rebind("RemoteHello", service);
+        // 客户端调用代码
+        // MyRemote service = (MyRemote)Naming.lookup("rmi://localhost/RemoteHello");
+        // System.out.println(service.sayHello("rmi"));
+
+    }
+
+}
+
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
+import com.ldz.demo.service.MyRemote;
+
+public class MyRemoteClientMain {
+    public static void main(String[] args) throws MalformedURLException, RemoteException, NotBoundException {
+        MyRemote service = (MyRemote)Naming.lookup("rmi://localhost/RemoteHello");
+
+        System.out.println(service.sayHello("rmi"));
+    }
+}
+
+```
+
+
+### 虚拟代理例子: 显示音乐专辑封面
+
+`虚拟代理`: 作为创建开销大的对象的代表. 虚拟代理经常延迟对象的创建知道真正需要. 在对象创建前和创建是, 虚拟带来也会扮演对象的替身. 对象创建后, 带来就会将请求委托给RealSubject
+
+我们要编写一个应用, 来展示你喜爱的音乐专辑封面, 你可以建立一个专辑标题菜单, 然后从 Amazon.com 等网站的在先服务中取得音乐专辑封面的图. 如果你使用Swing, 可以创建一个 Icon , 让它从网络取得图像. 唯一的问题是, 限于万历副在和连续带宽, 取得一张专辑封面可能需要一些时间, 因此在等待图像加载时, 你的应用应该显示一些冬歇. 我们也不希望在等待图像时整个应用被挂在一起. 一旦图像被加载, 刚才显示的东西应该消失, 图像显示出来
+
+类图如下
+
+```plantuml
+@startuml
+
+interface Icon {
+    getIconWidth()
+    getIconHeight()
+    paintIcon()
+}
+
+note top of Icon : 这是Swing的Icon接口, 在用户界面上显示图像
+
+class ImageIcon implements Icon {
+    getIconWidth()
+    getIconHeight()
+    paintIcon()
+}
+
+note bottom of Icon : 这是 javax.swing.ImageIcon 一个显示图像的类
+
+class ImageProxy implements Icon {
+    getIconWidth()
+    getIconHeight()
+    paintIcon()
+}
+
+note bottom of ImageProxy : 这时我们的带来, 首先显示小学, 图像加载后, 委托 ImageIcon 显示图像
+
+ImageProxy -right-> ImageIcon : subject
+
+@enduml
+```
+
+代码如下
+
+```java
+import java.awt.*;             
+import javax.swing.*;          
+  
+class ImageComponent extends JComponent {
+    private static final long serialVersionUID = 1L;
+    private Icon icon;         
+  
+    public ImageComponent(Icon icon) {
+        this.icon = icon;      
+    }
+  
+    public void setIcon(Icon icon) {
+        this.icon = icon;      
+    } 
+    
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);        
+        int w = icon.getIconWidth();    
+        int h = icon.getIconHeight();   
+        int x = (800 - w)/2;   
+        int y = (600 - h)/2;   
+        icon.paintIcon(this, g, x, y);  
+    }
+} 
+
+import java.net.*;
+import java.awt.*;
+import javax.swing.*;
+
+class ImageProxy implements Icon {
+    volatile ImageIcon imageIcon;
+    final URL imageURL;
+    Thread retrievalThread;
+    boolean retrieving = false;
+
+    public ImageProxy(URL url) { imageURL = url; }
+
+    public int getIconWidth() {
+        if (imageIcon != null) {
+            return imageIcon.getIconWidth();
+        } else {
+            return 800;
+        }
+    }
+
+    public int getIconHeight() {
+        if (imageIcon != null) {
+            return imageIcon.getIconHeight();
+        } else {
+            return 600;
+        }
+    }
+
+    synchronized void setImageIcon(ImageIcon imageIcon) {
+        this.imageIcon = imageIcon;
+    }
+    public void paintIcon(final Component c, Graphics  g, int x,  int y) {
+        if (imageIcon != null) {
+            // 当图像加载完毕, 把所有方法委托给 ImageIcon
+            imageIcon.paintIcon(c, g, x, y);
+        } else {
+
+            // 在加载过程中, 显示 "专辑封面加载中, 请稍后" 
+            g.drawString("Loading album cover, please wait...", x+300, y+190);
+            if (!retrieving) {
+                retrieving = true;
+
+                retrievalThread = new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            // 异步加载图片, 防止应用卡顿
+                            setImageIcon(new ImageIcon(imageURL, "Album Cover"));
+                            c.repaint();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                retrievalThread = new Thread(() -> {
+                        try {
+                            setImageIcon(new ImageIcon(imageURL, "Album Cover"));
+                            c.repaint();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                });
+                retrievalThread.start();
+  
+            } 
+        } 
+    } 
+}
+
+
+import java.net.*;
+import javax.swing.*;
+import java.util.*;
+
+public class ImageProxyTestDrive {
+    ImageComponent imageComponent;
+    JFrame frame = new JFrame("Album Cover Viewer");
+    JMenuBar menuBar;
+    JMenu menu;
+    Hashtable<String, String> albums = new Hashtable<String, String>();
+
+    public static void main (String[] args) throws Exception {
+        ImageProxyTestDrive testDrive = new ImageProxyTestDrive();
+        System.out.println(testDrive);
+    }
+
+
+    public ImageProxyTestDrive() throws Exception {
+        albums.put("Buddha Bar","http://images.amazon.com/images/P/B00009XBYK.01.LZZZZZZZ.jpg");
+        albums.put("Ima","http://images.amazon.com/images/P/B000005IRM.01.LZZZZZZZ.jpg");
+        albums.put("Karma","http://images.amazon.com/images/P/B000005DCB.01.LZZZZZZZ.gif");
+        albums.put("MCMXC a.D.","http://images.amazon.com/images/P/B000002URV.01.LZZZZZZZ.jpg");
+        albums.put("Northern Exposure","http://images.amazon.com/images/P/B000003SFN.01.LZZZZZZZ.jpg");
+        albums.put("Selected Ambient Works, Vol. 2","http://images.amazon.com/images/P/B000002MNZ.01.LZZZZZZZ.jpg");
+
+        URL initialURL = new URL((String)albums.get("Selected Ambient Works, Vol. 2"));
+        menuBar = new JMenuBar();
+        menu = new JMenu("Favorite Albums");
+        menuBar.add(menu);
+        frame.setJMenuBar(menuBar);
+
+        for (Enumeration<String> e = albums.keys(); e.hasMoreElements();) {
+            String name = (String)e.nextElement();
+            JMenuItem menuItem = new JMenuItem(name);
+            menu.add(menuItem);
+            menuItem.addActionListener(event -> {
+                imageComponent.setIcon(new ImageProxy(getAlbumUrl(event.getActionCommand())));
+                frame.repaint();
+            });
+        }
+
+
+        // set up frame and menus
+
+        Icon icon = new ImageProxy(initialURL);
+        imageComponent = new ImageComponent(icon);
+        frame.getContentPane().add(imageComponent);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800,600);
+        frame.setVisible(true);
+
+    }
+
+    URL getAlbumUrl(String name) {
+        try {
+            return new URL((String)albums.get(name));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+```
+
+### 用动态代理来创建一个保护代理
+
+#### 动态代理类图
+
+```plantuml
+@startuml
+
+skinparam linetype ortho
+
+interface Subject {
+    request()
+}
+
+class RealSubject implements Subject {
+    request()
+}
+
+interface InvocationHandler {
+    invoke()
+}
+
+package JAVA动态代理 #DDDDDD {
+    class Proxy implements Subject {
+        Subject subject
+        request()
+    }
+
+    class ConcreteInvocationHandler implements InvocationHandler {
+        invoke()
+    }
+}
+
+note bottom of JAVA动态代理
+你提供的ConcreteInvocationHandler, Proxy上的任何方法调用都会被传到这个类
+Proxy由java生成的, 实现完整的 Subject接口
+end note
+
+ConcreteInvocationHandler -right--> RealSubject
+Proxy -right-> ConcreteInvocationHandler
+
+
+@enduml
+```
+
+#### 用动态代理来创建一个保护代理代码
+
+每个城镇都需要配对服务, 不是吗? 你负责帮对象村实现月会服务系统, 你尝试高个创新, 在服务中加入 "极客评分" 特性. 参加这可以给对方的极客程度打分.你希望这可以让顾客积极参与并找到可能的对象, 你的服务涉及到一个Person接口, 该接口允许设置并取得一个人的信息
+
+```java
+public interface Person {      
+  
+    String getName();          
+    String getGender();
+    String getInterests();
+    int getGeekRating();
+  
+    void setName(String name);
+    void setGender(String gender);  
+    void setInterests(String interests); 
+    void setGeekRating(int rating); 
+  
+} 
+
+public class PersonImpl implements Person {
+    String name;
+    String gender;
+    String interests;
+    int rating;
+    int ratingCount = 0;
+
+    public String getName() {
+        return name;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public String getInterests() {
+        return interests;
+    }
+
+    public int getGeekRating() {
+        if (ratingCount == 0) return 0;
+        return (rating/ratingCount);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public void setInterests(String interests) {
+        this.interests = interests;
+    }
+
+    public void setGeekRating(int rating) {
+        this.rating += rating;
+        ratingCount++;
+    }
+
+}
+
+public class OwnerInvocationHandler implements InvocationHandler {
+    Person person;
+
+    public OwnerInvocationHandler(Person person) {
+        this.person = person;
+    }
+
+    public Object invoke(Object proxy, Method method, Object[] args)
+            throws IllegalAccessException {
+
+        try {
+            if (method.getName().startsWith("get")) {
+                return method.invoke(person, args);
+            } else if (method.getName().equals("setGeekRating")) {
+                throw new IllegalAccessException();
+            } else if (method.getName().startsWith("set")) {
+                return method.invoke(person, args);
+            }
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+
+import java.lang.reflect.*;
+
+public class NonOwnerInvocationHandler implements InvocationHandler {
+    Person person;
+
+    public NonOwnerInvocationHandler(Person person) {
+        this.person = person;
+    }
+
+    public Object invoke(Object proxy, Method method, Object[] args)
+            throws IllegalAccessException {
+
+        try {
+            if (method.getName().startsWith("get")) {
+                return method.invoke(person, args);
+            } else if (method.getName().equals("setGeekRating")) {
+                return method.invoke(person, args);
+            } else if (method.getName().startsWith("set")) {
+                throw new IllegalAccessException();
+            }
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+
+import java.lang.reflect.*;
+import java.util.*;
+
+public class MatchMakingTestDrive {
+    HashMap<String, Person> datingDB = new HashMap<String, Person>();
+
+    public static void main(String[] args) {
+        MatchMakingTestDrive test = new MatchMakingTestDrive();
+        test.drive();
+    }
+
+    public MatchMakingTestDrive() {
+        initializeDatabase();
+    }
+    public void drive() {
+        Person joe = getPersonFromDatabase("Joe Javabean"); 
+        Person ownerProxy = getOwnerProxy(joe);
+        System.out.println("Name is " + ownerProxy.getName());
+        ownerProxy.setInterests("bowling, Go");
+        System.out.println("Interests set from owner proxy");
+        try {
+            ownerProxy.setGeekRating(10);   
+        } catch (Exception e) {
+            System.out.println("Can't set rating from owner proxy");
+        }
+        System.out.println("Rating is " + ownerProxy.getGeekRating());
+
+        Person nonOwnerProxy = getNonOwnerProxy(joe);
+        System.out.println("Name is " + nonOwnerProxy.getName());
+        try {
+            nonOwnerProxy.setInterests("bowling, Go");
+        } catch (Exception e) {
+            System.out.println("Can't set interests from non owner proxy");
+        }
+        nonOwnerProxy.setGeekRating(3);
+        System.out.println("Rating set from non owner proxy");
+        System.out.println("Rating is " + nonOwnerProxy.getGeekRating());
+    }
+
+    Person getOwnerProxy(Person person) {
+
+        return (Person) Proxy.newProxyInstance(
+                person.getClass().getClassLoader(),
+                person.getClass().getInterfaces(),
+                new OwnerInvocationHandler(person));
+    }
+
+    Person getNonOwnerProxy(Person person) {
+
+        return (Person) Proxy.newProxyInstance(
+                person.getClass().getClassLoader(),
+                person.getClass().getInterfaces(),
+                new NonOwnerInvocationHandler(person));
+    }
+
+    Person getPersonFromDatabase(String name) {
+        return (Person)datingDB.get(name);
+    }
+
+    void initializeDatabase() {
+        Person joe = new PersonImpl();
+        joe.setName("Joe Javabean");
+        joe.setInterests("cars, computers, music");
+        joe.setGeekRating(7);
+        datingDB.put(joe.getName(), joe);
+
+        Person kelly = new PersonImpl();
+        kelly.setName("Kelly Klosure");
+        kelly.setInterests("ebay, movies, music");
+        kelly.setGeekRating(6);
+        datingDB.put(kelly.getName(), kelly);
+    }
+}
+
+```
+

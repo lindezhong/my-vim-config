@@ -27,6 +27,12 @@ default_map['remote_debug_transport']='dt_socket'
 default_map['remote_debug_port']='5005'
 
 
+#####################################################################################################################
+# maven初始化默认值
+#####################################################################################################################
+# maven默认group_id
+default_map['init_maven_group_id']='com.ldz.demo'
+
 # 初始默认值,如果有default_map改变需要重新调用
 defaultMapInit() {
     if [[ "${default_map['remote_debug_switch']}" == "y" ]]; then
@@ -41,30 +47,37 @@ defaultMapInit
 # 帮助文档
 help() {
     echo '
---help: 查看mvn.sh脚本帮助文档
+--help : 查看mvn.sh脚本帮助文档
 
-deploy: 部署maven项目,运行前强制打包编译
+deploy : 部署maven项目,运行前强制打包编译
     mvn.sh deploy {class过滤字符:默认不过滤}
     $2 : class过滤字符:默认不过滤
-    return: 打包运行maven项目
+    return : 打包运行maven项目
 
-run: 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
+run : 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
     mvn.sh run {class过滤字符:默认不过滤}
     如果为spring boot 项目需要先执行mvn clean install,将resource下的资源打包,编译无法打包resource下的资源
     $2 : class过滤字符:默认不过滤
-    return: 编译运行maven项目
+    return : 编译运行maven项目
 
-debug: 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
+debug : 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
     mvn.sh debug {class过滤字符:默认不过滤}
     如果为spring boot 项目需要先执行mvn clean install,将resource下的资源打包,编译无法打包resource下的资源
     $2 : class过滤字符:默认不过滤
     return: 编译运行maven项目
 
-find_main: 扫描本目录下所有的main java
+find_main : 扫描本目录下所有的main java
     mvn.sh find_main {路径中要包含的字符:默认不过滤} {路径中要包含的字符:默认不过滤}
     $2: 路径中要包含的字符,默认不过滤,一般为src/main或src/test 用来区分是否为测试类
     $3: 路径中要包含的字符,默认不过滤,一般为类名
     return 本目录下所有的main java全路径(package.class_name)
+
+init : 初始化maven项目
+    
+    init jar : 初始化普通maven项目, 打包为jar
+        mvn.sh init jar
+        在运行过程中需要手动输入 groupId 和 artifactId
+        return : 在本地会创建一个 artifactId 的maven项目
     '
 }
 
@@ -264,6 +277,37 @@ run() {
     java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path
 }
 
+# 初始化普通maven项目
+init_maven_jar() {
+    # maven groupId
+    local groupId
+    # maven artifactId
+    local artifactId
+
+    read -p "请输入groupId,如果输入空则默认使用 [${default_map['init_maven_group_id']}]  :" groupId
+    test -z "$groupId" && groupId="${default_map['init_maven_group_id']}"
+
+    read -p "请输入artifactId : " artifactId
+    while [ -z $artifactId ]; do
+        read -p "不允许输入空请重新输入, artifactId : " artifactId
+    done
+
+    # 初始化普通maven项目, 使用模板maven-archetype-quickstart
+    mvn archetype:generate -DgroupId=$groupId -DartifactId=$artifactId -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+}
+
+# 初始化maven项目
+init_maven() {
+    local INIT_ACTION=$1
+    shift 1
+    case $INIT_ACTION in
+        'jar' )
+            # 初始化普通maven项目
+            init_maven_jar $*
+            ;;
+    esac
+}
+
 case $ACTION in
     '--help' )
         help
@@ -281,6 +325,10 @@ case $ACTION in
         ;;
     'find_main' )
         _findMainClass_ $*
+        ;;
+    'init' )
+        # 初始化maven项目
+        init_maven $*
         ;;
     * )
         echo "未知操作"

@@ -4,6 +4,10 @@ set shiftwidth=4
 set expandtab
 set autoindent
 set cindent
+" 默认字符过多不换行, 使用 set wrap 恢复换行
+set nowrap
+" 使用autcmd命令兼容coc的调用链
+
 set nu
 " 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
 set maxmempattern=2000
@@ -307,6 +311,12 @@ imap <silent> <C-A-down> <Esc><plug>(coc-implementation)
 imap <silent> <A-down> <Esc><plug>(coc-implementation)
 imap <silent> <C-up> <Esc><plug>(coc-references)
 
+" coc调用链, 使用 <tab> 展开调用链 , t 字母打开操作 
+" showIncomingCalls : 查看谁调用了自己, showOutgoingCalls: 我调用了谁
+nmap <silent> <C-h> :call CocActionAsync('showIncomingCalls')<CR>
+imap <silent> <C-h> <Esc>`^:call CocActionAsync('showIncomingCalls')<CR>
+" nmap <silent> <leader><S-h> :call CocActionAsync('showOutgoingCalls')
+
 
 function! s:check_back_space() abort
   let col = col('.') - 1
@@ -317,8 +327,8 @@ let g:coc_snippet_next = '<tab>'
 
 
 " Use <C-h> to show documentation in preview window.
-nnoremap <silent> <C-h> :call <SID>show_documentation()<CR>
-imap <silent> <C-h> <Esc>`^:call <SID>show_documentation()<CR>i
+nnoremap <silent> <C-d> :call <SID>show_documentation()<CR>
+imap <silent> <C-d> <Esc>`^:call <SID>show_documentation()<CR>i
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -468,7 +478,7 @@ imap <silent><ESC><ENTER> <Esc>`^<Plug>(coc-codeaction-cursor)i
 " | `<Plug>VimspectorToggleBreakpoint`            | Toggle line breakpoint on the current line.                         | `vimspector#ToggleBreakpoint()`                                   |
 " | `<Plug>VimspectorToggleConditionalBreakpoint` | Toggle conditional line breakpoint or logpoint on the current line. | `vimspector#ToggleBreakpoint( { trigger expr, hit count expr } )` |
 " | `<Plug>VimspectorAddFunctionBreakpoint`       | Add a function breakpoint for the expression under cursor           | `vimspector#AddFunctionBreakpoint( '<cexpr>' )`                   |
-" | `<Plug>VimspectorGoToCurrentLine`             | Reset the current program counter to the current line               | `vimspector#GoToCurrentLine()`                                        |
+" | `<Plug>VimspectorGoToCurrentLine`             | Reset the current program counter to the current line               | `vimspector#GoToCurrentLine()`                                    |
 " | `<Plug>VimspectorRunToCursor`                 | Run to Cursor                                                       | `vimspector#RunToCursor()`                                        |
 " | `<Plug>VimspectorStepOver`                    | Step Over                                                           | `vimspector#StepOver()`                                           |
 " | `<Plug>VimspectorStepInto`                    | Step Into                                                           | `vimspector#StepInto()`                                           |

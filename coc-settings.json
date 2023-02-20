@@ -1,9 +1,18 @@
 {
   "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/clangd/bin/clangd",
   "translator.engines": ["bing","google","youdao","haici"],
+  "java.home": "/opt/jdk17",
+  "note.tree.key.toggle": "coc-tree(coc树)的展开或关闭节点快捷键",
+  "tree.key.toggle": "<tab>",
+  "note.tree.key.actions": "coc-tree(coc树)触发coc树节点上的操作",
+  "tree.key.actions": "t",
+  "note.suggest.floatConfig": "配置弹出菜单和文档窗口的样式",
   "suggest.floatConfig": {
+      "note.maxWidth": "最大宽度",
       "maxWidth": 1000,
-      "border": true,
-      "rounded": true
+      "note.border": "是否时哦嗯边框",
+      "border": false,
+      "note.rounded": "当 border 为真时使用圆角边框。",
+      "rounded": false
   }
 }

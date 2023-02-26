@@ -5514,7 +5514,7 @@ import java.rmi.RemoteException;
 
 /**
  * <pre>
- * Remote 时一个 '记号' 接口, 一是时它没有方法
+ * Remote 时一个 '记号' 接口, 意思是它没有方法
  * </pre>
  */
 public interface MyRemote extends Remote {
@@ -6052,3 +6052,673 @@ public class MatchMakingTestDrive {
 
 ```
 
+## 复合模式
+
+`复合模式`: 模式通常被在一起使用, 并结合在通一个设计解决方案中. `复合模式`在一个解决方案中结合两个或多个模式, 以解决一般或重复发生的问题
+
+### 模式合作(非符合模式)例子: 鸭子模拟器
+
+```java
+
+// 1. 首先我们创建一个Quackable(嘎嘎叫接口)
+public interface Quackable extends QuackObservable {
+    // Quackable只需要做好一件事嘎嘎叫
+    public void quack();
+}
+
+// 2. 绿头鸭实现Quackable(嘎嘎叫接口)
+public class MallardDuck implements Quackable {
+    // 16. 整合Observable辅助类和Quackable类
+    Observable observable;
+
+    public MallardDuck() {
+        // 16. 整合Observable辅助类和Quackable类
+        observable = new Observable(this);
+    }
+
+    // 2. 绿头鸭实现Quackable(嘎嘎叫接口)
+    public void quack() {
+        System.out.println("Quack");
+        // 16. 整合Observable辅助类和Quackable类
+        notifyObservers();
+    }
+
+
+    // 16. 整合Observable辅助类和Quackable类
+    public void registerObserver(Observer observer) {
+        observable.registerObserver(observer);
+    }
+
+    // 16. 整合Observable辅助类和Quackable类
+    public void notifyObservers() {
+        observable.notifyObservers();
+    }
+
+    public String toString() {
+        return "Mallard Duck";
+    }
+}
+
+// 2. 鸭鸣器(猎人用来吸引猎物的工具)实现Quackable(嘎嘎叫接口)
+public class DuckCall implements Quackable {
+    Observable observable;
+
+    public DuckCall() {
+        observable = new Observable(this);
+    }
+
+    public void quack() {
+        System.out.println("Kwak");
+        notifyObservers();
+    }
+
+    public void registerObserver(Observer observer) {
+        observable.registerObserver(observer);
+    }
+
+    public void notifyObservers() {
+        observable.notifyObservers();
+    }
+
+    public String toString() {
+        return "Duck Call";
+    }
+}
+
+
+// 2. 橡皮鸭实现实现Quackable(嘎嘎叫接口)
+public class RubberDuck implements Quackable {
+    Observable observable;
+
+    public RubberDuck() {
+        observable = new Observable(this);
+    }
+
+    public void quack() {
+        System.out.println("Squeak");
+        notifyObservers();
+    }
+
+    public void registerObserver(Observer observer) {
+        observable.registerObserver(observer);
+    }
+
+    public void notifyObservers() {
+        observable.notifyObservers();
+    }
+
+    public String toString() {
+        return "Rubber Duck";
+    }
+}
+
+// 4. 当鸭子出现这里时, 鹅也离得不远
+public class Goose {
+
+    // 鹅的叫声是咯咯, 而不是嘎嘎
+    public void honk() {
+        System.out.println("Honk");
+    }
+
+    public String toString() {
+        return "Goose";
+    }
+}
+
+// 5. 我们需要一个鹅适配器
+public class GooseAdapter implements Quackable {
+    Goose goose;
+    Observable observable;
+
+    public GooseAdapter(Goose goose) {
+        this.goose = goose;
+        observable = new Observable(this);
+    }
+
+    public void quack() {
+        goose.honk();
+        notifyObservers();
+    }
+
+    public void registerObserver(Observer observer) {
+        observable.registerObserver(observer);
+    }
+
+    public void notifyObservers() {
+        observable.notifyObservers();
+    }
+
+    public String toString() {
+        return "Goose pretending to be a Duck";
+    }
+}
+
+
+// 8. 然后, 嘎嘎叫学家要计算嘎嘎叫次数, 让我们创建一个装饰者, 通过把鸭子包装进装饰者对象, 给鸭子一些新行为(计算次数的行为)
+public class QuackCounter implements Quackable {
+    // 我们用一个实例变量来记录被装饰的嘎嘎叫者
+    Quackable duck;
+    // 要统计所有嘎嘎叫, 我们用静态变量追踪
+    static int numberOfQuacks;
+
+    public QuackCounter(Quackable duck) {
+        this.duck = duck;
+    }
+
+    public void quack() {
+        // 当quack()被调用时, 我们把调用委托给正在装饰的Quackable对象
+        duck.quack();
+        // 然后把叫声的数量加1
+        numberOfQuacks++;
+    }
+
+    // 给装饰者添加一个静态方法, 这个方法返回在所有Quackable中发生的叫声次数
+    public static int getQuacks() {
+        return numberOfQuacks;
+    }
+
+    public void registerObserver(Observer observer) {
+        duck.registerObserver(observer);
+    }
+
+    public void notifyObservers() {
+        duck.notifyObservers();
+    }
+
+
+    public String toString() {
+        return duck.toString();
+    }
+}
+
+// 10. 但嘎嘎叫学家担心忘了加上 QuackCounter 装饰者,所以我们用抽象工厂模式创建鸭子
+// 我们定义一个抽象工厂, 它的子类会实现不同的家族
+public abstract class AbstractDuckFactory {
+    
+    public abstract Quackable createMallardDuck();
+    public abstract Quackable createRedheadDuck();
+    public abstract Quackable createDuckCall();
+    public abstract Quackable createRubberDuck();
+}
+
+// 普通鸭子工厂
+public class DuckFactory extends AbstractDuckFactory {
+
+    public Quackable createMallardDuck() {
+        return new MallardDuck();
+    }
+
+    public Quackable createRedheadDuck() {
+        return new RedheadDuck();
+    }
+
+    public Quackable createDuckCall() {
+        return new DuckCall();
+    }
+
+    public Quackable createRubberDuck() {
+        return new RubberDuck();
+    }
+}
+
+// 带计数的鸭子工厂, 所有的鸭子嘎嘎叫后都会统计叫的次数
+public class CountingDuckFactory extends AbstractDuckFactory {
+
+    public Quackable createMallardDuck() {
+        return new QuackCounter(new MallardDuck());
+    }
+
+    public Quackable createRedheadDuck() {
+        return new QuackCounter(new RedheadDuck());
+    }
+
+    public Quackable createDuckCall() {
+        return new QuackCounter(new DuckCall());
+    }
+
+    public Quackable createRubberDuck() {
+        return new QuackCounter(new RubberDuck());
+    }
+}
+
+// 12. 我们来创建一群鸭子
+import java.util.Iterator;
+import java.util.ArrayList;
+
+public class Flock implements Quackable {
+    ArrayList<Quackable> quackers = new ArrayList<Quackable>();
+
+    public void add(Quackable quacker) {
+        quackers.add(quacker);
+    }
+
+    public void quack() {
+        Iterator<Quackable> iterator = quackers.iterator();
+        while (iterator.hasNext()) {
+            Quackable quacker = iterator.next();
+            quacker.quack();
+        }
+    }
+
+    public String toString() {
+        return "Flock of Quackers";
+    }
+}
+
+// 14. 每次Quackable嘎嘎叫时, 嘎嘎叫学家希望能被通知, 首先我们的主题(Subject)需要一个接口
+public interface QuackObservable {
+    public void registerObserver(Observer observer);
+    public void notifyObservers();
+}  
+
+// 需要将所有的Quackable都实现此接口
+// public interface Quackable extends QuackObservable {
+//     // Quackable只需要做好一件事嘎嘎叫
+//     public void quack();
+// }
+
+
+// 15. 现在, 我们需要确定所有实现 Quackable 的具体类, 都能够扮演 QuackObservable
+// 为了达到这个目的, 可以通过在每一个类中实现组合和通知(像观察者模式中做的一样)
+// 但是这次我们的做法稍微不同: 我们要在另一个类封装组合和通知代码, 这个类称为 Observable,
+// 然后把它和 QuackObservable 组合. 这一, 我们只写一次真实代码, QuackObservable 只需要调用委托给辅助类 Observable
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+
+public class Observable implements QuackObservable {
+    List<Observer> observers = new ArrayList<Observer>();
+    QuackObservable duck;
+
+    public Observable(QuackObservable duck) {
+        this.duck = duck;
+    }
+
+    public void registerObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    public void notifyObservers() {
+        Iterator<Observer> iterator = observers.iterator();
+        while (iterator.hasNext()) {
+            Observer observer = iterator.next();
+            observer.update(duck);
+        }
+    }
+
+    public Iterator<Observer> getObservers() {
+        return observers.iterator();
+    }
+}
+
+// 17. 几乎大功告成! 我们只需要把莫斯的Observer端实现
+public interface Observer {
+    public void update(QuackObservable duck);
+}
+
+public class Quackologist implements Observer {
+
+    public void update(QuackObservable duck) {
+        System.out.println("Quackologist: " + duck + " just quacked.");
+    }
+
+    public String toString() {
+        return "Quackologist";
+    }
+}
+
+
+
+public class DuckSimulator {
+    public static void main(String[] args) {
+        // 3. 好了, 我们有了鸭子, 还需要一个模拟器
+        // 最简单的鸭子模拟器, 不涉及任何设计模式
+        simulator_01();
+        
+        // 6. 现在模拟器也应该可以使用鹅了
+        // 7. 现在我们来快速运行一下
+        // 有一只鹅出现, 希望自己也像一个Quackable(嘎嘎叫接口)
+        // 因此我们用适配器模式把鹅适配成Quackable, 就可以调用适配器的quack()方法, 让鹅嘎嘎叫
+        simulator_02();
+
+        // 9. 我们需要更新模拟器, 以创建被装饰的鸭子
+        // 然后, 嘎嘎叫学家要计算嘎嘎叫次数
+        // 因此我们用装饰者模式, 添加了一个 QuackCounter 装饰者, 用来追踪quack()被调用的次数
+        // 并将调用委托给它所包装的 Quackable
+        simulator_03();
+
+        // 11. 设置模拟器来时使用工厂
+        // 但嘎嘎叫学家担心忘了加上 QuackCounter 装饰者
+        // 所以我们用抽象工厂模式创建鸭子. 从此, 无论和是需要鸭子, 就找工厂要, 工厂会交回装饰过的鸭子
+        // 别忘了要没被装饰的鸭子, 也可以用另一个鸭子工厂
+        simulator_04();
+
+        // 13. 跟踪所有这些鸭子,鹅和Quackable(嘎嘎叫接口), 我们面临麻烦的管理问题
+        // 因此我们用组合模式来把 Quackable 分组成群, 这个模式也允许嘎嘎叫学家创建子群, 以便管理鸭子家族
+        // 通过使用java的迭代器, 我们在实现中使用了迭代器
+        simulator_05();
+
+        // 18. 每次Quackable嘎嘎叫时, 嘎嘎叫学家希望能被通知
+        // 因此我们使用观察者模式, 让嘎嘎叫学家注册成为 Quackable 观察者. 现在每次 Quackable 嘎嘎叫时, 嘎嘎叫学家就会被通知
+        // 在这个实现中, 我们再次用到迭代器. 嘎嘎叫学家甚至可以在组合中使用观察者模式
+        simulator_06();
+    }
+
+    // 3. 好了, 我们有了鸭子, 还需要一个模拟器
+    // 最简单的鸭子模拟器, 不涉及任何设计模式
+    public static void simulator_01() {
+
+        Quackable mallardDuck = new MallardDuck();
+        Quackable redheadDuck = new RedheadDuck();
+        Quackable duckCall = new DuckCall();
+        Quackable rubberDuck = new RubberDuck();
+
+        System.out.println("\nDuck Simulator");
+
+        simulate(mallardDuck);
+        simulate(redheadDuck);
+        simulate(duckCall);
+        simulate(rubberDuck);
+    }
+    
+    // 6. 现在模拟器也应该可以使用鹅了
+    // 7. 现在我们来快速运行一下
+    // 有一只鹅出现, 希望自己也像一个Quackable(嘎嘎叫接口)
+    // 因此我们用适配器模式把鹅适配成Quackable, 就可以调用适配器的quack()方法, 让鹅嘎嘎叫
+    public static void simulator_02() {
+        Quackable mallardDuck = new MallardDuck();
+        Quackable redheadDuck = new RedheadDuck();
+        Quackable duckCall = new DuckCall();
+        Quackable rubberDuck = new RubberDuck();
+        Quackable gooseDuck = new GooseAdapter(new Goose());
+    
+        System.out.println("\nDuck Simulator: With Goose Adapter");
+    
+        simulate(mallardDuck); 
+        simulate(redheadDuck); 
+        simulate(duckCall);    
+        simulate(rubberDuck);  
+        simulate(gooseDuck); 
+    }
+    
+    // 9. 我们需要更新模拟器, 以创建被装饰的鸭子
+    // 然后, 嘎嘎叫学家要计算嘎嘎叫次数
+    // 因此我们用装饰者模式, 添加了一个 QuackCounter 装饰者, 用来追踪quack()被调用的次数
+    // 并将调用委托给它所包装的 Quackable
+    public static void simulator_03() {
+        Quackable mallardDuck = new QuackCounter(new MallardDuck());
+        Quackable redheadDuck = new QuackCounter(new RedheadDuck());
+        Quackable duckCall = new QuackCounter(new DuckCall());
+        Quackable rubberDuck = new QuackCounter(new RubberDuck()); 
+        Quackable gooseDuck = new GooseAdapter(new Goose());
+    
+        System.out.println("\nDuck Simulator: With Decorator");
+
+        simulate(mallardDuck); 
+        simulate(redheadDuck);
+        simulate(duckCall);    
+        simulate(rubberDuck);  
+        simulate(gooseDuck);   
+
+        System.out.println("The ducks quacked " + 
+                           QuackCounter.getQuacks() + " times");
+    }
+
+
+    // 11. 设置模拟器来时使用工厂
+    // 但嘎嘎叫学家担心忘了加上 QuackCounter 装饰者
+    // 所以我们用抽象工厂模式创建鸭子. 从此, 无论和是需要鸭子, 就找工厂要, 工厂会交回装饰过的鸭子
+    // 别忘了要没被装饰的鸭子, 也可以用另一个鸭子工厂
+    public static void simulator_04() {
+        AbstractDuckFactory duckFactory = new CountingDuckFactory();
+
+        simulator.simulate(duckFactory);
+
+    }
+
+    // 13. 跟踪所有这些鸭子,鹅和Quackable(嘎嘎叫接口), 我们面临麻烦的管理问题
+    // 因此我们用组合模式来把 Quackable 分组成群, 这个模式也允许嘎嘎叫学家创建子群, 以便管理鸭子家族
+    // 通过使用java的迭代器, 我们在实现中使用了迭代器
+    public static void simulator_05() {
+        AbstractDuckFactory duckFactory = new CountingDuckFactory();
+
+        Quackable redheadDuck = duckFactory.createRedheadDuck();
+        Quackable duckCall = duckFactory.createDuckCall();
+        Quackable rubberDuck = duckFactory.createRubberDuck();
+        Quackable gooseDuck = new GooseAdapter(new Goose());
+
+        System.out.println("\nDuck Simulator: With Composite - Flocks");
+
+        Flock flockOfDucks = new Flock();
+
+        flockOfDucks.add(redheadDuck);
+        flockOfDucks.add(duckCall);
+        flockOfDucks.add(rubberDuck);
+        flockOfDucks.add(gooseDuck);
+
+        Flock flockOfMallards = new Flock();
+
+        Quackable mallardOne = duckFactory.createMallardDuck();
+        Quackable mallardTwo = duckFactory.createMallardDuck();
+        Quackable mallardThree = duckFactory.createMallardDuck();
+        Quackable mallardFour = duckFactory.createMallardDuck();
+
+        flockOfMallards.add(mallardOne);
+        flockOfMallards.add(mallardTwo);
+        flockOfMallards.add(mallardThree);
+        flockOfMallards.add(mallardFour);
+
+        flockOfDucks.add(flockOfMallards);
+
+        System.out.println("\nDuck Simulator: Whole Flock Simulation");
+        simulate(flockOfDucks);
+
+        System.out.println("\nDuck Simulator: Mallard Flock Simulation");
+        simulate(flockOfMallards);
+
+        System.out.println("\nThe ducks quacked " +
+                           QuackCounter.getQuacks() +
+                           " times");
+
+
+    }
+
+    // 18. 每次Quackable嘎嘎叫时, 嘎嘎叫学家希望能被通知
+    // 因此我们使用观察者模式, 让嘎嘎叫学家注册成为 Quackable 观察者. 现在每次 Quackable 嘎嘎叫时, 嘎嘎叫学家就会被通知
+    // 在这个实现中, 我们再次用到迭代器. 嘎嘎叫学家甚至可以在组合中使用观察者模式
+    public static void simulator_06() {
+        DuckSimulator simulator = new DuckSimulator();
+        AbstractDuckFactory duckFactory = new CountingDuckFactory();
+        
+        Quackable redheadDuck = duckFactory.createRedheadDuck();
+        Quackable duckCall = duckFactory.createDuckCall();
+        Quackable rubberDuck = duckFactory.createRubberDuck();
+        Quackable gooseDuck = new GooseAdapter(new Goose());
+
+        Flock flockOfDucks = new Flock();
+
+        flockOfDucks.add(redheadDuck);
+        flockOfDucks.add(duckCall);
+        flockOfDucks.add(rubberDuck);
+        flockOfDucks.add(gooseDuck);
+
+        Flock flockOfMallards = new Flock();
+
+        Quackable mallardOne = duckFactory.createMallardDuck();
+        Quackable mallardTwo = duckFactory.createMallardDuck();
+        Quackable mallardThree = duckFactory.createMallardDuck();
+        Quackable mallardFour = duckFactory.createMallardDuck();
+
+        flockOfMallards.add(mallardOne);
+        flockOfMallards.add(mallardTwo);
+        flockOfMallards.add(mallardThree);
+        flockOfMallards.add(mallardFour);
+
+        flockOfDucks.add(flockOfMallards);
+
+        System.out.println("\nDuck Simulator: With Observer");
+
+        Quackologist quackologist = new Quackologist();
+        flockOfDucks.registerObserver(quackologist);
+
+        simulate(flockOfDucks);
+
+        System.out.println("\nThe ducks quacked " +
+                           QuackCounter.getQuacks() +
+                           " times");
+
+
+
+
+    }
+
+
+    pubilc static void simulate(AbstractDuckFactory duckFactory) {
+        Quackable mallardDuck = duckFactory.createMallardDuck();
+        Quackable redheadDuck = duckFactory.createRedheadDuck();
+        Quackable duckCall = duckFactory.createDuckCall();
+        Quackable rubberDuck = duckFactory.createRubberDuck();
+        Quackable gooseDuck = new GooseAdapter(new Goose());
+
+        System.out.println("\nDuck Simulator: With Abstract Factory");
+
+        simulate(mallardDuck);
+        simulate(redheadDuck);
+        simulate(duckCall);
+        simulate(rubberDuck);
+        simulate(gooseDuck);
+
+        System.out.println("The ducks quacked " +
+                           QuackCounter.getQuacks() +
+                           " times");
+    }
+
+    public static void simulate(Quackable duck) {
+        duck.quack();
+    }
+
+
+}
+
+
+```
+
+### MVC模式
+
+#### MVC模式概念
+
+1. 模型(Model): 模型持有所有数据,状态和应用逻辑. 模型对视图和控制器是无视的, 虽然它提供了操纵和检索其状态的接口, 并发送状态改变通知给观察者
+2. 视图(View): 呈现模型, 视图通常直接从模型中取得显示所需的状态和数据
+3. 控制器(Controller): 取得用户输入并解读其对模型的含义
+
+#### MVC模式流程图
+
+```plantuml
+@startuml
+
+!include <cloudinsight/desktop>
+
+rectangle "控制器" as controller
+rectangle "<$desktop>\n视图" as view
+rectangle "class Player\n  play(){}\n  rip(){}\n  burn(){}\n}\n模型" as model
+
+view -left--> controller : 1.用户做了某件事
+controller --> model : 2.改变状态
+controller --> view : 3.改变显示
+model -left-> view : 4.我变了
+view -right-> model : 5.我需要你的状态信息
+
+@enduml
+```
+
+1. 你是用户, 你和视图交互
+    > 视图是你看模型的窗口, 当你对视图做一些事(例如点击播放按钮), 视图就告诉控制器你做了声明, 控制器的工作是负责处理
+
+2. 控制器要求模型改变状态
+    > 控制器接受并解读你的动作, 如果你点击某个按钮, 控制器的任务就是理解这个动作的含义, 以及如何基于此动作操纵模型
+
+3. 控制器也可能要求视图做改变
+    > 作为控制器从视图接收到动作的结果, 控制器可能需要告诉三视图改变. 例如, 控制器可以使得界面上的某些按钮或菜单有效或无效
+
+4. 当模型状态改变时, 模型通知视图
+    > 不管是基于一些你所做的动作(例如点击按钮),还是其他内部改变(例如播放列表的下一首歌开始),当模型中某些东西改变时, 模型通知视图它的状态已改变
+
+5. 视图向模型询问状态
+    > 视图直接从模型取得要显示的状态. 例如, 但模型通知视图新个开始播放, 视图向模型询问歌名并显示. 当控制器请求视图做某些改变时,视图也可能向模型询问状态
+
+#### MVC模式中的设计模式
+
+##### 观察者模式
+
+```plantuml
+@startuml
+!include <cloudinsight/desktop>
+
+rectangle "class Foo\n  bar(){\n    doBar();\n  }\n}\n模型" as model
+note top of model : 可观察者/主题
+
+cloud "观察者" as observer  {
+    rectangle "控制器" as controller
+    rectangle "<$desktop>\n视图" as view1
+    rectangle "<$desktop>\n视图" as view2
+
+    controller <-down- view1
+    controller <-down- view2
+}
+
+note top of observer : 无论何时模型的状态变化, 所有这些观察者都会被通知
+
+model -right-> observer : 我的状态改变了
+
+observer -left-> model : 对于模型状态变化感兴趣的对象, 向模型注册为观察者
+
+@enduml
+```
+
+##### 策略模式
+
+```plantuml
+@startuml
+!include <cloudinsight/desktop>
+
+rectangle "<$desktop>\n视图" as view
+
+rectangle "控制器" as controller1
+rectangle "控制器" as controller2
+
+view -down-> controller1
+view -down-> controller2
+
+note bottom of controller1
+对于视图来说, 控制器时策略
+它值的如何处理用户动作
+end note
+
+note bottom of controller2
+通过改变控制器, 我们可以切换到另一种行为
+end note
+
+@enduml
+```
+
+##### 组合模式
+
+```plantuml
+@startuml
+!include <cloudinsight/desktop>
+
+rectangle "<$desktop>\n视图" as view_root
+rectangle "<$desktop>\n视图" as view_1
+rectangle "<$desktop>\n视图" as view_2
+
+view_root -down-> view_1
+view_root -down-> view_2
+
+note top of view_root
+视图时GUI组件(标签,窗口, 文本输入等)的组合,
+顶层组件包含其他组件,其他组件又包含其他组件
+以此类推,直到叶节点
+end note
+
+@enduml
+```

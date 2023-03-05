@@ -6722,3 +6722,437 @@ end note
 
 @enduml
 ```
+
+## 桥接模式
+
+`桥接模式`: 将抽象和实现解耦，使得两者可以独立地变化
+
+桥梁模式是一个非常简单的模式，它只是使用了类间的聚合关系、继承、覆写等常用功能，但是它却提供了一个非常清晰、稳定的架构。
+
+桥梁模式是非常简单的，使用该模式时主要考虑如何拆分抽象和实现，并不是一涉及继承就要考虑使用该模式，那还要继承干什么呢？桥梁模式的意图还是对变化的封装，尽量把可能变化的因素封装到最细、最小的逻辑单元中，避免风险扩散。因此读者在进行系统设计时，发现类的继承有N层时，可以考虑使用桥梁模式。
+
+### 桥接模式类图
+
+```plantuml
+@startuml
+abstract class Abstraction {
+    operation()
+}
+
+note top of Abstraction
+Abstraction(抽象化角色)
+它的主要职责是定义出该角色的行为，
+同时保存一个对实现化角色的引用，
+该角色一般是抽象类。
+end note
+
+interface Implementor {
+    operationImpl()
+}
+
+note top of Implementor
+Implementor(实现化角色)
+它是接口或者抽象类，定义角色必需的行为和属性
+end note
+
+class RefinedAbstraction extends Abstraction {
+
+}
+
+note bottom of RefinedAbstraction
+RefinedAbstraction(修正抽象化角色)
+它引用实现化角色对抽象化角色进行修正。
+end note
+
+class ConcreteImplementor implements Implementor {
+
+}
+
+note bottom of ConcreteImplementor
+ConcreteImplementor(具体实现化角色)
+它实现接口或抽象类定义的方法和属性。
+end note
+Abstraction -right-> Implementor
+@enduml
+```
+
+桥梁模式中的几个名词比较拗口，大家只要记住一句话就成：抽象角色引用实现角色，或者说抽象角色的部分实现是由实现角色完成的。我们来看其通用源码，先看实现化角色
+
+```java
+public interface Implementor {
+    //基本方法
+    public void doSomething();
+    public void doAnything();
+}
+
+public class ConcreteImplementor1 implements Implementor{
+    public void doSomething(){
+        //业务逻辑处理
+    }
+    public void doAnything(){
+        //业务逻辑处理
+    }
+}
+
+public class ConcreteImplementor2 implements Implementor{
+    public void doSomething(){
+        //业务逻辑处理
+    }
+    public void doAnything(){
+        //业务逻辑处理
+    }
+}
+
+public abstract class Abstraction {
+    //定义对实现化角色的引用
+    private Implementor imp;
+    //约束子类必须实现该构造函数
+    public Abstraction(Implementor imp){
+        this.imp = imp;
+    }
+    //自身的行为和属性
+    public void request(){
+        this.imp.doSomething();
+    }
+    //获得实现化角色
+    public Implementor getImp(){
+        return imp;
+    }
+}
+
+public class RefinedAbstraction extends Abstraction {
+    //覆写构造函数
+    public RefinedAbstraction(Implementor imp){
+        super(imp);
+    }
+    //修正父类的行为
+    @Override
+    public void request(){
+        // 业务处理...
+        super.request();
+        super.getImp().doAnything();
+    }
+}
+
+public class Client {
+    public static void main(String[] args) {
+        //定义一个实现化角色
+        Implementor imp = new ConcreteImplementor1();
+        //定义一个抽象化角色
+        Abstraction abs = new RefinedAbstraction(imp);
+        //执行行文
+        abs.request();
+    }
+}
+```
+
+
+### 桥接模式优点
+
+1. 抽象和实现分离: 这也是桥梁模式的主要特点，它完全是为了解决继承的缺点而提出的设计模式。在该模式下，实现可以不受抽象的约束，不用再绑定在一个固定的抽象层次上。
+2. 优秀的扩充能力: 想增加实现？没问题！想增加抽象，也没有问题！只要对外暴露的接口层允许这样的变化，我们已经把变化的可能性减到最小。
+3. 实现细节对客户透明: 客户不用关心细节的实现，它已经由抽象层通过聚合关系完成了封装。
+
+### 桥接模式使用场景
+
+1. 不希望或不适用使用继承的场景: 例如继承层次过渡、无法更细化设计颗粒等场景，需要考虑使用桥梁模式
+2. 接口或抽象类不稳定的场景: 明知道接口不稳定还想通过实现或继承来实现业务需求，那是得不偿失的，也是比较失败的做法。
+3. 重用性要求较高的场景: 设计的颗粒度越细，则被重用的可能性就越大，而采用继承则受父类的限制，不可能出现太细的颗粒度。
+
+
+### 桥接模式例子: 公司生产
+
+我们每个人都有理想，但不要只是空想，理想是要靠今天的拼搏来实现的。今天咱们就来谈谈自己的理想，如希望成为一个富翁，身价过亿，有两家大公司，一家是房地产公司，另一家是服装制造公司。这两家公司都很赚钱，天天帮你累积财富。其实你并不关心公司的类型，你关心的是它们是不是在赚钱，赚了多少，这才是你关注的。商人嘛，唯利是图是其本性，偷税漏税是方法，欺上瞒下、压榨员工血汗是常用的手段，先用类图表示一下这两个公司
+
+```plantuml
+@startuml
+class Client {
+
+}
+
+abstract class Corp {
+    void makeMoney()
+    void produce()
+    void sell()
+}
+
+class HouseCorp extends Corp {}
+class ClothesCorp extends Corp {}
+
+Client -right-> Corp
+@enduml
+```
+
+类图很简单，声明了一个Corp抽象类，定义一个公司的抽象模型，公司首要是赚钱的，做义务或善举那也是有背后利益支撑的，还是赞成这句话“天下熙熙，皆为利来；天下攘攘，皆为利往”。我们先看Corp类的源代码
+
+```java
+// 怎么这是模板方法模式啊？是的，这是个引子，请继续往下看。合适的方法存在合适的类中，这个基本上是每本Java基础书上都会讲的，但是到实际的项目中应用的时候就不是这么回事儿了。我们继续看两个实现类是如何实现的
+// 抽象公司
+public abstract class Corp {
+    /*
+    * 如果是公司就应该有生产，不管是软件公司还是制造业公司
+    * 每家公司生产的东西都不一样，所以由实现类来完成
+    */
+    protected abstract void produce();
+    /*
+    * 有产品了，那肯定要销售啊，不销售公司怎么生存
+    */
+    protected abstract void sell();
+        //公司是干什么的？赚钱的
+        public void makeMoney(){
+        //每个公司都是一样，先生产
+        this.produce();
+        //然后销售
+    this.sell();
+    }
+}
+
+// 房地产公司
+public class HouseCorp extends Corp {
+    //房地产公司盖房子
+    protected void produce() {
+        System.out.println("房地产公司盖房子...");
+    }
+    //房地产公司卖房子，自己住那可不赚钱
+    protected void sell() {
+        System.out.println("房地产公司出售房子...");
+    }
+    //房地产公司很High了，赚钱，计算利润
+    public void makeMoney(){
+        super.makeMoney();
+        System.out.println("房地产公司赚大钱了...");
+    }
+}
+
+// 服装公司
+public class ClothesCorp extends Corp {
+    //服装公司生产的就是衣服了
+    protected void produce() {
+        System.out.println("服装公司生产衣服...");
+    }
+    //服装公司卖服装，可只卖服装，不卖穿衣服的模特
+    protected void sell() {
+        System.out.println("服装公司出售衣服...");
+    }
+    //服装公司不景气，但怎么说也是赚钱行业
+    public void makeMoney(){
+        super.makeMoney();
+        System.out.println("服装公司赚小钱...");
+    }
+}
+
+public class Client {
+    public static void main(String[] args) {
+        System.out.println("-------房地产公司是这样运行的-------");
+        //先找到我的公司
+        HouseCorp houseCorp =new HouseCorp();
+        //看我怎么挣钱
+        houseCorp.makeMoney();
+        System.out.println("\n");
+        System.out.println("-------服装公司是这样运行的-------");
+        ClothesCorp clothesCorp = new ClothesCorp();
+        clothesCorp.makeMoney();
+    }
+}
+```
+
+
+上述代码完全可以描述我现在的公司，但是你要知道万物都是运动的，你要用运动的眼光看问题，公司才会发展……终于有一天你觉得赚钱速度太慢，于是你上下疏通，左右打关系，终于开辟了一条赚钱的“康庄大道”：生产山寨产品！什么产品呢？即市场上什么牌子的东西火爆我生产什么牌子的东西，不管是打火机还是电脑，只要它火爆，我就生产，赚过了高峰期就换个产品，打一枪换一个牌子，不承担售后成本、也不担心销路问题，我只要正品的十分之一的价格，你买不买？哈哈，赚钱啊！
+
+企业的方向定下来了，通过调查，苹果公司的iPod系列产品比较火爆，那咱就生产这个，把服装厂改成iPod生产厂，看类图的变化
+
+```plantuml
+@startuml
+class Client {
+
+}
+
+abstract class Corp {
+    void makeMoney()
+    void produce()
+    void sell()
+}
+
+class HouseCorp extends Corp {}
+class IPodCorp extends Corp {}
+
+Client -right-> Corp
+@enduml
+```
+
+好，我的企业改头换面了，开始生产iPod产品了，看我IPodCorp类的实现
+
+```java
+public class IPodCorp extends Corp {
+    //我开始生产iPod了
+    protected void produce() {
+        System.out.println("我生产iPod...");
+    }
+    //山寨的iPod很畅销，便宜嘛
+    protected void sell() {
+        System.out.println("iPod畅销...");
+    }
+    //狂赚钱
+    public void makeMoney(){
+        super.makeMoney();
+        System.out.println("我赚钱呀...");
+    }
+}
+```
+
+服装工厂改成了电子工厂，你这个董事长还是要去看看到底生产什么的，场景类如代码
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        System.out.println("-------房地产公司是按这样运行的-------");
+        //先找到我的公司
+        HouseCorp houseCorp =new HouseCorp();
+        //看我怎么挣钱
+        houseCorp.makeMoney();
+        System.out.println("\n");
+        System.out.println("-------山寨公司是按这样运行的-------");
+        IPodCorp iPodCorp = new IPodCorp();
+        iPodCorp.makeMoney();
+    }
+}
+```
+
+确实，只用修改了黑色字体这几句话，服装厂就开始变成山寨iPod生产车间，然后你就看着你的财富在积累。山寨的东西不需要特别的销售渠道（正品到哪里我就到哪里），不需要维修成本（大不了给你换个，你还想怎么样，过了高峰期我就改头换面了，你找谁维修去？投诉？投诉谁呢？），不承担广告成本（正品在打广告，我还需要吗？需要吗？），但是也有犯愁的时候，这是一个山寨工厂，要及时地生产出市场上流行的产品，转型要快，要灵活，今天从生产iPod转为生产MP4,明天再转为生产上网本，这都需要灵活的变化，不要限制得太死！那问题来了，每次我的厂房，我的工人，我的设备都在，不可能每次我换个山寨产品厂子就彻底不要了。这不行，成本忒高了点，那怎么办, 既然产品和工厂绑得太死，那我就给你来松松，改变设计, 类图如下
+
+```plantuml
+@startuml
+class Client {
+
+}
+
+abstract class Corp {
+    Product product
+
+    Corp(Product product)
+    void makeMoney()
+}
+note top of Corp : 公司
+
+class HouseCorp extends Corp {}
+class SanZhaiCorp extends Corp {}
+
+interface Product {
+    void beProducted()
+    void beSelled()
+}
+note top of Product : 产品
+
+class House implements Product {}
+class IPod implements Product {}
+
+Client -right-> Corp
+Corp -right-> Product
+
+@enduml
+```
+
+公司和产品之间建立关联关系，可以彻底解决以后山寨公司生产产品的问题，工厂想换产品？太容易了！看程序说话，先看Product抽象类，如代码
+
+```java
+// 抽象产品类
+public abstract class Product {
+    //甭管是什么产品它总要能被生产出来
+    public abstract void beProducted();
+    //生产出来的东西，一定要销售出去，否则亏本
+    public abstract void beSelled();
+}
+
+// 房子
+public class House extends Product {
+    //豆腐渣就豆腐渣呗，好歹也是房子
+    public void beProducted() {
+        System.out.println("生产出的房子是这样的...");
+    }
+    //虽然是豆腐渣，也是能够销售出去的
+    public void beSelled() {
+        System.out.println("生产出的房子卖出去了...");
+    }
+}
+
+// iPod产品
+public class IPod extends Product {
+    public void beProducted() {
+        System.out.println("生产出的iPod是这样的...");
+    }
+    public void beSelled() {
+        System.out.println("生产出的iPod卖出去了...");
+    }
+}
+
+// 抽象公司类
+public abstract class Corp {
+    //定义一个抽象的产品对象，不知道具体是什么产品
+    private Product product;
+    //构造函数，由子类定义传递具体的产品进来
+    public Corp(Product product){
+        this.product = product;
+    }
+    //公司是干什么的？赚钱的！
+    public void makeMoney(){
+        //每家公司都是一样，先生产
+        this.product.beProducted();
+        //然后销售
+        this.product.beSelled();
+    }
+}
+
+// 房地产公司
+public class HouseCorp extends Corp {
+    //定义传递一个House产品进来
+    public HouseCorp(House house){
+        super(house);
+    }
+    //房地产公司很High了，赚钱，计算利润
+    public void makeMoney(){
+        super.makeMoney();
+        // 修正抽象化角色
+        System.out.println("房地产公司赚大钱了...");
+    }
+}
+
+// 山寨公司
+public class ShanZhaiCorp extends Corp {
+    //产什么产品，不知道，等被调用的才知道
+    public ShanZhaiCorp(Product product){
+        super(product);
+    }
+    //狂赚钱
+    public void makeMoney(){
+        super.makeMoney();
+        System.out.println("我赚钱呀...");
+    }
+}
+
+// HouseCorp类和ShanZhaiCorp类的区别是在有参构造的参数类型上，HouseCorp类比较明确，我就是只要House类，
+// 所以直接定义传递进来的必须是House类， 一个类尽可能少地承担职责，那方法也一样，
+// 既然HouseCorp类已经非常明确地只生产House产品，那为什么不定义成House类型呢？
+// ShanZhaiCorp就不同了，它确定不了生产什么类型。
+
+public class Client {
+    public static void main(String[] args) {
+        House house = new House();
+        System.out.println("-------房地产公司是这样运行的-------");
+        //先找到房地产公司
+        HouseCorp houseCorp =new HouseCorp(house);
+        //看我怎么挣钱
+        houseCorp.makeMoney();
+        System.out.println("\n");
+        //山寨公司生产的产品很多，不过我只要指定产品就成了
+        System.out.println("-------山寨公司是这样运行的-------");
+        ShanZhaiCorp shanZhaiCorp = new ShanZhaiCorp(new IPod());
+        shanZhaiCorp.makeMoney();
+        // 突然有一天，老板良心发现了，不准备生产这种“三无”产品了，那我们程序该怎么修改呢？
+        // 如果仍重操旧业，生产衣服，那该如何处理呢？很容易处理，增加一个产品类，
+        // 然后稍稍修改一下场景就可以了，我们来看衣服产品类
+        // System.out.println("-------山寨公司是这样运行的-------");
+        // ShanZhaiCorp shanZhaiCorp = new ShanZhaiCorp(new Clothes());
+        // shanZhaiCorp.makeMoney();
+    }
+}
+```

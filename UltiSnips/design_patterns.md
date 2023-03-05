@@ -7156,3 +7156,500 @@ public class Client {
     }
 }
 ```
+
+## 生成器模式
+
+`生成器模式`: 将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示
+
+建造者模式关注的是零件类型和装配工艺（顺序），这是它与工厂方法模式最大不同的地方，虽然同为创建类模式，但是注重点不同
+
+### 生成器模式类图
+
+```plantuml
+@startuml
+
+class Director {
+    Construct()
+}
+note top of Director
+Director导演类
+负责安排已有模块的顺序
+然后告诉Builder开始建造
+end note
+
+abstract class Builder {
+    BuildPart()
+}
+note top of Builder
+Builder抽象建造者
+规范产品的组建，一般是由子类实现
+end note
+
+class ConcreteBuilder extends Builder {
+
+}
+note bottom of ConcreteBuilder
+ConcreteBuilder具体建造者
+实现抽象类定义的所有方法
+并且返回一个组建好的对象
+end note
+
+class Product {
+
+}
+note bottom of Product
+Product产品类
+通常是实现了模板方法模式
+也就是有模板方法和基本方法
+end note
+
+Director -right-> Builder
+ConcreteBuilder -right-> Product
+
+@enduml
+```
+
+代码示例
+
+```java
+// 产评类通常是一个组合或继承（如模板方法模式）产生的类
+public class Product {
+    public void doSomething(){
+        //独立业务处理
+    }
+}
+
+// 抽象建造者
+public abstract class Builder {
+    // setPart方法是零件的配置，什么是零件？其他的对象，获得一个不同零件，或者
+    // 不同的装配顺序就可能产生不同的产品
+    //设置产品的不同部分，以获得不同的产品
+    public abstract void setPart();
+    //建造产品
+    public abstract Product buildProduct();
+}
+
+// 需要注意的是，如果有多个产品类就有几个具体的建造者，而且这多个产品类具有相同接口或抽象类
+// 具体建造者
+public class ConcreteProduct extends Builder {
+    private Product product = new Product();
+    //设置产品零件public void setPart(){
+        //产品类内的逻辑处理
+    }
+    //组建一个产品
+    public Product buildProduct() {
+        return product;
+    }
+}
+
+// 导演类起到封装的作用，避免高层模块深入到建造者内部的实现类。
+// 当然，在建造者模式比较庞大时，导演类可以有多个。
+// 导演类
+public class Director {
+    private Builder builder = new ConcreteProduct();
+        //构建不同的产品
+        public Product getAProduct(){
+        builder.setPart();
+        /*
+        * 设置不同的零件，产生不同的产品
+        */
+        return builder.buildProduct();
+    }
+}
+
+
+```
+
+### 生成器模式的优点
+
+1. 封装性: 使用建造者模式可以使客户端不必知道产品内部组成的细节，如例子中我们就不需要关心每一个具体的模型内部是如何实现的
+2. 建造者独立，容易扩展: BenzBuilder和BMWBuilder是相互独立的，对系统的扩展非常有利。
+3. 便于控制细节风险: 由于具体的建造者是独立的，因此可以对建造过程逐步细化，而不对其他的模块产生任何影响。
+
+### 建造者模式的使用场景
+
+1. 相同的方法，不同的执行顺序，产生不同的事件结果时，可以采用建造者模式
+2. 多个部件或零件，都可以装配到一个对象中，但是产生的运行结果又不相同时，则可以使用该模式。
+3. 产品类非常复杂，或者产品类中的调用顺序不同产生了不同的效能，这个时候使用建造者模式非常合适。
+4. 在对象创建过程中会使用到系统中的一些其他对象，这些对象在产品对象的创建过程中不易得到时，也可以采用建造者模式封装该对象的创建过程。该种场景只能是一个补偿方法，因为一个对象不容易获得，而在设计阶段竟然没有发觉，而要通过创建者模式柔化创建
+过程，本身已经违反设计的最初目标。
+
+### 生成器模式例子: 汽车厂
+
+又是一个周三，快要下班了，老大突然拉住我，喜滋滋地告诉我：“××公司很满意我们做的模型，又签订了一个合同，把奔驰、宝马的车辆模型都交给我们公司制作了，不过这次又额外增加了一个新需求：汽车的启动、停止、喇叭声音、引擎声音都由客户自己控制，他想什么顺序就什么顺序，这个没问题吧？”
+
+那任务又是一个时间紧、工程量大的项目，为什么是“又”呢？因为基本上每个项目都是如此，我该怎么来完成这个任务呢？
+
+首先，我们分析一下需求，奔驰、宝马都是一个产品，它们有共有的属性，××公司关心的是单个模型的运行过程：奔驰模型A是先有引擎声音，然后再响喇叭；奔驰模型B是先启动起来，然后再有引擎声音，这才是××公司要关心的。那到我们老大这边呢，就是满足人家的要求，要什么顺序就立马能产生什么顺序的模型出来。我就负责把老大的要求实现出来，而且还要是批量的，也就是说××公司下单订购宝马A车模，我们老大马上就找我“生产一个这样的车模，启动完毕后，喇叭响一下”，然后我们就准备开始批量生产这些模型。由我生产出N多个奔驰和宝马车辆模型，这些车辆模型都有run()方法，但是具体到每一个模型的run()方法中间的执行任务的顺序是不同的，老大说要啥顺序，我就给啥顺序，最终客户买走后只能是既定的模型。好，需求还是比较复杂，我们先一个一个地解决，先从找一个最简单的切入点——产品类，每个车都是一个产品, 类图如下
+
+```plantuml
+@startuml
+
+abstract class CarModel {
+    start()
+    stop()
+    alarm()
+    engineBoom()
+    run()
+    setSequence()
+}
+
+class BenzModel extends CarModel {}
+note bottom of BenzModel : 奔驰实现类
+
+class BMWModel extends CarModel {}
+note bottom of BMWModel : 宝马实现类
+
+@enduml
+```
+
+类图比较简单，在CarModel中我们定义了一个setSequence方法，车辆模型的这几个动作要如何排布，是在这个ArrayList中定义的。然后run()方法根据sequence定义的顺序完成指定的顺序动作，与第10章介绍的模板方法模式是不是非常类似？好，我们先看CarModel源代码，代码清单如下
+
+```java
+// 车辆模型的抽象类
+// CarModel的设计原理是这样的，setSequence方法是允许客户自己设置一个顺序，
+// 是要先启动响一下喇叭再跑起来，还是要先响一下喇叭再启动。对于一个具体的模型永远都固定的，
+// 但是对N多个模型就是动态的了。在子类中实现父类的基本方法，run()方法读取
+sequence，然后遍历sequence中的字符串，哪个字符串在先，就先执行哪个方法
+public abstract class CarModel {
+    //这个参数是各个基本方法执行的顺序
+    private ArrayList<String> sequence = new ArrayList<String>();
+    //模型是启动开始跑了
+    protected abstract void start();
+    //能发动，还要能停下来，那才是真本事
+    protected abstract void stop();
+    //喇叭会出声音，是滴滴叫，还是哔哔叫
+    protected abstract void alarm();
+    //引擎会轰隆隆地响，不响那是假的
+    protected abstract void engineBoom();
+    //那模型应该会跑吧，别管是人推的，还是电力驱动，总之要会跑
+    final public void run() {
+        //循环一边，谁在前，就先执行谁
+        for(int i=0;i<this.sequence.size();i++){
+            String actionName = this.sequence.get(i);
+
+            if(actionName.equalsIgnoreCase("start")){
+                this.start(); //启动汽车
+            } else if(actionName.equalsIgnoreCase("stop")){
+                this.stop(); //停止汽车
+            } else if(actionName.equalsIgnoreCase("alarm")){
+                this.alarm(); //喇叭开始叫了
+            } else if(actionName.equalsIgnoreCase("engine boom")){
+                //如果是engine boom关键
+                this.engineBoom(); //引擎开始轰鸣
+            }
+        }
+    }
+    //把传递过来的值传递到类内
+    final public void setSequence(ArrayList sequence){
+        this.sequence = sequence;
+    }
+}
+
+// 奔驰模型代码
+public class BenzModel extends CarModel {
+    protected void alarm() {
+        System.out.println("奔驰车的喇叭声音是这个样子的...");
+    }
+    protected void engineBoom() {
+        System.out.println("奔驰车的引擎是这个声音的...");
+    }
+    protected void start() {
+        System.out.println("奔驰车跑起来是这个样子的...");
+    }
+    protected void stop() {
+        System.out.println("奔驰车应该这样停车...");
+    }
+}
+
+// 宝马模型代码
+public class BMWModel extends CarModel {
+    protected void alarm() {
+        System.out.println("宝马车的喇叭声音是这个样子的...");
+    }
+    protected void engineBoom() {
+        System.out.println("宝马车的引擎是这个声音的...");
+    }
+    protected void start() {
+        System.out.println("宝马车跑起来是这个样子的...");
+    }
+    protected void stop() {
+        System.out.println("宝马车应该这样停车...");
+    }
+}
+
+// 奔驰模型代码
+public class Client {
+    public static void main(String[] args) {
+        /*
+        * 客户告诉XX公司，我要这样一个模型，然后XX公司就告诉我老大
+        * 说要这样一个模型，这样一个顺序，然后我就来制造
+        */
+        BenzModel benz = new BenzModel();
+        //存放run的顺序
+        ArrayList<String> sequence = new ArrayList<String>();
+        sequence.add("engine boom"); //客户要求，run的时候先发动引擎
+        sequence.add("start"); //启动起来
+        sequence.add("stop");
+        //开了一段就停下来
+        //我们把这个顺序赋予奔驰车
+        benz.setSequence(sequence);
+        benz.run();
+    }
+}
+
+```
+
+看，我们组装了这样的一辆汽车，满足了××公司的需求。但是想想我们的需求，汽车的动作执行顺序是要能够随意调整的。我们只满足了一个需求，还有下一个需求呀，然后是第二个宝马模型，只要启动、停止，其他的什么都不要；第三个模型，先喇叭，然后启动，然后停止；第四个……直到把你逼疯为止，那怎么办？我们就一个一个地来写场景类满足吗？不可能了，那我们要想办法来解决这个问题，有了！我们为每种模型产品模型定义一个建造者，你要啥顺序直接告诉建造者，由建造者来建造，于是乎我们就有了如下类图。
+
+```plantuml
+@startuml
+
+abstract class CarBuilder {
+    setSequence()
+    CarModel getCarModel()
+}
+
+note top of CarBuilder
+增加了一个CarBuilder抽象类，由它来组装各个车模，
+要什么类型什么顺序的车辆模型，都由相关的子类完成
+end note
+
+class BenzCarBuilder extends CarBuilder {}
+note bottom of BenzCarBuilder : 奔驰车组装
+
+class BMWCarBuilder extends CarBuilder {}
+note bottom of BMWCarBuilder : 宝马车组装
+
+abstract class CarModel {
+    start()
+    stop()
+    alarm()
+    engineBoom()
+    run()
+    setSequence()
+}
+
+class BenzModel extends CarModel {}
+note bottom of BenzModel : 奔驰实现类
+
+class BMWModel extends CarModel {}
+note bottom of BMWModel : 宝马实现类
+
+CarBuilder -right-> CarModel
+
+@enduml
+```
+
+代码清单如下
+
+```java
+// 抽象汽车组装者
+public abstract class CarBuilder {
+    //建造一个模型，你要给我一个顺序要求，就是组装顺序
+    public abstract void setSequence(ArrayList<String> sequence);
+    //设置完毕顺序后，就可以直接拿到这个车辆模型
+    public abstract CarModel getCarModel();
+}
+
+// 很简单，每个车辆模型都要有确定的运行顺序，然后才能返回一个车辆模型
+// 奔驰车组装者
+public class BenzBuilder extends CarBuilder {
+    private BenzModel benz = new BenzModel();
+        public CarModel getCarModel() {
+        return this.benz;
+    }
+    public void setSequence(ArrayList<String> sequence) {
+        this.benz.setSequence(sequence);
+    }
+}
+
+// 宝马车组装者
+public class BMWBuilder extends CarBuilder {
+    private BMWModel bmw = new BMWModel();
+        public CarModel getCarModel() {
+        return this.bmw;
+    }
+    public void setSequence(ArrayList<String> sequence) {
+        this.bmw.setSequence(sequence);
+    }
+}
+
+// 我们再来看看××公司的需求如何满足
+public class Client {
+    public static void main(String[] args) {
+        /*
+        * 客户告诉XX公司，我要这样一个模型，然后XX公司就告诉我老大
+        * 说要这样一个模型，这样一个顺序，然后我就来制造
+        */
+        //存放run的顺序
+        ArrayList<String> sequence = new ArrayList<String>();
+        sequence.add("engine boom"); //客户要求，run时候时候先发动引擎
+        sequence.add("start"); //启动起来
+        sequence.add("stop");
+        //开了一段就停下来
+        //要一个奔驰车：
+        BenzBuilder benzBuilder = new BenzBuilder();//把顺序给这个builder类，制造出这样一个车出来
+        benzBuilder.setSequence(sequence);
+        //制造出一个奔驰车
+        BenzModel benz = (BenzModel)benzBuilder.getCarModel();
+        //奔驰车跑一下看看
+        benz.run();
+    }
+}
+
+// 那如果我再想要个同样顺序的宝马车呢
+public class Client {
+    public static void main(String[] args) {
+        //存放run的顺序
+        ArrayList<String> sequence = new ArrayList<String>();
+        sequence.add("engine boom"); //客户要求，run的时候先发动引擎
+        sequence.add("start"); //启动起来
+        sequence.add("stop"); //开了一段就停下来
+        //要一个奔驰车：
+        BenzBuilder benzBuilder = new BenzBuilder();
+        //把顺序给这个builder类，制造出这样一个车出来
+        benzBuilder.setSequence(sequence);
+        //制造出一个奔驰车
+        BenzModel benz = (BenzModel)benzBuilder.getCarModel();
+        //奔驰车跑一下看看
+        benz.run();
+        //按照同样的顺序，我再要一个宝马
+        BMWBuilder bmwBuilder = new BMWBuilder();
+        bmwBuilder.setSequence(sequence);
+        BMWModel bmw = (BMWModel)bmwBuilder.getCarModel();
+        bmw.run();
+    }
+}
+```
+
+看，同样运行顺序的宝马车也生产出来了，而且代码是不是比刚开始直接访问产品类（Procuct）简单了很多。我们在做项目时，经常会有一个共识：需求是无底洞，是无理性的，不可能你告诉它不增加需求就不增加，这4个过程（start、stop、alarm、engine boom）按照排列组合有很多种，××公司可以随意组合，它要什么顺序的车模我就必须生成什么顺序的车模，客户可是上帝！那我们不可能预知他们要什么顺序的模型呀，怎么办？封装一下，找一个导演，指挥各个事件的先后顺序，然后为每种顺序指定一个代码，你说一种我们立刻就给你生产处理，好方法，厉害！我们先修改一下类图，类图如下
+
+```plantuml
+@startuml
+
+class Client {}
+
+class Director {
+    CarModel getABenzModel()
+    CarModel getBBenzModel()
+    CarModel getCBMWModel()
+    CarModel getDBMWModel()
+}
+
+abstract class CarBuilder {
+    setSequence()
+    CarModel getCarModel()
+}
+
+note top of CarBuilder
+增加了一个CarBuilder抽象类，由它来组装各个车模，
+要什么类型什么顺序的车辆模型，都由相关的子类完成
+end note
+
+class BenzCarBuilder extends CarBuilder {}
+note bottom of BenzCarBuilder : 奔驰车组装
+
+class BMWCarBuilder extends CarBuilder {}
+note bottom of BMWCarBuilder : 宝马车组装
+
+abstract class CarModel {
+    start()
+    stop()
+    alarm()
+    engineBoom()
+    run()
+    setSequence()
+}
+
+class BenzModel extends CarModel {}
+note bottom of BenzModel : 奔驰实现类
+
+class BMWModel extends CarModel {}
+note bottom of BMWModel : 宝马实现类
+
+CarBuilder -right-> CarModel
+Client --> Director
+Director --o CarBuilder
+Director ..> CarModel
+
+@enduml
+```
+
+导演类代码清单如下
+
+```java
+public class Director {
+    private ArrayList<String> sequence = new ArrayList();
+    private BenzBuilder benzBuilder = new BenzBuilder();
+    private BMWBuilder bmwBuilder = new BMWBuilder();
+    /*
+    * A类型的奔驰车模型，先start，然后stop，其他什么引擎、喇叭一概没有
+    */
+    public BenzModel getABenzModel(){
+        //清理场景，这里是一些初级程序员不注意的地方
+        this.sequence.clear();
+        //ABenzModel的执行顺序
+        this.sequence.add("start");
+        this.sequence.add("stop");
+        //按照顺序返回一个奔驰车
+        this.benzBuilder.setSequence(this.sequence);
+        return (BenzModel)this.benzBuilder.getCarModel();
+    }
+    
+    /*
+    * B型号的奔驰车模型，是先发动引擎，然后启动，然后停止，没有喇叭
+    */
+    public BenzModel getBBenzModel(){
+        this.sequence.clear();
+        this.sequence.add("engine boom");
+        this.sequence.add("start");
+        this.sequence.add("stop");this.benzBuilder.setSequence(this.sequence);
+        return (BenzModel)this.benzBuilder.getCarModel();
+    }
+    
+    /*
+    * C型号的宝马车是先按下喇叭（炫耀嘛），然后启动，然后停止
+    */
+    public BMWModel getCBMWModel(){
+        this.sequence.clear();
+        this.sequence.add("alarm");
+        this.sequence.add("start");
+        this.sequence.add("stop");
+        this.bmwBuilder.setSequence(this.sequence);
+        return (BMWModel)this.bmwBuilder.getCarModel();
+    }
+    
+    /*
+    * D类型的宝马车只有一个功能，就是跑，启动起来就跑，永远不停止
+    */
+    public BMWModel getDBMWModel(){
+        this.sequence.clear();
+        this.sequence.add("start");
+        this.bmwBuilder.setSequence(this.sequence);
+        return (BMWModel)this.benzBuilder.getCarModel();
+    }
+    /*
+    * 这里还可以有很多方法，你可以先停止，然后再启动，或者一直停着不动，静态的嘛
+    * 导演类嘛，按照什么顺序是导演说了算
+    */
+}
+
+public class Client {
+    public static void main(String[] args) {
+        Director director = new Director();
+        //1万辆A类型的奔驰车
+        for(int i=0;i<10000;i++){
+            director.getABenzModel().run();
+        }
+        //100万辆B类型的奔驰车
+        for(int i=0;i<1000000;i++){
+            director.getBBenzModel().run();
+        }
+        //1000万辆C类型的宝马车
+        for(int i=0;i<10000000;i++){
+            director.getCBMWModel().run();
+        }
+    }
+}
+```

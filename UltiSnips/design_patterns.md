@@ -8070,3 +8070,259 @@ public class Client {
     }
 }
 ```
+
+## 享元模式
+
+`享元模式`: 使用共享对象可有效地支持大量的细粒度的对象
+
+`内部状态(intrinsic)` : 内部状态是对象可共享出来的信息，存储在享元对象内部并且不会随环境改变而改变
+
+`外部状态(extrinsic)` 外部状态是对象得以依赖的一个标记，是随环境改变而改变的、不可以共享的状态
+
+是一种结构型设计模式， 它摒弃了在每个对象中保存所有数据的方式， 通过共享多个对象所共有的相同状态， 让你能在有限的内存容量中载入更多对象。
+
+池技术的重要实现方式
+
+### 享元模式类图
+
+```plantuml
+@startuml
+
+note "享元模式只是一种优化。\n在应用该模式之前，\n你要确定程序中存在与大量类似对象同时占用内存相关的内存消耗问题，\n并且确保该问题无法使用其他更好的方式来解决。" as flyweight_note
+
+
+class Client {}
+
+note top of Client
+客户端 （Client） 负责计算或存储享元的外在状态。 
+在客户端看来， 享元是一种可在运行时进行配置的模板对象， 
+具体的配置方式为向其方法中传入一些情景数据参数。
+end note
+
+class Context {
+    - Object uniqueState
+    - Flyweight flyweight
+
+    + Context(reparationState, uniqueState)
+    + operation()
+}
+
+note right of Context
+情景 （Context） 类包含原始对象中各不相同的外在状态。 
+情景与享元对象组合在一起就能表示原始对象的全部状态。
+通常情况下， 原始对象的行为会保留在享元类中。 
+因此调用享元方法必须提供部分外在状态作为参数。 
+但你也可将行为移动到情景类中， 然后将连入的享元作为单纯的数据对象。
+end note
+
+note left of Context::uniqueState
+外部状态: 外部状态是对象得以依赖的一个标记
+是随环境改变而改变的、不可以共享的状态
+end note
+
+note left of Context::flyweight
+内部状态: 内部状态是对象可共享出来的信息
+存储在享元对象内部并且不会随环境改变而改变
+end note
+
+note left of Context::Context
+this.uniqueState = uniqueState
+this.flyweight = FlyweightFactory.getFlyweight(reparationState)
+end note
+
+note left of Context::operation
+flyweight.operation(uniqueState)
+end note
+
+class FlyweightFactory {
+    - Map<reparationState, Flyweight> cache
+
+    + getFlyweight(reparationState)
+}
+
+note bottom of FlyweightFactory
+享元工厂 （Flyweight Factory） 会对已有享元的缓存池进行管理。 
+有了工厂后， 客户端就无需直接创建享元， 
+它们只需调用工厂并向其传递目标享元的一些内在状态(reparationState)即可。 
+工厂会根据参数在之前已创建的享元中进行查找， 
+如果找到满足条件的享元就将其返回； 如果没有找到就根据参数新建享元。
+end note
+
+class Flyweight {
+    - reparationState
+    + operation(uniqueState)
+}
+
+note right of Flyweight::reparationState
+内在状态(reparationState) 用于映射内部状态的key可以的和多个字段
+end note
+
+note bottom of Flyweight
+享元 （Flyweight） 类包含原始对象中部分能在多个对象中共享的状态。 
+同一享元对象可在许多不同情景中使用。 
+享元中存储的状态被称为 “内在状态(Flyweight内部字段)”。 
+传递给享元方法的状态被称为 “外在状态(uniqueState)”
+end note
+
+Client -down-> Context
+Context --> FlyweightFactory
+Context --> Flyweight
+FlyweightFactory -right-> Flyweight
+
+@enduml
+```
+
+### 享元模式要点
+
+1. 享元与不可变性: 由于享元对象可在不同的情景中使用， 你必须确保其状态不能被修改。 享元类的状态只能由构造函数的参数进行一次性初始化， 它不能对其他对象公开其设置器或公有成员变量。
+2. 享元工厂
+    > 为了能更方便地访问各种享元， 你可以创建一个工厂方法来管理已有享元对象的缓存池。 工厂方法从客户端处接收目标享元对象的内在状态作为参数， 如果它能在缓存池中找到所需享元， 则将其返回给客户端； 如果没有找到， 它就会新建一个享元， 并将其添加到缓存池中
+    > 你可以选择在程序的不同地方放入该函数。 最简单的选择就是将其放置在享元容器中。 除此之外， 你还可以新建一个工厂类， 或者创建一个静态的工厂方法并将其放入实际的享元类中。
+3. 享元模式适合应用场景
+    > - 程序需要生成数量巨大的相似对象
+    > - 这将耗尽目标设备的所有内存
+    > - 对象中包含可抽取且能在多个对象间共享的重复状态。
+4. 实现方式
+    > 1. 将需要改写为享元的类成员变量拆分为两个部分
+    >   - 内在状态： 包含不变的、 可在许多对象中重复使用的数据的成员变量。
+    >   - 外在状态： 包含每个对象各自不同的情景数据的成员变量
+    > 2. 保留类中表示内在状态的成员变量， 并将其属性设置为不可修改。 这些变量仅可在构造函数中获得初始数值。
+    > 3. 找到所有使用外在状态成员变量的方法， 为在方法中所用的每个成员变量新建一个参数， 并使用该参数代替成员变量。
+    > 4. 你可以有选择地创建工厂类来管理享元缓存池， 它负责在新建享元时检查已有的享元。 如果选择使用工厂， 客户端就只能通过工厂来请求享元， 它们需要将享元的内在状态作为参数传递给工厂。
+    > 5. 客户端必须存储和计算外在状态 （情景） 的数值， 因为只有这样才能调用享元对象的方法。 为了使用方便， 外在状态和引用享元的成员变量可以移动到单独的情景类中。
+5. 享元模式优点:  如果程序中有很多相似对象， 那么你将可以节省大量内存。
+6. 享元模式缺点
+    > - 你可能需要牺牲执行速度来换取内存， 因为他人每次调用享元方法时都需要重新计算部分情景数据。
+    > - 代码会变得更加复杂。 团队中的新成员总是会问： “为什么要像这样拆分一个实体的状态？”。
+
+### 享元模式例子: 渲染一片森林
+
+本例中， 我们将渲染一片森林 （1,000,000 棵树）！ 每棵树都由包含一些状态的对象来表示 （坐标和纹理等）。 尽管程序能够完成其主要工作， 但很显然它需要消耗大量内存。
+
+原因很简单： 太多树对象包含重复数据 （名称、 纹理和颜色）。 因此我们可用享元模式来将这些数值存储在单独的享元对象中 （ Tree­Type类）。 现在我们不再将相同数据存储在数千个 Tree对象中， 而是使用一组特殊的数值来引用其中一个享元对象。
+
+客户端代码不会知道任何事情， 因为重用享元对象的复杂机制隐藏在了享元工厂中。
+
+```java
+//  包含每棵树的独特状态
+import java.awt.*;
+
+public class Tree {
+    private int x;
+    private int y;
+    private TreeType type;
+
+    public Tree(int x, int y, TreeType type) {
+        this.x = x;
+        this.y = y;
+        this.type = type;
+    }
+
+    public void draw(Graphics g) {
+        type.draw(g, x, y);
+    }
+}
+
+// 包含多棵树共享的状态
+import java.awt.*;
+
+public class TreeType {
+    private String name;
+    private Color color;
+    private String otherTreeData;
+
+    public TreeType(String name, Color color, String otherTreeData) {
+        this.name = name;
+        this.color = color;
+        this.otherTreeData = otherTreeData;
+    }
+
+    public void draw(Graphics g, int x, int y) {
+        g.setColor(Color.BLACK);
+        g.fillRect(x - 1, y, 3, 5);
+        g.setColor(color);
+        g.fillOval(x - 5, y - 10, 10, 10);
+    }
+}
+
+// 封装创建享元的复杂机制
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+
+public class TreeFactory {
+    static Map<String, TreeType> treeTypes = new HashMap<>();
+
+    public static TreeType getTreeType(String name, Color color, String otherTreeData) {
+        TreeType result = treeTypes.get(name);
+        if (result == null) {
+            result = new TreeType(name, color, otherTreeData);
+            treeTypes.put(name, result);
+        }
+        return result;
+    }
+}
+
+//  我们绘制的森林
+import refactoring_guru.flyweight.example.trees.Tree;
+import refactoring_guru.flyweight.example.trees.TreeFactory;
+import refactoring_guru.flyweight.example.trees.TreeType;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Forest extends JFrame {
+    private List<Tree> trees = new ArrayList<>();
+
+    public void plantTree(int x, int y, String name, Color color, String otherTreeData) {
+        TreeType type = TreeFactory.getTreeType(name, color, otherTreeData);
+        Tree tree = new Tree(x, y, type);
+        trees.add(tree);
+    }
+
+    @Override
+    public void paint(Graphics graphics) {
+        for (Tree tree : trees) {
+            tree.draw(graphics);
+        }
+    }
+}
+
+// 客户端代码
+import refactoring_guru.flyweight.example.forest.Forest;
+
+import java.awt.*;
+
+public class Demo {
+    static int CANVAS_SIZE = 500;
+    static int TREES_TO_DRAW = 1000000;
+    static int TREE_TYPES = 2;
+
+    public static void main(String[] args) {
+        Forest forest = new Forest();
+        for (int i = 0; i < Math.floor(TREES_TO_DRAW / TREE_TYPES); i++) {
+            forest.plantTree(random(0, CANVAS_SIZE), random(0, CANVAS_SIZE),
+                    "Summer Oak", Color.GREEN, "Oak texture stub");
+            forest.plantTree(random(0, CANVAS_SIZE), random(0, CANVAS_SIZE),
+                    "Autumn Oak", Color.ORANGE, "Autumn Oak texture stub");
+        }
+        forest.setSize(CANVAS_SIZE, CANVAS_SIZE);
+        forest.setVisible(true);
+
+        System.out.println(TREES_TO_DRAW + " trees drawn");
+        System.out.println("---------------------");
+        System.out.println("Memory usage:");
+        System.out.println("Tree size (8 bytes) * " + TREES_TO_DRAW);
+        System.out.println("+ TreeTypes size (~30 bytes) * " + TREE_TYPES + "");
+        System.out.println("---------------------");
+        System.out.println("Total: " + ((TREES_TO_DRAW * 8 + TREE_TYPES * 30) / 1024 / 1024) +
+                "MB (instead of " + ((TREES_TO_DRAW * 38) / 1024 / 1024) + "MB)");
+    }
+
+    private static int random(int min, int max) {
+        return min + (int) (Math.random() * ((max - min) + 1));
+    }
+}
+```

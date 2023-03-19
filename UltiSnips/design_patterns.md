@@ -8326,3 +8326,333 @@ public class Demo {
     }
 }
 ```
+
+## 解释器模式
+
+`解释器模式(Interpreter Pattern)`: 给定一门语言，定义它的文法的一种表示，并定义一个解释器，该解释器使用该表示来解释语言中的句子
+
+### 解释器模式类图
+
+```plantuml
+@startuml
+
+class Client {}
+note top of Client
+通常Client是一个封装类，
+封装的结果就是传递进来一个规范语法文件，
+解析器分析后产生结果并返回，
+避免了调用者与语法解析器的耦合关系
+end note
+
+class Context {}
+
+note right of Context
+环境角色
+end note
+
+abstract class AbstractExpression {
+    + interpret()
+}
+
+note left of AbstractExpression
+抽象解释器(AbstractExpression)
+具体的解释任务由各个实现类完成，
+具体的解释器分别由TerminalExpression和Non-terminalExpression完成。
+end note
+
+class TerminalExpression extends AbstractExpression {
+}
+
+note bottom of TerminalExpression
+终结符表达式(TerminalExpression)
+实现与文法中的元素相关联的解释操作，
+通常一个解释器模式中只有一个终结符表达
+式，但有多个实例，对应不同的终结符。
+具体到我们例子就是VarExpression类
+表达式中的每个终结符都在栈中产生了一个VarExpression对象。
+end note
+
+class NonTerminalExpression extends AbstractExpression {
+}
+
+note bottom of NonTerminalExpression
+非终结符表达式(NonTerminalExpression)
+文法中的每条规则对应于一个非终结表达式，
+具体到我们的例子就是加减法规则分别对
+应到AddExpression和SubExpression两个类。
+非终结符表达式根据逻辑的复杂程度而增加，
+原则上每个文法规则都对应一个非终结符表达式。
+end note
+
+Client --> Context
+Client --> AbstractExpression
+@enduml
+```
+
+示例代码如下
+```java
+// 抽象表达式
+// 抽象表达式是生成语法集合（也叫做语法树）的关键，
+// 每个语法集合完成指定语法解析任务，
+// 它是通过递归调用的方式，最终由最小的语法单元进行解析完成
+public abstract class Expression {
+    //每个表达式必须有一个解析任务
+    public abstract Object interpreter(Context
+}
+
+// 终结符表达式
+// 通常，终结符表达式比较简单，主要是处理场景元素和数据的转
+public class TerminalExpression extends Expression {
+    //通常终结符表达式只有一个，但是有多个对象
+    public Object interpreter(Context ctx) {
+        return null;
+    }
+}
+
+// 非终结符表达式
+// 每个非终结符表达式都代表了一个文法规则，并且每个文法规则都只关心自己周边的文法规则的结果（注意是结果），
+// 因此这就产生了每个非终结符表达式调用自己周边的非终结符表达式，然后最终、最小的文法规则就是终结符表达式，
+// 终结符表达式的概念就是如此，不能够再参与比自己更小的文法运算了
+public class NonTerminalExpression extends Expression {
+    //每个非终结符表达式都会对其他表达式产生依赖
+    public NonterminalExpression(Expression... expression){
+    }
+    public Object interpreter(Context ctx) {
+        //进行文法处理
+        return null;
+    }
+}
+
+// 客户类
+// 通常Client是一个封装类，封装的结果就是传递进来一个规范语法文件，
+// 解析器分析后产生结果并返回，避免了调用者与语法解析器的耦合关系
+public class Client {
+    public static void main(String[] args) {
+        Context ctx = new Context();
+        //通常定一个语法容器，容纳一个具体的表达式，通常为ListArray、LinkedList、Stack等类型
+        Stack&Expression> stack = null;
+        for(;;){
+            //进行语法判断，并产生递归调用
+        }
+        //产生一个完整的语法树，由各个具体的语法分析进行解析
+        Expression exp = stack.pop();
+        //具体元素进入场景
+        exp.interpreter(ctx);
+    }
+}
+
+```
+
+### 解析器模式要点
+
+1. 解析器模式优点: 解释器是一个简单语法分析工具，它最显著的优点就是扩展性，修改语法规则只要修改相应的非终结符表达式就可以了，若扩展语法，则只要增加非终结符类就可以了
+2. 解析器模式缺点
+    > - 解释器模式会引起类膨胀: 每个语法都要产生一个非终结符表达式，语法规则比较复杂时，就可能产生大量的类文件，为维护带来了非常多的麻烦。
+    > - 解释器模式采用递归调用方法: 每个非终结符表达式只关心与自己有关的表达式，每个表达式需要知道最终的结果，必须一层一层地剥茧，无论是面向过程的语言还是面向对象的语言，递归都是在必要条件下使用的，它导致调试非常复杂。想想看，如果要排查一个语法错误，我们是不是要一个断点一个断点地调试下去，直到最小的语法单元。
+    > - 效率问题: 解释器模式由于使用了大量的循环和递归，效率是一个不容忽视的问题，特别是一用于解析复杂、冗长的语法时，效率是难以忍受的。
+3. 解释器模式使用的场景
+    > - 重复发生的问题可以使用解释器模式
+    > - 一个简单语法需要解释的场景
+
+### 解析器模式例子: 计算器
+
+在银行、证券类项目中，经常会有一些模型运算，通过对现有数据的统计、分析而预测不可知或未来可能发生的商业行为。模型运算大部分是针对海量数据的，例如建立一个模型公式，分析一个城市的消费倾向，进而影响银行的营销和业务扩张方向。一般的模型运算都有一个或多个运算公式，通常是加、减、乘、除四则运算，偶尔也有指数、开方等复杂运算。具体到一个金融业务中，模型公式是非常复杂的，虽然只有加、减、乘、除四则运算，但是公式有可能有十多个参数，而且上百个业务品各有不同的取参路径，同时相关表的数据量都在百万级。呵呵，复杂了吧，不复杂那就不叫金融业务，我们来讲讲运算的核心——模型公式及其如何实现。
+
+业务需求：输入一个模型公式（加、减运算），然后输入模型中的参数，运算出结果。
+
+设计要求：
+
+- 公式可以运行时编辑，并且符合正常算术书写方式，例如a+b-c
+- 高扩展性，未来增加指数、开方、极限、求导等运算符号时较少改动。
+- 效率可以不用考虑，晚间批量运算。
+- 业务种类的公式：a+b+c-d, a+b+e-d, a-f ... 
+
+想想公式中有什么？仅有两类元素：运算元素和运算符号，运算元素就是指a、b、c等符号，需要具体赋值的对象，也叫做终结符号，为什么叫终结符号呢？因为这些元素除了需要赋值外，不需要做任何处理，所有运算元素都对应一个具体的业务参数，这是语法中最小的单元逻辑，不可再拆分；运算符号就是加减符号，需要我们编写算法进行处理，每个运算符号都要对应处理单元，否则公式无法运行，运算符号也叫做非终结符号。两类元素的共同点是都要被解析，不同点是所有的运算元素具有相同的功能，可以用一个类表示，而运算符号则是需要分别进行解释，加法需要加法解析器，减法需要减法解析器。分析到这里，我们就可以先画一个简单的类图
+
+```plantuml
+@startuml
+
+class Client {}
+
+class Calculator {
+    Calculator(String expStr)
+}
+note top of Calculator
+Calculator的作用是封装，
+根据迪米特法则，Client只与直接的朋友Calculator交流，
+与其他类没关系
+end note
+
+abstract class Expression {
+    + int interpreter(Map<String, Integer> var)
+}
+note top of Expression : 解释器
+
+class VarExpression extends Expression {
+
+    + int interpreter(Map<String, Integer> var)
+}
+note bottom of VarExpression : 运算元素解析
+
+abstract class SymbolExpression extends Expression {
+    # Expression left
+    # Expression right
+
+    + SymbolExpression(Expression left, Expression right)
+}
+note top of SymbolExpression : 运算符号解析
+
+class AddExpression extends SymbolExpression {
+    + int interpreter(Map<String, Integer> var)
+}
+note bottom of AddExpression : 加法解析
+
+class SubExpression extends SymbolExpression {
+    + int interpreter(Map<String, Integer> var)
+}
+note bottom of SubExpression : 减法解析
+
+Client -> Calculator
+Calculator -> Expression
+
+@enduml
+```
+
+代码清单如下
+
+```java
+
+// 抽象表达式类
+// 抽象类非常简单，仅一个方法interpreter负责对传递进来的参数和值进行解析和匹配，
+// 其中输入参数为HashMap类型，key值为模型中的参数，如a、b、c等，value为运算时取得的具体数字
+public abstract class Expression {
+    //解析公式和数值，其中var中的key值是公式中的参数，value值是具体的数字
+    public abstract int interpreter(HashMap<String,Integer> var);
+}
+
+// 变量解析器
+public class VarExpression extends Expression {
+    private String key;
+    public VarExpression(String _key){
+        this.key = _key;
+    }
+    //从map中取之
+    public int interpreter(HashMap<String, Integer> var) {
+        return var.get(this.key);
+    }
+}
+
+// 抽象运算符号解析器
+// 这个解析过程还是比较有意思的，每个运算符号都只和自己左右两个数字有关系，但左右两个数字有可能也是一个解析的结果，
+// 无论何种类型，都是Expression的实现类，于是在对运算符解析的子类中增加了一个构造函数，传递左右两个表达式
+public abstract class SymbolExpression extends Expression {
+    protected Expression left;
+    protected Expression right;
+    //所有的解析公式都应只关心自己左右两个表达式的结果
+    public SymbolExpression(Expression _left,Expression _right){
+        this.left = _left;
+        this.right = _right;
+    }
+}
+
+// 加法解析器
+public class AddExpression extends SymbolExpression {
+    public AddExpression(Expression _left,Expression _right){
+        super(_left,_right);
+    }
+    //把左右两个表达式运算的结果加起来
+    public int interpreter(HashMap<String, Integer> var) {
+        return super.left.interpreter(var) + super.right.interpreter(var);
+    }
+}
+
+// 减法解析器
+public class SubExpression extends SymbolExpression {
+    public SubExpression(Expression _left,Expression _right){
+        super(_left,_right);
+    }
+    //左右两个表达式相减
+    public int interpreter(HashMap<String, Integer> var) {
+        return super.left.interpreter(var) - super.right.interpreter(var);
+    }
+}
+
+// 解析器封装类
+public class Calculator {
+    //定义表达式
+    private Expression expression;
+    //构造函数传参，并解析
+    public Calculator(String expStr){
+        //定义一个栈，安排运算的先后顺序
+        Stack<Expression> stack = new Stack<Expression>();
+        //表达式拆分为字符数组
+        char[] charArray = expStr.toCharArray();
+        //运算
+        Expression left = null;
+        Expression right = null;
+        for(int i=0;i<charArray.length;i++){
+            switch(charArray[i]) {
+            case '+': //加法
+                //加法结果放到栈中
+                left = stack.pop();
+                right=new VarExpression(String.valueOf(charArray[++i]))
+                stack.push(new AddExpression(left,right));
+                break;
+            case '-':
+                left = stack.pop();
+                right=new VarExpression(String.valueOf(charArray[++i]))
+                stack.push(new SubExpression(left,right));
+                break;
+            default: //公式中的变量
+                stack.push(new VarExpression(String.valueOf(charArray[i
+            }
+        }
+        //把运算结果抛出来
+        this.expression = stack.pop();
+    }
+    //开始运算
+    public int run(HashMap<String,Integer> var){
+    return this.expression.interpreter(var);
+    }
+}
+
+// 客户模拟类
+// getExpStr是从键盘事件中获得的表达式，getValue方法是从键盘事件中获得表达式中的元素映射值，运行过程如下
+// 1. 请输入表达式：a+b-c
+// 2. 请输入a的值：100
+// 3. 请输入b的值：20
+// 4. 请输入c的值:40
+// 5. 运算结果为：a+b-c=80
+public class Client {
+    //运行四则运算
+    public static void main(String[] args) throws IOException{
+        String expStr = getExpStr();
+        //赋值
+        HashMap<String,Integer> var = getValue(expStr);
+        Calculator cal = new Calculator(expStr);
+        System.out.println("运算结果为："+expStr +"="+cal.run(var));
+    }
+    //获得表达式
+    public static String getExpStr() throws IOException{
+        System.out.print("请输入表达式：");
+        return (new BufferedReader(new InputStreamReader(System.in))).readLine();
+    }
+    //获得值映射
+    public static HashMap<String,Integer> getValue(String exprStr) throws IOException
+        HashMap<String,Integer> map = new HashMap<String,Integer>();
+        //解析有几个参数要传递
+        for(char ch:exprStr.toCharArray()){
+            if(ch != '+' && ch != '-'){
+                //解决重复参数的问题
+                if(!map.containsKey(String.valueOf(ch))){
+                    String in = (new BufferedReader(new InputStreamReader(System.in))).readLine();
+                    map.put(String.valueOf(ch),Integer.valueOf(in));
+                }
+            }
+        }
+        return map;
+    }
+}
+
+```
+

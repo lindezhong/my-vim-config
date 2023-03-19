@@ -7653,3 +7653,420 @@ public class Client {
     }
 }
 ```
+
+## 责任链模式
+
+`责任链模式`: 使多个对象都有机会处理请求，从而避免了请求的发送者和接受者之间的耦合关系。将这些对象连成一条链，并沿着这条链传递该请求，直到有对象处理它为止。
+
+
+### 责任链模式类图
+
+```plantuml
+@startuml
+
+class Client {}
+
+note right of Client
+客户端, 可根据程序逻辑一次性或者动态地生成链。
+值得注意的是， 请求可发送给链上的任意一个处理者， 
+而非必须是第一个处理者。
+end note
+
+interface Handler {
+    + setNext(Handler handler)
+    + handle(request)
+}
+
+note right of Handler
+处理者（Handler） 声明了所有具体处理者的通用接口。 
+该接口通常仅包含单个方法用于请求处理， 
+但有时其还会包含一个设置链上下个处理者的方法。
+end note
+
+abstract class AbstractHandler implements Handler {
+    - Handler next
+    + setNext(Handler handler)
+    + handle(request)
+}
+
+note right of AbstractHandler
+抽象处理者 （Abstract Handler） 是一个可选的类， 
+你可以将所有处理者共用的样本代码放置在其中。
+通常情况下， 该类中定义了一个保存对于下个处理者引用的成员变量。 
+客户端可通过将处理者传递给上个处理者的构造函数或设定方法来创建链。
+该类还可以实现默认的处理行为： 确定下个处理者存在后再将请求传递给它。
+end note
+
+class ConcreteHandler extends AbstractHandler {
+    + handle(request)
+}
+
+note right of ConcreteHandler
+具体处理者 （Concrete Handlers） 包含处理请求的实际代码。 
+每个处理者接收到请求后， 都必须决定是否进行处理， 以及是否沿着链传递请求。
+处理者通常是独立且不可变的， 需要通过构造函数一次性地获得所有必要地数据。
+end note
+
+Client --> Handler
+
+@enduml
+```
+
+```plantuml
+@startuml
+
+[Request] -> [HandlerA]
+[HandlerA] -> [HandlerB]
+[HandlerB] -> [HandlerC]
+[HandlerC] -> [Respon]
+
+
+@enduml
+```
+
+### 责任链模式要点
+
+1. 有一些责任链模式，每个Handler都有机会处理Request，通常这种责任链被称为拦截器（Interceptor）或者过滤器（Filter）
+2. 处理者可以决定不再沿着链传递请求， 这可高效地取消所有后续处理步骤。
+3. 责任链模式优点
+    > - 简化你的对象, 因为它不需要知道链的结构以及保持器成员的直接引用
+    > - 允许你通过改变链的成员或次序, 动态地添加或移除责任
+4. 责任链模式缺点
+    > - 并不保证请求一定会被执行, 如果没有对象处理它, 可能会掉到链的末尾(这个可以时优点或缺点)
+    > - 运行时可能会难以观察和调试
+
+### 责任链模式例子: 三从四德
+
+中国古代对妇女制定了“三从四德”的道德规范，“三从”是指“未嫁从父、既嫁从夫、夫死从子”。也就是说，一位女性在结婚之前要听从于父亲，结婚之后要听从于丈夫，如果丈夫死了还要听从于儿子。举例来说，如果一位女性要出去逛街，在她出嫁前必须征得父亲的同意，出嫁之后必须获得丈夫的许可，那丈夫死了怎么办？那就得问问儿子是否允许自己出去逛街。估计你接下来马上要问：“要是没有儿子怎么办？”那就请示小叔子、侄子等。在父系社会中，妇女只占从属地位，现在想想中国古代的妇女还是挺悲惨的，连逛街都要多番请示。作为父亲、丈夫或儿子，只有两种选择：要不承担起责任来，允许她或不允许她逛街；要不就让她请示下一个人，这是整个社会体系的约束，应用到我们项目中就是业务规则。下面来看如何通过程序来实现“三从”，需求很简单：通过程序描述一下古代妇女的“三从”制度。好，我们先来看类图，如下所示
+
+```plantuml
+@startuml
+
+interface IWomen {
+    + int getType()
+    + String getRequest()
+}
+
+class Women implements IWomen {
+
+}
+
+interface IHandler {
+    + void HandlerMessage(IWomen women)
+}
+
+note top of IHandler : 控制权的抽象
+
+class Father implements IHandler {}
+class Husband implements IHandler {}
+class Son implements IHandler {}
+
+IHandler -left--> IWomen
+@enduml
+```
+
+类图非常简单，IHandler是三个有决策权对象的接口，IWomen是女性的代码，其实现也非常简单，代码清单如下
+
+```java
+// 女性接口
+public interface IWomen {
+    //获得个人状况: 一个是取得当前的个人状况getType，通过返回值决定是结婚了还是没结婚、丈夫是否在世等
+    public int getType();
+    //获得个人请示，你要干什么？出去逛街？约会?还是看电影？
+    public String getRequest();
+}
+
+// 古代妇女
+public class Women implements IWomen{
+    /*
+    * 通过一个int类型的参数来描述妇女的个人状况
+    * 1--未出嫁
+    * 2--出嫁
+    * 3--夫死
+    */
+    private int type=0;
+    //妇女的请示
+    private String request = "";
+    //构造函数传递过来请求
+    public Women(int _type,String _request){
+        this.type = _type;
+        this.request = _request;
+    }
+    //获得自己的状况
+    public int getType(){
+        return this.type;
+    }
+    //获得妇女的请求
+    public String getRequest(){
+        return this.request;
+    }
+}
+
+// 有处理权的人员接口
+public interface IHandler {
+    //一个女性（女儿、妻子或者母亲）要求逛街，你要处理这个请求
+    public void HandleMessage(IWomen women);
+}
+
+// 父亲类: 在女儿没有出嫁之前父亲是有决定权的
+public class Father implements IHandler {
+    //未出嫁的女儿来请示父亲
+    public void HandleMessage(IWomen women) {
+        System.out.println("女儿的请示是："+women.getRequest());
+        System.out.println("父亲的答复是:同意");
+    }
+}
+
+// 丈夫类: 在女性出嫁后，丈夫有决定权
+public class Husband implements IHandler {
+    //妻子向丈夫请示
+    public void HandleMessage(IWomen women) {
+        System.out.println("妻子的请示是："+women.getRequest());
+        System.out.println("丈夫的答复是：同意");
+    }
+}
+
+// 儿子类: 在女性丧偶后，对母亲提出的请求儿子有决定权
+public class Son implements IHandler {
+    //母亲向儿子请示
+    public void HandleMessage(IWomen women) {
+        System.out.println("母亲的请示是："+women.getRequest());
+        System.out.println("儿子的答复是：同意");
+    }
+}
+
+// 场景类: 处理女儿、妻子、母亲提出的请求，我们来模拟一下一个古代妇女出去逛街是如何请示的
+// 首先是通过随机方法产生了5个古代妇女的对象，然后看她们是如何就逛街这件事去请示的
+public class Client {
+    public static void main(String[] args) {
+        //随机挑选几个女性
+        Random rand = new Random();
+        ArrayList<IWomen> arrayList = new ArrayList();
+        for(int i=0;i<5;i++){
+            arrayList.add(new Women(rand.nextInt(4),"我要出去逛街"));
+        }
+        //定义三个请示对象
+        IHandler father = new Father();
+        IHandler husband = new Husband();
+        IHandler son = new Son();
+        for(IWomen women:arrayList){
+            if(women.getType() ==1){ //未结婚少女，请示父亲
+                System.out.println("\n--------女儿向父亲请示-------");
+                father.HandleMessage(women);
+            } else if(women.getType() ==2){ //已婚少妇，请示丈夫
+                System.out.println("\n--------妻子向丈夫请示-------");
+                husband.HandleMessage(women);
+            } else if(women.getType() == 3){ //母亲请示儿子
+                System.out.println("\n--------母亲向儿子请示-------");
+                son.HandleMessage(women);
+            }else{
+                //暂时什么也不做
+            }
+        }
+    }
+}
+
+```
+“三从四德”的旧社会规范已经完整地表现出来了，你看谁向谁请示都定义出来了，但是你是不是发现这个程序写得有点不舒服？有点别扭？有点想重构它的感觉？那就对了！这段代码有以下几个问题：
+
+- 职责界定不清晰: 对女儿提出的请示，应该在父亲类中做出决定，父亲有责任、有义务处理女儿的请示，因此Father类应该是知道女儿的请求自己处理，而不是在Client类中进行组装出来，也就是说原本应该是父亲这个类做的事情抛给了其他类进行处理，不应该是这样的。
+- 代码臃肿: 我们在Client类中写了if...else的判断条件，而且能随着能处理该类型的请示人员越多，if...else的判断就越多，想想看，臃肿的条件判断还怎么有可读性？
+- 耦合过重: 这是什么意思呢，我们要根据Women的type来决定使用IHandler的那个实现类来处理请求。有一个问题是：如果IHandler的实现类继续扩展怎么办？修改Client类？与开闭原则违背了！
+- 异常情况欠考虑: 妻子只能向丈夫请示吗？如果妻子（比如一个现代女性穿越到古代了，不懂什么“三从四德”）向自己的父亲请示了，父亲应该做何处理？我们的程序上可没有体现出来，逻辑失败了！
+
+既然有这么多的问题，那我们要想办法来解决这些问题，我们先来分析一下需求，女性提出一个请示，必然要获得一个答复，甭管是同意还是不同意，总之是要一个答复的，而且这个答复是唯一的，不能说是父亲作出一个决断，而丈夫也作出了一个决断，也即是请示传递出去，必然有一个唯一的处理人给出唯一的答复，OK，分析完毕，收工，重新设计，我们可以抽象成这样一个结构，女性的请求先发送到父亲类，父亲类一看是自己要处理的，就作出回应处理，如果女儿已经出嫁了，那就要把这个请求转发到女婿来处理，那女婿一旦去天国报道了，那就由儿子来处理这个请求，类似于如图
+
+```plantuml
+@startuml
+
+autonumber
+
+女性请示 -> 父亲
+父亲 --> 女性请示 : 父亲做出回应
+父亲 -> 丈夫 : 父亲不回应转发请示
+丈夫 --> 女性请示 : 丈夫做出回应
+丈夫 -> 儿子 : 丈夫不回应转发请示
+儿子 --> 女性请示 : 儿子做出回应
+
+@enduml
+```
+
+父亲、丈夫、儿子每个节点有两个选择：要么承担责任，做出回应；要么把请求转发到后序环节。结构分析得已经很清楚了，那我们看怎么来实现这个功能，类图重新修正，如图
+
+```plantuml
+@startuml
+
+interface IWomen {
+    + int getType()
+    + String getRequest()
+}
+
+note top of IWomen : 古代妇女的代表
+
+class Women implements IWomen {
+
+}
+
+interface IHandler {
+    + void handlerMessage(IWomen women)
+    + void setNext(Handler h)
+    # void response(IWomen wome)
+}
+
+note top of IHandler
+控制权的抽象
+handlerMessage() : 处理请求
+setNext() : 设置下一个处理环节时谁
+response() : 回应, 各个实现类实现
+end note
+
+class Father implements IHandler {}
+class Husband implements IHandler {}
+class Son implements IHandler {}
+
+IHandler -left--> IWomen
+@enduml
+```
+
+从类图上看，三个实现类Father、Husband、Son只要实现构造函数和父类中的抽象方法response就可以了，具体由谁处理女性提出的请求，都已经转移到了Handler抽象类中，我们来看Handler怎么实现，如代码清单
+
+```java
+
+// 方法比较长，但是还是比较简单的，读者有没有看到，其实在这里也用到模板方法模式，在模板方法中判断请求的级别和当前能够处理的级别，
+// 如果相同则调用基本方法，做出反馈；如果不相等，则传递到下一个环节，由下一环节做出回应，如果已经达到环节结尾，
+// 则直接做不同意处理。基本方法response需要各个实现类实现，每个实现类只要实现两个职责：一是定义自己能够处理的等级级别；二是对请求做出回应
+public abstract class Handler {
+    public final static int FATHER_LEVEL_REQUEST = 1;
+    public final static int HUSBAND_LEVEL_REQUEST = 2;
+    public final static int SON_LEVEL_REQUEST = 3;
+    //能处理的级别
+    private int level =0;
+    //责任传递，下一个人责任人是谁
+    private Handler nextHandler;
+    //每个类都要说明一下自己能处理哪些请求
+    public Handler(int _level){
+        this.level = _level;
+    }
+    //一个女性（女儿、妻子或者是母亲）要求逛街，你要处理这个请求
+    public final void HandleMessage(IWomen women){
+        if(women.getType() == this.level){
+            this.response(women);
+        }else{
+            if(this.nextHandler != null){ //有后续环节，才把请求往后递送
+                this.nextHandler.HandleMessage(women);
+            }else{ //已经没有后续处理人了，不用处理了
+                System.out.println("---没地方请示了，按不同意处理---\n");
+            }
+        }
+    }
+    /*
+    * 如果不属于你处理的请求，你应该让她找下一个环节的人，如女儿出嫁了，
+    * 还向父亲请示是否可以逛街，那父亲就应该告诉女儿，应该找丈夫请示
+    */
+    public void setNext(Handler _handler){
+        this.nextHandler = _handler;
+    }
+    //有请示那当然要回应
+    protected abstract void response(IWomen women);
+}
+
+// 父亲类
+public class Father extends Handler {
+    //父亲只处理女儿的请求
+    public Father(){
+        super(Handler.FATHER_LEVEL_REQUEST);
+    }
+    //父亲的答复
+    protected void response(IWomen women) {
+        System.out.println("--------女儿向父亲请示-------");
+        System.out.println(women.getRequest());
+        System.out.println("父亲的答复是:同意\n");
+    }
+}
+// 丈夫类
+public class Husband extends Handler {
+    //丈夫只处理妻子的请求
+    public Husband(){
+        super(Handler.HUSBAND_LEVEL_REQUEST);
+    }
+    //丈夫请示的答复
+    protected void response(IWomen women) {
+        System.out.println("--------妻子向丈夫请示-------");
+        System.out.println(women.getRequest());
+        System.out.println("丈夫的答复是：同意\n");
+    }
+}
+// 儿子类
+public class Son extends Handler {
+    //儿子只处理母亲的请求
+    public Son(){
+        super(Handler.SON_LEVEL_REQUEST);
+    }
+    //儿子的答复
+    protected void response(IWomen women) {
+        System.out.println("--------母亲向儿子请示-------");
+        System.out.println(women.getRequest());
+        System.out.println("儿子的答复是：同意\n");
+    }
+}
+
+// 女性类
+public class Women implements IWomen{
+    /*
+    * 通过一个int类型的参数来描述妇女的个人状况* 1--未出嫁
+    * 2--出嫁
+    * 3--夫死
+    */
+    private int type=0;
+    //妇女的请示
+    private String request = "";
+    //构造函数传递过来请求
+    public Women(int _type,String _request){
+        this.type = _type;
+        //为了便于显示，在这里做了点处理
+        switch(this.type){
+            case 1:
+            this.request = "女儿的请求是：" + _request;
+            break;
+        case 2:
+            this.request = "妻子的请求是：" + _request;
+            break;
+            case 3:
+            this.request = "母亲的请求是：" + _request;
+        }
+    }
+    //获得自己的状况
+    public int getType(){
+        return this.type;
+    }
+    //获得妇女的请求
+    public String getRequest(){
+        return this.request;
+    }
+}
+
+// 场景类: 业务调用类Client也不用去做判断到底是需要谁去处理，而且Handler抽象类的子类可以继续增加下去，只需要扩展传递链而已，
+// 调用类可以不用了解变化过程，甚至是谁在处理这个请求都不用知道。在这种模式下，即使现代社会的一个小太妹穿越到古代
+// （例如掉入时空隧道，或者时空突然扭转，甚至是突然魔法显灵），对“三从四德”没有任何 了解也可以自由地应付，
+// 反正只要请示父亲就可以了，该父亲处理就父亲处理，不该父亲处理就往下传递。这就是责任链模式
+public class Client {
+    public static void main(String[] args) {
+        //随机挑选几个女性
+        Random rand = new Random();
+        ArrayList<IWomen> arrayList = new ArrayList();
+        for(int i=0;i<5;i++){
+            arrayList.add(new Women(rand.nextInt(4),"我要出去逛街"));
+        }
+        //定义三个请示对象
+        Handler father = new Father();
+        Handler husband = new Husband();
+        Handler son = new Son();
+        //设置请示顺序
+        father.setNext(husband);
+        husband.setNext(son);
+        for(IWomen women:arrayList){
+            father.HandleMessage(women);
+        }
+    }
+}
+```

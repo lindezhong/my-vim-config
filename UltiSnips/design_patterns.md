@@ -8656,3 +8656,541 @@ public class Client {
 
 ```
 
+## 中介者模式
+
+`中介者模式`: 用一个中介对象封装一系列的对象交互，中介者使各对象不需要显示地相互作用，从而使其耦合松散，而且可以独立地改变它们之间的交互(该模式会限制对象之间的直接交互， 迫使它们通过一个中介者对象进行合作。)
+
+### 中介者模式类图
+
+```plantuml
+@startuml
+
+left to right direction
+
+interface Mediator {
+    + notice(sender)
+}
+
+note top of Mediator
+中介者 （Mediator） 接口声明了与组件交流的方法， 
+但通常仅包括一个通知方法。 
+组件可将任意上下文 （包括自己的对象） 
+作为该方法的参数， 只有这样接收组件和发送者类之间才不会耦合。
+end note
+
+class ConcreteMediator {
+    - ComponentA componentA
+    - ComponentB componentB
+    - ComponentC componentC
+    - ComponentD componentD
+
+    + notice(sender)
+    + reactorOnA()
+    + reactorOnB()
+    + reactorOnC()
+    + reactorOnD()
+}
+
+note bottom of ConcreteMediator
+具体中介者 （Concrete Mediator） 封装了多种组件间的关系。 
+具体中介者通常会保存所有组件的引用并对其进行管理， 
+甚至有时会对其生命周期进行管理。
+
+notice() 方法如下
+if (sender == componentA)
+    reactorOnA()
+end note
+
+class ComponentA {
+    - Mediator m
+    + operationA()
+}
+class ComponentB {
+    - Mediator m
+    + operationB()
+}
+class ComponentC {
+    - Mediator m
+    + operationC()
+}
+note right of ComponentC
+组件（Component） 是各种包含业务逻辑的类。 
+每个组件都有一个指向中介者的引用， 
+该引用被声明为中介者接口类型。 
+组件不知道中介者实际所属的类， 
+因此你可通过将其连接到不同的中介者以使其能在其他程序中复用。
+end note
+
+
+class ComponentD {
+    - Mediator m
+    + operationD()
+}
+note right of ComponentD
+组件并不知道其他组件的情况。 
+如果组件内发生了重要事件， 它只能通知中介者。 
+中介者收到通知后能轻易地确定发送者， 
+这或许已足以判断接下来需要触发的组件了。
+
+对于组件来说， 中介者看上去完全就是一个黑箱。 
+发送者不知道最终会由谁来处理自己的请求， 
+接收者也不知道最初是谁发出了请求。
+end note
+
+
+ComponentA -down-> Mediator
+ComponentB -down-> Mediator
+ComponentC -up-> Mediator
+ComponentD -up-> Mediator
+
+ConcreteMediator .left.|> Mediator
+ConcreteMediator -up-o ComponentA
+ConcreteMediator -up-o ComponentB
+ConcreteMediator -down-o ComponentC
+ConcreteMediator -down-o ComponentD
+
+@enduml
+```
+
+### 中介者模式要点
+
+1. 与其他模式的关系
+    > - 责任链模式、 命令模式、 中介者模式和观察者模式用于处理请求发送者和接收者之间的不同连接方式：  
+    >   - 责任链按照顺序将请求动态传递给一系列的潜在接收者， 直至其中一名接收者对请求进行处理。
+    >   - 命令在发送者和请求者之间建立单向连接。
+    >   - 中介者清除了发送者和请求者之间的直接连接， 强制它们通过一个中介对象进行间接沟通。
+    >   - 观察者允许接收者动态地订阅或取消接收请求。
+    > - 外观模式和中介者的职责类似： 它们都尝试在大量紧密耦合的类中组织起合作。
+    >   - 外观为子系统中的所有对象定义了一个简单接口， 但是它不提供任何新功能。 子系统本身不会意识到外观的存在。 子系统中的对象可以直接进行交流。
+    >   - 中介者将系统中组件的沟通行为中心化。 各组件只知道中介者对象， 无法直接相互交流。
+    > - 中介者和观察者之间的区别往往很难记住。 在大部分情况下， 你可以使用其中一种模式， 而有时可以同时使用。 让我们来看看如何做到这一点。
+    >   - 中介者的主要目标是消除一系列系统组件之间的相互依赖。 这些组件将依赖于同一个中介者对象。 观察者的目标是在对象之间建立动态的单向连接， 使得部分对象可作为其他对象的附属发挥作用。
+    >   - 有一种流行的中介者模式实现方式依赖于观察者。 中介者对象担当发布者的角色， 其他组件则作为订阅者， 可以订阅中介者的事件或取消订阅。 当中介者以这种方式实现时， 它可能看上去与观察者非常相似。
+    >   - 当你感到疑惑时， 记住可以采用其他方式来实现中介者。 例如， 你可永久性地将所有组件链接到同一个中介者对象。 这种实现方式和观察者并不相同， 但这仍是一种中介者模式。
+    >   - 假设有一个程序， 其所有的组件都变成了发布者， 它们之间可以相互建立动态连接。 这样程序中就没有中心化的中介者对象， 而只有一些分布式的观察者。
+
+2. 中介者模式的优点 中介者模式的优点就是减少类间的依赖，把原有的一对多的依赖变成了一对一的依赖，同事类只依赖中介者，减少了依赖，当然同时也降低了类间的耦合
+3. 中介者模式的缺点: 中介者模式的缺点就是中介者会膨胀得很大，而且逻辑复杂，原本N个对象直接的相互依赖关系转换为中介者和同事类的依赖关系，同事类越多，中介者的逻辑就越复杂。
+
+### 中介者模式例子: 进销存系统
+
+大家都来自五湖四海，都要生存，于是都找了个靠山——公司，就是给你发薪水的地方。公司要想尽办法赢利赚钱，赢利方法则不尽相同，但是各个公司都有相同的三个环节：采购、销售和库存。这个怎么说呢？比如一个软件公司，要开发软件，就需要购买开发环境，如Windows操作系统、数据库产品等，这就是采购；开发完产品还要把产品推销出去；有产品就必然有库存，软件产品也有库存，虽然不需要占用库房空间，但也要占用光盘或硬盘，这也是库存。再比如做咨询服务的公司，它要采购什么？采购知识，采购经验，这是这类企业的生存之本，销售的也是知识和经验，库存同样是知识和经验。既然进销存是如此重要，我们今天就来讲讲它的原理和设计，我相信很多人都已经开发过这种类型的软件，基本上都形成了固定套路，不管是单机版还是网络版，一般的做法都是通过数据库来完成相关产品的管理，相对来说这还是比较简单的项目，三个模块的示意图如图
+
+```plantuml
+@startuml
+
+[采购管理] <-right-> [销售管理]
+[采购管理] <--> [存货管理]
+[销售管理] <--> [存货管理]
+@enduml
+```
+
+我们从这个示意图上可以看出，三个模块是相互依赖的。我们就以一个终端销售商（以服务最终客户为目标的企业，比如某某超市、某某商店等）为例，采购部门要采购IBM的电脑，它根据以下两个要素来决定采购数量
+
+
+- 销售情况
+> 销售部门要反馈销售情况，畅销就多采购，滞销就不采购。
+- 库存情况
+> 即使是畅销产品，库存都有1000台了，每天才卖出去10台，也就不需要再采购了！销售模块是企业的赢利核心，对其他两个模块也有影响：
+- 库存情况
+> 库房有货，才能销售，空手套白狼是不行的。
+- 督促采购
+> 在特殊情况下，比如一个企业客户要一次性购买100台电脑，库存只有80台，这时需要催促采购部门赶快采购！
+
+同样地，库存管理也对其他两个模块有影响。库房是有容积限制的，不可能无限大，所以就有了清仓处理，那就要求采购部门停止采购，同时销售部门进行打折销售
+
+从以上分析来看，这三个模块都有自己的行为，并且与其他模块之间的行为产生关联，类似于我们办公室的同事，大家各干各的活，但是彼此之间还是有交叉的，于是彼此之间就产生紧耦合，也就是一个团队。我们先来实现这个进销存，类图如图
+
+```plantuml
+@startuml
+
+class Purchase {
+    + void buyIBMComputer(int number)
+    + void refuseBuyIBM()
+}
+
+note top of Purchase : 采购管理
+
+class Sale {
+    + void sellIBMComputer(int number)
+    + int getSaleStatus()
+    + void offSale()
+}
+
+note top of Sale : 销售管理
+
+class Stock {
+    - static int COMPUTER_NUMBER = 100
+
+    + void increase(int number)
+    + void decrease(int number)
+    + int getStockNumber()
+    + void clearStock()
+}
+
+note bottom of Stock : 存货管理
+
+Purchase <-right-> Sale
+Purchase <--> Stock
+Sale <--> Stock
+
+@enduml
+```
+
+代码清单如下
+
+```java
+// 采购管理
+public class Purchase {
+    //采购IBM电脑
+    public void buyIBMcomputer(int number){
+        //访问库存
+        Stock stock = new Stock();
+        //访问销售
+        Sale sale = new Sale();
+        //电脑的销售情况
+        int saleStatus = sale.getSaleStatus();
+        if(saleStatus>80){ //销售情况良好
+            System.out.println("采购IBM电脑:"+number + "台");
+            stock.increase(number);
+        }else{ //销售情况不好
+            int buyNumber = number/2; //折半采购
+            System.out.println("采购IBM电脑："+buyNumber+ "台");
+        }
+    }
+    //不再采购IBM电脑
+    public void refuseBuyIBM(){
+        System.out.println("不再采购IBM电脑");
+    }
+}
+
+// 库存管理
+public class Stock {
+    //刚开始有100台电脑
+    private static int COMPUTER_NUMBER =100;
+    //库存增加
+    public void increase(int number){
+        COMPUTER_NUMBER = COMPUTER_NUMBER + number;
+        System.out.println("库存数量为："+COMPUTER_NUMBER);
+    }
+    //库存降低
+    public void decrease(int number){
+        COMPUTER_NUMBER = COMPUTER_NUMBER - number;
+        System.out.println("库存数量为："+COMPUTER_NUMBER);
+    }
+    //获得库存数量
+    public int getStockNumber(){
+        return COMPUTER_NUMBER;
+    }
+    //存货压力大了，就要通知采购人员不要采购，销售人员要尽快销售
+    public void clearStock(){
+        Purchase purchase = new Purchase();
+        Sale sale = new Sale();
+        System.out.println("清理存货数量为："+COMPUTER_NUMBER);
+        //要求折价销售
+        sale.offSale();
+        //要求采购人员不要采购
+        purchase.refuseBuyIBM();
+    }
+}
+
+// 销售管理
+public class Sale {
+    //销售IBM电脑
+    public void sellIBMComputer(int number){
+        //访问库存
+        Stock stock = new Stock();
+        //访问采购
+        Purchase purchase = new Purchase();
+        if(stock.getStockNumber()<number){ //库存数量不够销售
+            purchase.buyIBMcomputer(number);
+        }
+        System.out.println("销售IBM电脑"+number+"台");
+        stock.decrease(number);
+    }
+    //反馈销售情况，0～100之间变化，0代表根本就没人卖，100代表非常畅销，出一个卖一个
+    public int getSaleStatus(){
+        Random rand = new Random(System.currentTimeMillis());
+        int saleStatus = rand.nextInt(100);
+        System.out.println("IBM电脑的销售情况为："+saleStatus);
+        return saleStatus;
+    }
+    //折价处理
+    public void offSale(){
+        //库房有多少卖多少
+        Stock stock = new Stock();
+        System.out.println("折价销售IBM电脑"+stock.getStockNumber()+"台");
+    }
+}
+
+// 场景类
+public class Client {
+    public static void main(String[] args) {
+        //采购人员采购电脑
+        System.out.println("------采购人员采购电脑--------");
+        Purchase purchase = new Purchase();
+        purchase.buyIBMcomputer(100);
+        //销售人员销售电脑
+        System.out.println("\n------销售人员销售电脑--------");
+        Sale sale = new Sale();
+        sale.sellIBMComputer(1);
+        //库房管理人员管理库存
+        System.out.println("\n------库房管理人员清库处理--------");
+        Stock stock = new Stock();
+        stock.clearStock();
+    }
+}
+```
+
+三个不同类型的参与者完成了各自的活动。你有没有发现这三个类是彼此关联的？每个类都与其他两个类产生了关联关系。迪米特法则认为“每个类只和朋友类交流”，这个朋友类并非越多越好，朋友类越多，耦合性越大，要想修改一个就得修改一片，这不是面向对象设计所期望的，况且这还是仅三个模块的情况，属于比较简单的一个小项目。我们把进销存扩展一下，如图
+
+```plantuml
+@startuml
+
+[采购管理] <--> [销售管理]
+[销售管理] <--> [物流管理]
+[采购管理] <--> [物流管理]
+[供应商管理] <--> [存货管理]
+[存货管理] <--> [资产管理]
+[供应商管理] <--> [资产管理]
+[采购管理] <--> [供应商管理]
+[采购管理] <--> [存货管理]
+[采购管理] <--> [资产管理]
+@enduml
+```
+
+这是一个蜘蛛网的结构，别说是编写程序了，就是给人看估计也能让一大批人昏倒！每个对象都需要和其他几个对象交流，对象越多，每个对象要交流的成本也就越大了，只是维护这些对象的交流就能让一大批程序员望而却步！从这方面来说，我们已经发现设计的缺陷了，作为一个架构师，发现缺陷就要想办法修改。
+
+
+大家都学过网络的基本知识，网络拓扑有三种类型：总线型、环型、星型。星型网络拓扑如图所示
+
+在星型网络拓扑中，每个计算机通过交换机和其他计算机进行数据交换，各个计算机之间并没有直接出现交互的情况。这种结构简单，而且稳定，只要中间那个交换机不瘫痪，整个网络就不会发生大的故障。公司和网吧一般都采用星型网络。我们是不是可以把这种星型结构引入到我们的设计中呢？我们先画一个示意图
+
+```plantuml
+@startuml
+
+[中介者] <--> [采购管理]
+[中介者] <--> [销售管理]
+[中介者] <-up-> [存货管理]
+
+@enduml
+```
+
+加入了一个中介者作为三个模块的交流核心，每个模块之间不再相互交流，要交流就通过中介者进行。每个模块只负责自己的业务逻辑，不属于自己的则丢给中介者来处理，简化了各模块之间的耦合关系，类图如图
+
+```plantuml
+@startuml
+
+class Purchase extends AbstractColleague {
+    + void buyIBMComputer(int number)
+    + void refuseBuyIBM()
+}
+
+note top of Purchase : 采购管理
+
+class Sale extends AbstractColleague {
+    + void sellIBMComputer(int number)
+    + int getSaleStatus()
+    + void offSale()
+}
+
+note top of Sale : 销售管理
+
+class Stock extends AbstractColleague {
+    - static int COMPUTER_NUMBER = 100
+
+    + void increase(int number)
+    + void decrease(int number)
+    + int getStockNumber()
+    + void clearStock()
+}
+
+note top of Stock : 存货管理
+
+abstract class AbstractMediator {
+    # Purchase purchase
+    # Sale sale
+    # Stock stock
+
+    + AbstractMediator()
+    + void execute(String str, Object... objects)
+}
+
+class Mediator {
+    + void execute(String str, Object... objects)
+}
+
+abstract class AbstractColleague {
+    # AbstractMediator mediator
+    + AbstractMediator(AbstractMediator mediator)
+}
+
+Purchase -down-> Mediator
+Sale -down-> Mediator
+Stock -down-> Mediator
+
+Mediator --|> AbstractMediator
+
+@enduml
+```
+
+建立了两个抽象类AbstractMediator和AbstractColeague，每个对象只是与中介者Mediator之间产生依赖，与其他对象之间没有直接关系，AbstractMediator的作用是实现中介者的抽象定义，定义了一个抽象方法execute
+
+```java
+// 抽象中介者
+public abstract class AbstractMediator {
+    protected Purchase purchase;
+    protected Sale sale;
+    protected Stock stock;
+    //构造函数
+    public AbstractMediator(){
+        purchase = new Purchase(this);
+        sale = new Sale(this);
+        stock = new Stock(this);
+    }
+    //中介者最重要的方法叫做事件方法，处理多个对象之间的关系
+    public abstract void execute(String str,Object...objects);
+}
+
+// 具体中介者
+// 中介者Mediator定义了多个private方法，其目的是处理各个对象之间的依赖关系，
+// 就是说把原有一个对象要依赖多个对象的情况移到中介者的private方法中实现。
+// 在实际项目中，一般的做法是中介者按照职责进行划分，每个中介者处理一个或多个类似的关联请求
+public class Mediator extends AbstractMediator {
+    //中介者最重要的方法
+    public void execute(String str,Object...objects){
+        if(str.equals("purchase.buy")){ //采购电脑
+            this.buyComputer((Integer)objects[0]);
+        }else if(str.equals("sale.sell")){ //销售电脑
+            this.sellComputer((Integer)objects[0]);
+        }else if(str.equals("sale.offsell")){ //折价销售
+            this.offSell();
+        }else if(str.equals("stock.clear")){ //清仓处理
+            this.clearStock();
+        }
+    }
+    //采购电脑
+    private void buyComputer(int number){
+        int saleStatus = super.sale.getSaleStatus();
+        if(saleStatus>80){ 
+            //销售情况良好
+            System.out.println("采购IBM电脑:"+number + "台");
+            super.stock.increase(number);
+        }else{ //销售情况不好
+            int buyNumber = number/2; //折半采购
+            System.out.println("采购IBM电脑："+buyNumber+ "台");
+        }
+    }
+    //销售电脑
+    private void sellComputer(int number){
+        if(super.stock.getStockNumber()<number){ //库存数量不够销售
+            super.purchase.buyIBMcomputer(number);
+        }
+        super.stock.decrease(number);
+    }
+    //折价销售电脑
+    private void offSell(){
+        System.out.println("折价销售IBM电脑"+stock.getStockNumber()+"台");
+    }
+    //清仓处理
+    private void clearStock(){
+        //要求清仓销售
+        super.sale.offSale();
+        //要求采购人员不要采购
+        super.purchase.refuseBuyIBM();
+    }
+}
+
+// 抽象同事类
+public abstract class AbstractColleague {
+    protected AbstractMediator mediator;
+    public AbstractColleague(AbstractMediator _mediator){
+        this.mediator = _mediator;
+    }
+}
+
+// 修改后的采购管理
+// 上述Purchase类简化了很多，也清晰了很多，处理自己的职责，与外界有关系的事件处理则交给了中介者来完成
+public class Purchase extends AbstractColleague{
+    public Purchase(AbstractMediator _mediator){
+        super(_mediator);
+    }
+    //采购IBM电脑
+    public void buyIBMcomputer(int number){
+        super.mediator.execute("purchase.buy", number);
+    }
+    //不再采购IBM电脑
+    public void refuseBuyIBM(){
+        System.out.println("不再采购IBM电脑");
+    }
+}
+
+// 库存管理
+public class Stock extends AbstractColleague {
+    public Stock(AbstractMediator _mediator){
+        super(_mediator);
+    }//刚开始有100台电脑
+    private static int COMPUTER_NUMBER =100;
+    //库存增加
+    public void increase(int number){
+        COMPUTER_NUMBER = COMPUTER_NUMBER + number;
+        System.out.println("库存数量为："+COMPUTER_NUMBER);
+    }
+    //库存降低
+    public void decrease(int number){
+        COMPUTER_NUMBER = COMPUTER_NUMBER - number;
+        System.out.println("库存数量为："+COMPUTER_NUMBER);
+    }
+    //获得库存数量
+    public int getStockNumber(){
+        return COMPUTER_NUMBER;
+    }//存货压力大了，就要通知采购人员不要采购，销售人员要尽快销售
+    public void clearStock(){
+        System.out.println("清理存货数量为："+COMPUTER_NUMBER);
+        super.mediator.execute("stock.clear");
+    }
+}
+
+// 销售管理
+public class Sale extends AbstractColleague {
+    public Sale(AbstractMediator _mediator){
+        super(_mediator);
+    }
+    //销售IBM电脑
+    public void sellIBMComputer(int number){
+        super.mediator.execute("sale.sell", number);
+        System.out.println("销售IBM电脑"+number+"台");
+    }
+    //反馈销售情况，0～100变化，0代表根本就没人买，100代表非常畅销，出一个卖一个
+    public int getSaleStatus(){
+        Random rand = new Random(System.currentTimeMillis());
+        int saleStatus = rand.nextInt(100);
+        System.out.println("IBM电脑的销售情况为："+saleStatus);
+        return saleStatus;
+    }
+    //折价处理
+    public void offSale(){
+        super.mediator.execute("sale.offsell");
+    }
+}
+
+// 场景类
+public class Client {
+    public static void main(String[] args) {
+        AbstractMediator mediator = new Mediator();
+        //采购人员采购电脑
+        System.out.println("------采购人员采购电脑--------");
+        Purchase purchase = new Purchase(mediator);
+        purchase.buyIBMcomputer(100);
+        //销售人员销售电脑
+        System.out.println("\n------销售人员销售电脑--------");
+        Sale sale = new Sale(mediator);
+        sale.sellIBMComputer(1);
+        //库房管理人员管理库存
+        System.out.println("\n------库房管理人员清库处理--------");
+        Stock stock = new Stock(mediator);
+        stock.clearStock();
+    }
+}
+
+```

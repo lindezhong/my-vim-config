@@ -25,6 +25,27 @@ autonumber
 $0
 endsnippet
 
+# ##方向
+snippet plantUmlStyleDirectionLeftToRight "从左往右构建,默认从上往下构建"
+left to right direction
+$0
+endsnippet
+
+snippet plantUmlStyleDirectionRightToLeft "从右往左构建,默认从上往下构建"
+right to left direction
+$0
+endsnippet
+
+snippet plantUmlStyleDirectionTopToBottom "从上往下构建,默认从上往下构建"
+top to bottom direction
+$0
+endsnippet
+
+snippet plantUmlStyleDirectionBottomToTop "从下往上构建,默认从上往下构建"
+bottom to top direction
+$0
+endsnippet
+
 # #注释
 snippet plantUmlNote "plant注释 例子 : note {left|right|top|bottom|over} of Object #{Color} : {NoteContext}  1. Object : 注释对象 1.1 类图:如果为类字段格式为 Object::field(到字段要用plantUmlNoteMulti), 如果为方法有相同名用 ''双引号包裹 'name(int length)' 1.2 对于某些uml图来说可以链接到两个对象则用逗号分割 : A,B 2. NoteContet : 注释内容 3. Color: 颜色代码比如 000000 或 blue"
 note ${1:\{left|right|top|bottom|over\}} of ${2:Object} : ${3:noteContet}

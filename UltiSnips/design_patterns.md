@@ -9194,3 +9194,683 @@ public class Client {
 }
 
 ```
+
+## 备忘录模式
+
+`备忘录模式`: 在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态。这样以后就可将该对象恢复到原先保存的状态。
+
+### 备忘录模式类图
+
+1. 基于嵌套类的实现
+```plantuml
+@startuml
+
+title 备忘录模式类图:基于嵌套类的实现
+
+class Originator {
+    - state
+    
+    + Memento save()
+    + restore(Memento m)
+}
+
+note bottom of Originator
+原发器 （Originator）类可以生成自身状态的快照， 
+也可以在需要时通过快照恢复自身状态。
+end note
+
+class Memento {
+    - state
+
+    - Memento(state)
+    - getState()
+}
+
+note bottom of Memento
+备忘录 （Memento） 是原发器状态快照的值对象 （value object）。
+通常做法是将备忘录设为不可变的， 并通过构造函数一次性传递数据。
+end note
+
+class Caretaker {
+    - Originator originator
+    - Memento[]     history
+
+    + doSomething()
+    + undo()
+}
+
+note left of Caretaker::doSomething
+m = originator.save()
+history.push(m)
+// originator.change()
+end note
+
+note left of Caretaker::undo
+m = history.pop()
+originator.restore(m)
+end note
+
+note top of Caretaker
+负责人 （Caretaker） 仅知道 “何时” 和 “为何” 捕捉原发器的状态， 以及何时恢复状态。
+
+负责人通过保存备忘录栈来记录原发器的历史状态。 
+当原发器需要回溯历史状态时， 负责人将从栈中获取最顶部的备忘录， 
+并将其传递给原发器的恢复 （restoration） 方法。
+
+end note
+
+note "在该实现方法中， 备忘录类将被嵌套在原发器中。\n 这样原发器就可访问备忘录的成员变量和方法， \n 即使这些方法被声明为私有。\n  另一方面， 负责人对于备忘录的成员变量和方法的访问权限非常有限：\n  它们只能在栈中保存备忘录， 而不能修改其状态。" as memento
+
+
+Originator .right.> Memento
+Caretaker --o Originator
+Caretaker --o Memento
+
+@enduml
+```
+
+2. 基于中间接口的实现
+
+```plantuml
+@startuml
+
+title 备忘录模式类图:基于中间接口的实现
+
+class Originator {
+    - state
+    
+    + Memento save()
+    + restore(Memento m)
+}
+
+note left of Originator::restore
+cm = (ConcreteMemento)m
+state = cm.getState()
+end note
+
+interface Memento {}
+
+class ConcreteMemento implements Memento {
+    - state
+
+    + Memento(state)
+    + getState()
+
+}
+
+class Caretaker {
+    - Originator originator
+    - Memento[]     history
+
+    + undo()
+}
+
+Originator .right.> ConcreteMemento
+Caretaker -left-o Memento
+
+note top of Caretaker
+在没有嵌套类的情况下，
+你可以规定负责人仅可通过明确声明的中间接口与备忘录互动， 
+该接口仅声明与备忘录元数据相关的方法，
+限制其对备忘录成员变量的直接访问权限。
+
+另一方面， 原发器可以直接与备忘录对象进行交互， 
+访问备忘录类中声明的成员变量和方法。 
+这种方式的缺点在于你需要将备忘录的所有成员变量声明为公有。
+end note
+
+
+
+note "另外一种实现方法适用于不支持嵌套类的编程语言 \n （没错， 我说的就是 PHP）。" as note
+
+@enduml
+```
+
+3. 封装更加严格的实现: 如果你不想让其他类有任何机会通过备忘录来访问原发器的状态， 那么还有另一种可用的实现方式。
+
+```plantuml
+@startuml
+
+title 备忘录模式类图:封装更加严格的实现
+
+
+note "这种实现方式允许存在多种不同类型的原发器和备忘录。\n 每种原发器都和其相应的备忘录类进行交互。\n 原发器和备忘录都不会将其状态暴露给其他类。" as note_1
+
+note "负责人此时被明确禁止修改存储在备忘录中的状态。\n  但负责人类将独立于原发器， \n 因为此时恢复方法被定义在了备忘录类中。" as note_2
+
+note "每个备忘录将与创建了自身的原发器连接。 \n 原发器会将自己及状态传递给备忘录的构造函数。\n 由于这些类之间的紧密联系， 只要原发器定义了合适的设置器 （setter），\n  备忘录就能恢复其状态。" as note_3
+
+
+interface Originator {
+    + Memento save()
+}
+
+interface Memento {
+    + void restore()
+}
+
+class Caretaker {
+    - Memento[] history
+    
+    + undo()
+}
+
+class ConcreteOriginator implements Originator {
+    - state
+
+    + Memento save()
+    + setState(state)
+}
+
+class ConcreteMemento implements Memento {
+    - originator
+    - state
+
+    + ConcreteMemento(originator, state)
+
+    + restore()
+}
+
+note bottom of ConcreteMemento
+ConcreteMemento 为 ConcreteOriginator 的内部类
+end note
+
+Originator .right.> Memento
+Caretaker -left-o Memento
+
+ConcreteOriginator <-right-> ConcreteMemento
+
+@enduml
+```
+
+### 备忘录模式要点
+
+1.  备忘录模式适合应用场景
+    > - 当你需要创建对象状态快照来恢复其之前的状态时， 可以使用备忘录模式。
+    >   >  备忘录模式允许你复制对象中的全部状态 （包括私有成员变量）， 并将其独立于对象进行保存。 尽管大部分人因为 “撤销” 这个用例才记得该模式， 但其实它在处理事务 （比如需要在出现错误时回滚一个操作） 的过程中也必不可少。
+    > -  当直接访问对象的成员变量、 获取器或设置器将导致封装被突破时， 可以使用该模式。
+    >   >  备忘录让对象自行负责创建其状态的快照。 任何其他对象都不能读取快照， 这有效地保障了数据的安全性。
+2. 实现方式
+    > 1. 确定担任原发器角色的类。 重要的是明确程序使用的一个原发器中心对象， 还是多个较小的对象。
+    > 2. 创建备忘录类。 逐一声明对应每个原发器成员变量的备忘录成员变量。
+    > 3. 将备忘录类设为不可变。 备忘录只能通过构造函数一次性接收数据。 该类中不能包含设置器。
+    > 4. 如果你所使用的编程语言支持嵌套类， 则可将备忘录嵌套在原发器中； 如果不支持， 那么你可从备忘录类中抽取一个空接口， 然后让其他所有对象通过接口来引用备忘录。 你可在该接口中添加一些元数据操作， 但不能暴露原发器的状态。
+    > 5. 在原发器中添加一个创建备忘录的方法。 原发器必须通过备忘录构造函数的一个或多个实际参数来将自身状态传递给备忘录: 该方法返回结果的类型必须是你在上一步中抽取的接口 （如果你已经抽取了）。 实际上， 创建备忘录的方法必须直接与备忘录类进行交互。
+    > 6. 在原发器类中添加一个用于恢复自身状态的方法。 该方法接受备忘录对象作为参数。 如果你在之前的步骤中抽取了接口， 那么可将接口作为参数的类型。 在这种情况下， 你需要将输入对象强制转换为备忘录， 因为原发器需要拥有对该对象的完全访问权限。
+    > 7. 无论负责人是命令对象、 历史记录或其他完全不同的东西， 它都必须要知道何时向原发器请求新的备忘录、 如何存储备忘录以及何时使用特定备忘录来对原发器进行恢复。
+    > 8. 负责人与原发器之间的连接可以移动到备忘录类中。 在本例中， 每个备忘录都必须与创建自己的原发器相连接。 恢复方法也可以移动到备忘录类中， 但只有当备忘录类嵌套在原发器中， 或者原发器类提供了足够多的设置器并可对其状态进行重写时， 这种方式才能实现。
+3. 备忘录模式优点
+    > - 你可以在不破坏对象封装情况的前提下创建对象状态快照。
+    > - 你可以通过让负责人维护原发器状态历史记录来简化原发器代码。
+4. 备忘录模式缺点
+    > -  如果客户端过于频繁地创建备忘录， 程序将消耗大量内存。
+    > - 负责人必须完整跟踪原发器的生命周期， 这样才能销毁弃用的备忘录。
+    > - 绝大部分动态编程语言 （例如 PHP、 Python 和 JavaScript） 不能确保备忘录中的状态不被修改。
+5. 备忘录模式的使用场景
+    > - 需要保存和恢复数据的相关状态场景。
+    > - 提供一个可回滚（rollback）的操作；比如Word中的CTRL+Z组合键，IE浏览器中的后退按钮，文件管理器上的backspace键等。
+    > - 需要监控的副本场景中。例如要监控一个对象的属性，但是监控又不应该作为系统的主业务来调用，它只是边缘应用，即使出现监控不准、错误报警也影响不大，因此一般的做法是备份一个主线程中的对象，然后由分析程序来分析。
+    > - 数据库连接的事务管理就是用的备忘录模式，想想看，如果你要实现一个JDBC驱动，你怎么来实现事务？还不是用备忘录模式嘛！
+
+### 备忘录模式例子: 预见未来追女孩
+
+大家有没有看过尼古拉斯·凯奇主演的《Next》（中文译名为《预见未来》）？尼古拉斯·凯奇饰演一个可以预视并且扭转未来的人，其中有一个情节很是让人心动——男女主角见面的那段情节：Cris Johnson（尼古拉斯·凯奇饰演）坐在咖啡吧台前，看着离自己近在咫尺的Callie Ferris（朱莉安·摩尔饰演），计划着怎么认识这个命中注定的女人，看Cris Johnson如何利用自己的特异功能：
+
+- Cris Johnson端着一杯咖啡走过去，说“你好，可以认识你吗？”被拒绝，恢复到坐在咖啡吧台前的状态。
+- 走过去询问是否可以搭车，被拒绝，恢复原状。
+- 帮助解决困境，被拒绝，恢复原状。
+- 采用嬉皮士的方式解决困境，被拒绝，恢复原状。
+- 帮助解决困境，被打伤，装可怜，Callie Ferris怜惜，于是乎相识了。
+
+看看这是一件多么幸福的事情，追求一个女生可以多次反复地实验，直到找到好的方法和途径为止，这估计是大多数男生都希望获得的特异功能。想想看，看到一个心仪的女生，我们若反复尝试，总会有一个方法打动她的，多美好的一件事。现在我们还得回到现实生活，我们来分析一下类似事情的经过：
+
+- 复制一个当前状态，保留下来，这个状态就是等会儿搭讪女孩子失败后要恢复的状态，你不恢复原始状态，这不就露馅儿了吗？
+- 每次试探性尝试失败后，都必须恢复到这个原始状态。
+- N次试探总有一次成功吧，成功以后即可走成功路线。
+
+想想看，我们这里的场景中最重要的是哪一块？对的，是原始状态的保留和恢复这块，如何保留一个原始，如何恢复一个原始状态才是最重要的，那想想看，我们应该怎么实现呢？很简单呀，我们可以定义一个中间变量，保留这个原始状态。我们先看看类图，如图
+
+```plantuml
+@startuml
+
+title 男孩状态类图
+
+class Client {}
+
+class Boy {
+    - String state
+
+    + void changeState()
+    + String getState()
+    + void setState(String state)
+}
+
+note bottom of Boy
+男孩的状态
+end note
+
+Client -right-> Boy
+
+
+@enduml
+```
+
+太简单的类图了，我们来解释一下图中的状态state是什么意思，在某一时间点的所有位置信息、心理信息、环境信息都属于状态，我们这里用了一个标识性的名词state代表所有状态，比如在追女孩子前心情是期待、心理是焦躁不安等。每一次去认识女孩子都是会发生状态变化的，我们使用changeState方法来代替，由于程序比较简单，就没有编写接口，我们来看实现，如代码清单
+
+```java
+// 男孩状态类
+public class Boy {
+    //男孩的状态
+    private String state = "";
+    //认识女孩子后状态肯定改变，比如心情、手中的花等
+    public void changeState(){
+        this.state = "心情可能很不好";
+    }
+    public String getState() {
+        return state;
+    }
+    public void setState(String state) {
+        this.state = state;
+    }
+}
+
+// 场景类
+public class Client {
+    public static void main(String[] args) {
+        //声明出主角
+        Boy boy = new Boy();
+        //初始化当前状态
+        boy.setState("心情很棒！");
+        System.out.println("=====男孩现在的状态======");
+        System.out.println(boy.getState());
+        //需要记录下当前状态呀
+        Boy backup = new Boy();
+        backup.setState(boy.getState());
+        //男孩去追女孩，状态改变
+        boy.changeState();
+        System.out.println("\n=====男孩追女孩子后的状态======");
+        System.out.println(boy.getState());
+        //追女孩失败，恢复原状
+        boy.setState(backup.getState());
+        System.out.println("\n=====男孩恢复后的状态======");
+        System.out.println(boy.getState());
+    }
+}
+
+```
+
+程序运行正确，输出结果也是我们期望的，但是结果正确并不表示程序是最优的，我们来看看场景类Client，它代表的是高层模块，或者说是非“近亲”模块的调用者，注意看backup变量的使用，它对于高层模块完全是多余的，为什么一个状态的保存和恢复要让高层模块来负责呢？这应该是Boy类的职责，而不应该让高层模块来完成，也就是破坏了Boy类的封装，或者说Boy类没有封装好，它应该是把backup的定义容纳进来，而不应该让高层模块来定义。
+
+问题我们已经知道了，就是Boy类封装不够，那我们应该如何修改呢？如果在Boy类中再增加一个方法或者其他的内部类来保存这个状态，则对单一职责原则是一种破坏，想想看单一职责原则是怎么说的？一个类的职责应该是单一的，Boy类本身的职责是追求女孩子，而保留和恢复原始状态则应该由另外一个类来承担，那我们把这个类取名就叫做备忘录，这和大家经常在桌面上贴的那个便签是一个概念，分析到这里我们的思路已经非常清楚了，我们来修改一下类图，如图
+
+```plantuml
+@startuml
+
+title 完善后男孩状态类图
+
+class Client {}
+
+class Boy {
+    - String state
+
+    + void changeState()
+    + String getState()
+    + void setState(String state)
+    + Memento createMemento()
+    + void restoreMemento(Memento _memento)
+}
+
+class Memento {
+    - String state
+    + String getState()
+    + void setState(String state)
+}
+note bottom of Memento : 备忘录
+
+note bottom of Boy
+男孩的状态
+end note
+
+Client -up-> Boy
+Client -up-> Memento
+
+Boy .right.> Memento
+
+
+@enduml
+```
+
+改动很小，增加了一个新的类Memento，负责状态的保存和备份；同时，在Boy类中增加了创建一份备忘录createMemento和恢复一个备忘录resotreMemento，我们先来看Boy类的变化，如代码清单
+
+```java
+// 男孩状态类
+// 确实只增加了两个方法创建备份和恢复备份，至于在什么时候创建备份和恢复备份则是由高层模块决定的
+public class Boy {
+    //男孩的状态
+    private String state = "";
+    //认识女孩子后状态肯定改变，比如心情、手中的花等
+    public void changeState(){
+        this.state = "心情可能很不好";
+    }
+    public String getState() {
+        return state;
+    }
+    public void setState(String state) {
+        this.state = state;
+    }
+    //保留一个备份
+    public Memento createMemento(){
+        return new Memento(this.state);
+    }
+    //恢复一个备份
+    public void restoreMemento(Memento _memento){
+        this.setState(_memento.getState());
+    }
+}
+
+// 备忘录
+public class Memento {
+    //男孩的状态
+    private String state = "";
+    //通过构造函数传递状态信息
+    public Memento(String _state){
+        this.state = _state;
+    }
+    public String getState() {
+        return state;
+    }
+    public void setState(String state) {
+        this.state = state;
+    }
+}
+
+// 改进后的场景类
+public class Client {
+    public static void main(String[] args) {
+        //声明出主角
+        Boy boy = new Boy();
+        //初始化当前状态
+        boy.setState("心情很棒！");
+        System.out.println("=====男孩现在的状态======");
+        System.out.println(boy.getState());
+        //需要记录下当前状态呀
+        Memento mem = boy.createMemento();
+        //男孩去追女孩，状态改变
+        boy.changeState();
+        System.out.println("\n=====男孩追女孩子后的状态======");
+        System.out.println(boy.getState());
+        //追女孩失败，恢复原状
+        boy.restoreMemento(mem);
+        System.out.println("\n=====男孩恢复后的状态======");
+        System.out.println(boy.getState());
+    }
+}
+```
+
+运行结果保持相同，虽然程序中不再重复定义Boy类的对象了，但是我们还是要关心备忘录，这对迪米特法则是一个亵渎，它告诉我们只和朋友类通信，那这个备忘录对象是我们必须要通信的朋友类吗？对高层模块来说，它最希望要做的就是创建一个备份点，然后在需要的时候再恢复到这个备份点就成了，它不用关心到底有没有备忘录这个类。那根据这一指导思想，我们就需要把备忘录类再包装一下，怎么包装呢？建立一个管理类，就是管理这个备忘录，如图
+
+```plantuml
+@startuml
+
+title 完善后男孩状态类图
+
+
+class Client {}
+
+class Boy {
+    - String state
+
+    + void changeState()
+    + String getState()
+    + void setState(String state)
+    + Memento createMemento()
+    + void restoreMemento(Memento _memento)
+}
+
+class Memento {
+    - String state
+    + String getState()
+    + void setState(String state)
+}
+note top of Memento : 备忘录
+
+note top of Boy
+男孩的状态
+end note
+
+class Caretaker {
+    - Memento memento
+    + Memento getMemento()
+    + void setMemento(Memento memento)
+}
+
+Client -up-> Boy
+Client -up-> Caretaker
+
+Boy .right.> Memento
+Caretaker -left-o Memento
+
+
+@enduml
+```
+
+又增加了一个JavaBean，Boy类和Memento没有任何改变，不再赘述。我们来看增加的备忘录管理类，如代码清单
+
+```java
+// 备忘录管理者
+public class Caretaker {
+    //备忘录对象
+    private Memento memento;
+    public Memento getMemento() {
+        return memento;
+    }
+    public void setMemento(Memento memento) {
+        this.memento = memento;
+    }
+}
+
+// 进一步改进后的场景类
+public class Client {
+    public static void main(String[] args) {
+        //声明出主角
+        Boy boy = new Boy();
+        //声明出备忘录的管理者
+        Caretaker caretaker = new Caretaker();
+        //初始化当前状态
+        boy.setState("心情很棒！");
+        System.out.println("=====男孩现在的状态======");
+        System.out.println(boy.getState());
+        //需要记录下当前状态呀caretaker.setMemento(boy.createMemento());
+        //男孩去追女孩，状态改变
+        boy.changeState();
+        System.out.println("\n=====男孩追女孩子后的状态======");
+        System.out.println(boy.getState());
+        //追女孩失败，恢复原状
+        boy.restoreMemento(caretaker.getMemento());
+        System.out.println("\n=====男孩恢复后的状态======");
+        System.out.println(boy.getState());
+    }
+}
+```
+
+### clone方式的备忘录
+
+大家还记得在第13章中讲的原型模式吗？我们可以通过复制的方式产生一个对象的内部状态，这是一个很好的办法，发起人角色只要实现Cloneable就成，比较简单，我们来看类图，如图
+
+```plantuml
+@startuml
+
+title Clone方式的备忘录
+
+interface Cloneable {
+    Object clone()
+}
+
+class Originator implements Cloneable {
+    + Originator createMemento()
+    + restoreMemento(Originator _originator)
+    + Originator clone()
+}
+
+class Caretaker {
+    - Originator originator
+    + Originator getOriginator()
+    + void setOriginator(Originator originator)
+}
+
+Originator ..> Originator
+Caretaker -right-o Originator
+
+@enduml
+```
+
+从类图上看，发起人角色融合了发起人角色和备忘录角色，具有双重功效，如代码清单
+
+```java
+// 融合备忘录的发起人角色
+public class Originator implements Cloneable{
+    //内部状态
+    private String state = "";
+    public String getState() {
+        return state;
+    }
+    public void setState(String state) {
+        this.state = state;
+    }
+    //创建一个备忘录
+    public Originator createMemento(){
+        return this.clone();
+    }
+    //恢复一个备忘录
+    public void restoreMemento(Originator _originator){
+        this.setState(_originator.getState());
+    }
+    //克隆当前对象
+    @Override
+    protected Originator clone(){
+        try {
+            return (Originator)super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+// 备忘录管理员角色
+public class Caretaker {
+    //发起人对象
+    private Originator originator;
+    public Originator getOriginator() {
+        return originator;
+    }
+    public void setOriginator(Originator originator) {
+        this.originator = originator;
+    }
+}
+
+// 没什么太大变化，只是备忘录角色转换成了发起人角色，还是一个简单的JavaBean。
+// 我们来想想这种模式是不是还可以简化？要管理员角色干什么？就是为了管理备忘录角色，
+// 现在连备忘录角色都被合并了，还留着它干吗？我们想办法把它也精简掉，
+// 发起人自主备份和恢复
+public class Originator implements Cloneable{
+    private Originator backup;
+    //内部状态
+    private String state = "";
+    public String getState() {
+        return state;
+    }
+    public void setState(String state) {
+        this.state = state;
+    }
+    //创建一个备忘录
+    public void createMemento(){
+        this.backup = this.clone();
+    }
+    //恢复一个备忘录
+    public void restoreMemento(){
+        //在进行恢复前应该进行断言，防止空指针
+        this.setState(this.backup.getState());
+    }
+    //克隆当前对象
+    @Override
+    protected Originator clone(){
+        try {
+            return (Originator)super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+// 可能你要发问了，这和备忘录模式的定义不相符，它定义是“在该对象之外保存这个状态”，
+// 而你却把这个状态保存在了发起人内部。是的，设计模式定义的诞生比Java的出世略早，
+// 它没有想到Java程序是这么有活力，有远见，而且在面向对象的设计中，
+// 即使把一个类封装在另一个类中也是可以做到的，何况一个小小的对象复制，
+// 这是它的设计模式完全没有预见到的，我们把它弥补回来
+
+// 场景类
+public class Client {
+    public static void main(String[] args) {
+        //定义发起人
+        Originator originator = new Originator();
+        //建立初始状态
+        originator.setState("初始状态...");
+        System.out.println("初始状态是："+originator.getState());
+        //建立备份
+        originator.createMemento();
+        //修改状态
+        originator.setState("修改后的状态...");
+        System.out.println("修改后状态是："+originator.getState());
+        //恢复原有状态
+        originator.restoreMemento();
+        System.out.println("恢复后状态是："+originator.getState());
+    }
+}
+```
+
+### 多备份的备忘录
+
+不知道你有没有做过系统级别的维护？比如Backup Administrator（备份管理员），每天负责查看系统的备份情况，所有的备份都是由自动化脚本产生的。有一天，突然有一个重要的系统说我数据库有点问题，请把上一个月末的数据拉出来恢复，那怎么办？对备份管理员来说，这很好办，直接根据时间戳找到这个备份，还原回去就成了，但是对于我们刚刚学习的备忘录模式却行不通，为什么呢？它对于一个确定的发起人，永远只有一份备份，在这种情况下，单一的备份就不能满足要求了，我们需要设计一套多备份的架构。
+
+我们先来说一个名词，检查点（Check Point），也就是你在备份的时候做的戳记，系统级的备份一般是时间戳，那我们程序的检查点该怎么设计呢？一般是一个有意义的字符串。
+
+我们只要把通用代码中的Caretaker管理员稍做修改就可以了，如代码清单
+
+```java
+// 把容纳备忘录的容器修改为Map类型就可以了
+// 备忘录管理员
+public class Caretaker {
+    // 内存溢出问题，该备份一旦产生就装入内存，没有任何销毁的意向，这是非常危险的。
+    // 因此，在系统设计时，要严格限定备忘录的创建，建议增加Map的上限
+    //容纳备忘录的容器
+    private HashMap<String,Memento> memMap = new HashMap<String,Memento>();
+    public Memento getMemento(String idx) {
+        return memMap.get(idx);
+    }
+    public void setMemento(String idx,Memento memento) {
+        this.memMap.put(idx, memento);
+    }
+}
+
+// 场景类
+public class Client {
+    public static void main(String[] args) {
+        //定义出发起人
+        Originator originator = new Originator();
+        //定义出备忘录管理员
+        Caretaker caretaker = new Caretaker();
+        //创建两个备忘录
+        caretaker.setMemento("001",originator.createMemento());
+        caretaker.setMemento("002",originator.createMemento());
+        //恢复一个指定标记的备忘录
+        originator.restoreMemento(caretaker.getMemento("001"));
+    }
+}
+```
+
+### 封装得更好一点
+
+在系统管理上，一个备份的数据是完全、绝对不能修改的，它保证数据的洁净，避免数据污染而使备份失去意义。在我们的设计领域中，也存在着同样的问题，备份是不能被篡改的，也就是说需要缩小备份出的备忘录的阅读权限，保证只能是发起人可读就成了，那怎么才能做到这一点呢？使用内置类，如图
+
+

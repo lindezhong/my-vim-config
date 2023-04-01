@@ -1,5 +1,5 @@
 # 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/bash_completion.d/下，这样在下次登录终端时即可自动source自动补全脚本。
-complete -F _complete_func git
+# complete -F _complete_func git
 complete -F _complete_func git.sh
 complete -F _complete_func python.sh
 complete -F _complete_func mvn.sh
@@ -46,7 +46,7 @@ _complete_func() {
             "git stash show" # 查看堆栈中最新保存的stash和当前目录的差异。
             "git stash show {stash暂存栈下标} -p" # 查看堆栈中指定保存的stash和当前目录的差异。比如  git stash show stash@{1} -p 
             "git stash create" # 它创建了一个暂存条目，并返回它的对象名，而不将其推送到暂存参考日志中返回值配合 git stash store -m "消息" ${git stash create}
-            "git stash store -m {消息} {git stash create 执行结果}" # 创建的暂存条目推送到暂存参考日志
+            "git stash store -m {消息} {gitStashCreate执行结果}" # 创建的暂存条目推送到暂存参考日志
             "git stash branch {分支名} {stash暂存栈下标}" # 此命令使用指定的stash创建一个新分支，然后删除指定的存储, git stash branch new_branch stash@{1}
             )
         

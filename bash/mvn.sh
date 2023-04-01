@@ -73,7 +73,7 @@ find_main : 扫描本目录下所有的main java
     return 本目录下所有的main java全路径(package.class_name)
 
 init : 初始化maven项目
-    
+
     init jar : 初始化普通maven项目, 打包为jar
         mvn.sh init jar
         在运行过程中需要手动输入 groupId 和 artifactId
@@ -84,7 +84,7 @@ init : 初始化maven项目
 # 编译mvn项目,跳过测试类(只编译不打包)
 install() {
     # 不运行测试类，但打包
-    mvn clean install -DskipTests=true
+    mvn clean install  -Dmaven.test.skip=true
     if (( $? != 0 )); then
         echo "mvn编译失败,退出"
         exit 1
@@ -94,7 +94,7 @@ install() {
 # 扫描本目录下所有的main java
 _findMainClass_() {
 
-    
+
     local filter_class1=$1
     local filter_class2=$2
 
@@ -122,7 +122,7 @@ _selectClass() {
 
     local class_file_path=''
     local class_file_path_list=($(_findMainClass_ "$filter_class1" "$filter_class2"))
-    
+
     local class_index
     local i
     local class_file_path_list_langth=${#class_file_path_list[@]}
@@ -133,7 +133,7 @@ _selectClass() {
                 echo "$i) $class_file_path"
             fi
         done
-    
+
         # 重置class_file_path防止数据污染
         class_file_path=""
 
@@ -150,10 +150,10 @@ _selectClass() {
                 break
             fi
         fi
-   
+
     done
-        
-    
+
+
     echo ""
     echo ""
     echo "select index is [$class_index] , class file path is [$class_file_path]"
@@ -168,7 +168,7 @@ _selectClass() {
 deploy() {
 
     local filter_class=$1
-    
+
     install
 
     local jar_path_list=($(find ./ -name "*.jar" | grep -v "/lib"))
@@ -194,7 +194,7 @@ deploy() {
         done
         jar_path=${jar_path_list[$jar_path_index]}
         echo "输入 [$jar_path_index] , 选择 [$jar_path]"
-        
+
     fi
 
     _selectClass "src/main" $filter_class
@@ -207,17 +207,19 @@ deploy() {
         echo "java ${default_map['remote_debug']} -cp $jar_path $class_file_path"
         java ${default_map['remote_debug']} -cp $jar_path $class_file_path
     fi
-    
+
 
 }
 
 
-# 运行maven项目,只是编译不打包,开启远程debug,远程端口5005 
+# 运行maven项目,只是编译不打包,开启远程debug,远程端口5005
 run() {
     local filter_class=$1
     mvn compiler:compile
     local class_path_list=($(find ./ -name "classes" | grep "/target/classes"))
-    
+
+    # maven 自身jar
+    local local_mvn_jar_path=""
     local class_path=""
     local i
     for(( i=0; i<${#class_path_list[@]}; i++)) do
@@ -226,7 +228,21 @@ run() {
             class_path=":${class_path}"
         fi
         class_path="${class_path_item}${class_path}"
+
+        class_path_item=$(echo $class_path_item | sed 's/classes//g')
+
+        # 进入目录
+        pushd $class_path_item
+
+        local_mvn_jar_path="$local_mvn_jar_path $(find ./ -maxdepth 1 -name '*.jar')"
+
+        # 退出目录
+        popd
     done
+
+    local_mvn_jar_path=$(echo $local_mvn_jar_path | sed 's/\.\///g')
+    echo "本地jar: [$local_mvn_jar_path]"
+    local_mvn_jar_path=($local_mvn_jar_path)
 
     # 查找maven依赖的jar
     local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar"))
@@ -251,13 +267,29 @@ run() {
         pushd $maven_dir
         # 记录pushd的次数,用作后面的popd返回原始位置
         let push_num++
-        local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar")) 
+        local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar"))
     fi
 
+    local local_mvn_jar_path_item=""
+
+    local mvn_jar_paths=(${mvn_jar_path_list//:/${IFS}})
+
+
+    # local mvn_jar_paths=($($(echo $mvn_jar_path_list | sed 's/:/ /g')))
+    mvn_jar_path_list=""
+    for mvn_jar_path_item in "${mvn_jar_paths[@]}"; do
+        local match_mvn_jar_path_item=${mvn_jar_path_item##*/}
+        if [[ "${local_mvn_jar_path[@]}" =~ "${match_mvn_jar_path_item}" ]]; then
+            echo "跳过: $mvn_jar_path_item"
+        else
+            mvn_jar_path_list="$mvn_jar_path_list:$mvn_jar_path_item"
+        fi
+    done
+
     local use_mvn_jar_path=$mvn_jar_path_list
-    if [[ ! -z $use_mvn_jar_path ]]; then
-        use_mvn_jar_path=":$use_mvn_jar_path"
-    fi
+    # if [[ ! -z $use_mvn_jar_path ]]; then
+    #     use_mvn_jar_path=":$use_mvn_jar_path"
+    # fi
 
     echo "使用的maven jar path : [$use_mvn_jar_path]"
     echo "使用class_path : [${class_path}]"
@@ -335,4 +367,3 @@ case $ACTION in
         help
         ;;
 esac
-

@@ -36,7 +36,7 @@ _complete_func() {
         cmd_list=("git --help" # 查看帮助文档
 
             # git stash : 将目前还不想提交的但是已经修改的内容进行暂存至堆栈
-            "git stash -m {提交消息用双引号包裹}" # 将修改内容暂存至stash暂存区(为一个栈), 并且使用消息
+            "git stash push -m {提交消息用双引号包裹}" # 将修改内容暂存至stash暂存区(为一个栈), 并且使用消息
             "git stash list" # 查看当前stash暂存区中的内容
             "git stash pop" # 将当前stash中的内容弹出，并应用到当前分支对应的工作目录上, 命令将堆栈中最近保存的内容删除（栈是先进后出）
             "git stash pop {stash暂存栈下标}" # 将指定stash栈的内容弹出，并应用到当前分支对应的工作目录上, 比如git stash pop stash@{1}

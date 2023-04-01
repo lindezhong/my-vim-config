@@ -9873,4 +9873,1036 @@ public class Client {
 
 在系统管理上，一个备份的数据是完全、绝对不能修改的，它保证数据的洁净，避免数据污染而使备份失去意义。在我们的设计领域中，也存在着同样的问题，备份是不能被篡改的，也就是说需要缩小备份出的备忘录的阅读权限，保证只能是发起人可读就成了，那怎么才能做到这一点呢？使用内置类，如图
 
+## 原型模式
 
+`原型模式`: 用原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象.使你能够复制已有对象， 而又无需使代码依赖它们所属的类。
+
+原型模式将克隆过程委派给被克隆的实际对象。 模式为所有支持克隆的对象声明了一个通用接口， 该接口让你能够克隆对象， 同时又无需将代码和对象所属类耦合。 通常情况下， 这样的接口中仅包含一个 克隆方法
+
+### 原型模式类图
+
+```plantuml
+@startuml
+
+title 原型模式类图
+
+class Client {
+
+}
+note top of Client
+客户端 （Client） 可以复制实现了原型接口的任何对象。
+copy = existing.clone()
+end note
+
+interface Prototype {
+    + Prototype clone()
+}
+
+note top of Prototype
+原型 （Prototype） 接口将对克隆方法进行声明。
+在绝大多数情况下， 其中只会有一个名为 clone克隆的方法。
+end note
+
+
+class ConcretePrototype implements Prototype {
+    - field1
+
+    + ConcretePrototype(prototype)
+    + Prototype clone()
+}
+
+note right of ConcretePrototype
+具体原型 （Concrete Prototype） 类将实现克隆方法。
+除了将原始对象的数据复制到克隆体中之外，
+该方法有时还需处理克隆过程中的极端情况，
+例如克隆关联对象和梳理递归依赖等等。
+end note
+
+note left of ConcretePrototype::ConcretePrototype
+this.field1 = prototype.field1
+end note
+note left of ConcretePrototype::clone
+return ConcretePrototype(this)
+return (ConcretePrototype)super.clone()
+end note
+
+class SubclassPrototype extends ConcretePrototype {
+    - field2
+
+    + SubclassPrototype(prototype)
+    + Prototype clone()
+
+}
+note left of SubclassPrototype::SubclassPrototype
+this.field2 = prototype.field2
+end note
+note left of SubclassPrototype::clone
+return SubclassPrototype(this)
+return (SubclassPrototype)super.clone()
+end note
+
+
+Client -right-> Prototype
+
+note "java的Cloneable.clone()方法有以下需要注意的点 \n 1.构造函数不会被执行 \n 2. 为浅拷贝 \n 3. 对象内有final关键字则无法使用" as java_clone_note
+
+
+@enduml
+```
+
+### 原型模式要点
+
+1. 原型模式适合应用场景
+    > - 如果你需要复制一些对象， 同时又希望代码独立于这些对象所属的具体类， 可以使用原型模式。这一点考量通常出现在代码需要处理第三方代码通过接口传递过来的对象时。 即使不考虑代码耦合的情况， 你的代码也不能依赖这些对象所属的具体类， 因为你不知道它们的具体信息。原型模式为客户端代码提供一个通用接口， 客户端代码可通过这一接口与所有实现了克隆的对象进行交互， 它也使得客户端代码与其所克隆的对象具体类独立开来。
+    > - 如果子类的区别仅在于其对象的初始化方式， 那么你可以使用该模式来减少子类的数量。 别人创建这些子类的目的可能是为了创建特定类型的对象。在原型模式中， 你可以使用一系列预生成的、 各种类型的对象作为原型。客户端不必根据需求对子类进行实例化， 只需找到合适的原型并对其进行克隆即可。
+    > - 资源优化场景: 类初始化需要消化非常多的资源，这个资源包括数据、硬件资源等。
+    > - 性能和安全要求的场景: 通过new产生一个对象需要非常繁琐的数据准备或访问权限，则可以使用原型模式
+    > - 一个对象多个修改者的场景: 一个对象需要提供给其他对象访问，而且各个调用者可能都需要修改其值时，可以考虑使用原型模式拷贝多个对象供调用者使用
+    > - 在实际项目中，原型模式很少单独出现，一般是和工厂方法模式一起出现，通过clone的方法创建一个对象，然后由工厂方法提供给调用者。原型模式已经与Java融为一体，大家可以随手拿来使用。
+
+2. 实现方式
+    > 1. 创建原型接口， 并在其中声明 克隆方法。 如果你已有类层次结构， 则只需在其所有类中添加该方法即可。
+    > 2. 原型类必须另行定义一个以该类对象为参数的构造函数。 构造函数必须复制参数对象中的所有成员变量值到新建实体中。 如果你需要修改子类， 则必须调用父类构造函数， 让父类复制其私有成员变量值。
+    > 3. 克隆方法通常只有一行代码： 使用 new运算符调用原型版本的构造函数。 注意， 每个类都必须显式重写克隆方法并使用自身类名调用 new运算符。 否则， 克隆方法可能会生成父 类的对象。
+    > 4. 你还可以创建一个中心化原型注册表， 用于存储常用原型。
+
+3.  原型模式优缺点
+    > - 你可以克隆对象， 而无需与它们所属的具体类相耦合。
+    > - 你可以克隆预生成原型， 避免反复运行初始化代码。
+    > - 你可以更方便地生成复杂对象。
+    > - 你可以用继承以外的方式来处理复杂对象的不同配置。
+    > - 克隆包含循环引用的复杂对象可能会非常麻烦。
+4. java Cloneable.clone()优缺点
+    > - 性能优良: 原型模式是在内存二进制流的拷贝，要比直接new一个对象性能好很多，特别是要在一个循环体内产生大量的对象时，原型模式可以更好地体现其优点。
+    > - 逃避构造函数的约束: 这既是它的优点也是缺点，直接在内存中拷贝，构造函数是不会执行的。优点就是减少了约束，缺点也是减少了约束，需要大家在实际应用时考虑。
+
+5. 使用原型模式时，引用的成员变量必须满足两个条件才不会被拷贝:
+    > - 一是类的成员变量，而不是方法内变量；
+    > - 二是必须是一个可变的引用对象，而不是一个原始类型或不可变对象。
+
+### java Cloneable.clone()注意事项
+
+#### 构造函数不会被执行
+
+对象拷贝时构造函数确实没有被执行，这点从原理来讲也是可以讲得通的，Object类的clone方法的原理是从内存中（具体地说就是堆内存）以二进制流的方式进行拷贝，重新分配一个内存块，那构造函数没有被执行也是非常正常的了。
+
+```java
+public class Thing implements Cloneable{
+    public Thing(){
+        System.out.println("构造函数被执行了...");
+    }
+    @Override
+    public Thing clone(){
+        Thing thing=null;
+        try {
+            thing = (Thing)super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return thing;
+    }
+}
+
+// 运行结果只会打印一次 "构造函数被执行了..."
+public class Client {
+    public static void main(String[] args) {
+        //产生一个对象
+        Thing thing = new Thing();
+        //拷贝一个对象
+        Thing cloneThing = thing.clone();
+    }
+}
+```
+
+#### 为浅拷贝
+
+Java做了一个偷懒的拷贝动作，Object类提供的方法clone只是拷贝本对象，其对象内部的数组、引用对象等都不拷贝，还是指向原生对象的内部元素地址，这种拷贝就叫做浅拷贝。确实是非常浅，两个对象共享了一个私有变量，你改我改大家都能改，是一种非常不安全的方式，在实际项目中使用还是比较少的（当然，这也是一种“危机”环境的一种救命方式）
+
+```java
+public class Thing implements Cloneable{
+    //定义一个私有变量
+    private ArrayList<String> arrayList = new ArrayList<String>();
+
+    //设置arrayList的值
+    public void setValue(String value){
+        this.arrayList.add(value);
+    }
+    //取得arrayList的值
+    public ArrayList<String> getValue(){
+        return this.arrayList;
+    }
+
+    @Override
+    public Thing clone(){
+        Thing thing=null;
+        try {
+            thing = (Thing)super.clone();
+            // java Cloneable.clone() 为为浅拷贝
+            // 如果要改成深拷贝则需要对其独立拷贝
+            // thing.arrayList = (ArrayList<String>)this.arrayList.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return thing;
+    }
+}
+
+// 输出: [张三，李四]
+public class Client {
+    public static void main(String[] args) {
+        //产生一个对象
+        Thing thing = new Thing();
+        //设置一个值
+        thing.setValue("张三");
+        //拷贝一个对象
+        Thing cloneThing = thing.clone();
+        cloneThing.setValue("李四");
+
+
+        System.out.println(thing.getValue());
+    }
+}
+
+
+```
+
+####  对象内有final关键字则无法使用
+
+粗体部分仅仅增加了一个final关键字，然后编译器就报斜体部分错误，正常呀，final类型你还想重赋值呀！你要实现深拷贝的梦想在final关键字的威胁下破灭了，路总是有的，我们来想想怎么修改这个方法：删除掉final关键字，这是最便捷、安全、快速的方式。你要使用clone方法，在类的成员变量上就不要增加final关键字。
+
+```java
+public class Thing implements Cloneable{
+    //定义一个私有变量
+    private final ArrayList<String> arrayList = new ArrayList<String>();
+    @Override
+        public Thing clone(){
+        Thing thing=null;
+        try {
+            // 编译报错: 对象内有final关键字则无法使用
+            thing = (Thing)super.clone();
+            this.arrayList = (ArrayList<String>)this.arrayList.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return thing;
+    }
+}
+
+```
+
+### 原型模式例子: 发邮件
+
+现在电子账单越来越流行了，比如你的信用卡，每到月初的时候银行就会发一份电子邮件给你，说你这个月消费了多少，什么时候消费的，积分是多少等，这是每个月发一次。还有一种也是银 行发的邮件你肯定非常有印象：广告信，现在各大银行的信用卡部门都在拉拢客户，电子邮件是一种廉价、快捷的通信方式，你用纸质的广告信那个费用多高呀，比如我行今天推出一个信用卡 刷卡抽奖活动，通过电子账单系统可以一个晚上发送给600万客户，为什么要用电子账单系统呢？直接找个发垃圾邮件的工具不就解决问题了吗？是个好主意，但是这个方案在金融行业是行不通的，为什么？因为银行发送该类邮件是有要求的：
+
+- 个性化服务: 一般银行都要求个性化服务，发过去的邮件上总有一些个人信息吧，比如“××先生”，“××女士”等。
+- 递送成功率: 邮件的递送成功率有一定的要求，由于大批量地发送邮件会被接收方邮件服务器误认是垃圾邮件，因此在邮件头要增加一些伪造数据，以规避被反垃圾邮件引擎误认为是垃圾邮 件。
+
+从这两方面考虑广告信的发送也是电子账单系统（电子账单系统一般包括：账单分析、账单生成器、广告信管理、发送队列管理、发送机、退信处理、报表管理等）的一个子功能，我们今天就 来考虑一下广告信这个模块是怎么开发的。那既然是广告信，肯定需要一个模板，然后再从数据库中把客户的信息一个一个地取出，放到模板中生成一份完整的邮件，然后扔给发送机进行发送 处理，类图如图
+
+```plantuml
+@startuml
+
+title 发送电子账单类图
+
+class Mail {
+    - String receiver
+    - String subject
+    - String appellation
+    - String contxt
+    - String tail
+
+    + Mail(AdvTemplate advTemplate)
+    + getter()
+    + setter()
+}
+
+class AdvTemplate {
+    - String advSubject
+    - String advContext
+
+    + String getAdvSubject()
+    + String getAdvContext()
+}
+
+class Client {}
+
+Mail .right.> AdvTemplate
+Client --> Mail
+Client --> AdvTemplate
+
+
+@enduml
+```
+
+代码清单如下
+
+```java
+// 广告信模板代码
+public class AdvTemplate {
+    //广告信名称
+    private String advSubject ="XX银行国庆信用卡抽奖活动";
+    //广告信内容
+    private String advContext = "国庆抽奖活动通知：只要刷卡就送你一百万！...";
+    //取得广告信的名称
+    public String getAdvSubject(){
+        return this.advSubject;
+    }
+    //取得广告信的内容
+    public String getAdvContext(){
+        return this.advContext;
+    }
+}
+
+// 邮件类代码
+public class Mail {
+    //收件人
+    private String receiver;
+    //邮件名称
+    private String subject;
+    //称谓
+    private String appellation;
+    //邮件内容
+    private String contxt;
+    //邮件的尾部，一般都是加上"XXX版权所有"等信息
+    private String tail;
+    //构造函数
+    public Mail(AdvTemplate advTemplate){
+        this.contxt = advTemplate.getAdvContext();
+        this.subject = advTemplate.getAdvSubject();
+    }
+    //以下为getter/setter方法
+    public String getReceiver() {
+        return receiver;
+    }
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
+    public String getSubject() {
+        return subject;
+    }
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+    public String getAppellation() {
+        return appellation;
+    }
+    public void setAppellation(String appellation) {
+        this.appellation = appellation;
+    }
+    public String getContxt() {
+        return contxt;
+    }
+    public void setContxt(String contxt) {
+        this.contxt = contxt;
+    }
+    public String getTail() {
+        return tail;
+    }
+    public void setTail(String tail) {
+    this.tail = tail;
+    }
+}
+
+// 场景类
+public class Client {
+    //发送账单的数量，这个值是从数据库中获得
+    private static int MAX_COUNT = 6;
+    public static void main(String[] args) {
+        //模拟发送邮件
+        int i=0;
+        //把模板定义出来，这个是从数据库中获得
+        Mail mail = new Mail(new AdvTemplate());
+        mail.setTail("XX银行版权所有");
+        while(i<MAX_COUNT){
+            //以下是每封邮件不同的地方
+            mail.setAppellation(getRandString(5)+" 先生（女士）");
+            mail.setReceiver(getRandString(5)+"@"+getRandString(8) +".//然后发送邮件
+            sendMail(mail);
+            i++;
+        }
+    }
+    //发送邮件
+    public static void sendMail(Mail mail){
+        System.out.println("标题："+mail.getSubject() + "\t收件人："+mail.getReceiver()+"\t...发送成功！");
+    }
+    //获得指定长度的随机字符串
+    public static String getRandString(int maxLength){
+        String source ="abcdefghijklmnopqrskuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        StringBuffer sb = new StringBuffer();
+        Random rand = new Random();
+        for(int i=0;i<maxLength;i++){
+            sb.append(source.charAt(rand.nextInt(source.length())));
+        }
+        return sb.toString();
+    }
+}
+```
+由于是随机数，每次运行都有所差异，不管怎么样，我们这个电子账单发送程序是编写出来了，也能正常发送。我们再来仔细地想想，这个程序是否有问题？Look here，这是一个线程在运行，也就是你发送的是单线程的，那按照一封邮件发出去需要0.02秒（够小了，你还要到数据库中取数据呢），600万封邮件需要33个小时，也就是一个整天都发送不完，今天的没发送完，明天的账单又产生了，日积月累，激起甲方人员一堆抱怨，那怎么办？
+
+好办，把sendMail修改为多线程，但是只把sendMail修改为多线程还是有问题的呀，产生第一封邮件对象，放到线程1中运行，还没有发送出去；线程2也启动了，直接就把邮件对象mail的收件 人地址和称谓修改掉了，线程不安全了。说到这里，你会说这有N多种解决办法，其中一种是使用一种新型模式来解决这个问题：通过对象的复制功能来解决这个问题，类图稍做修改，如图
+
+```plantuml
+@startuml
+
+title 修改后电子账单类图
+
+interface Cloneable {
+
+}
+
+class Mail implements Cloneable {
+    - String receiver
+    - String subject
+    - String appellation
+    - String contxt
+    - String tail
+
+    + Mail(AdvTemplate advTemplate)
+    + Mail clone()
+    + getter()
+    + setter()
+}
+
+note left of Mail::clone
+添加clone()方法
+end note
+
+class AdvTemplate {
+    - String advSubject
+    - String advContext
+
+    + String getAdvSubject()
+    + String getAdvContext()
+}
+
+class Client {}
+
+Mail .right.> AdvTemplate
+Client --> Mail
+Client --> AdvTemplate
+
+
+@enduml
+```
+
+增加了一个Cloneable接口（Java自带的一个接口）， Mail实现了这个接口，在Mail类中覆写clone()方法，我们来看Mail类的改变，如代码清单
+
+```java
+// 邮件类代码
+public class Mail implements Cloneable {
+    //收件人
+    private String receiver;
+    //邮件名称
+    private String subject;
+    //称谓
+    private String appellation;
+    //邮件内容
+    private String contxt;
+    //邮件的尾部，一般都是加上"XXX版权所有"等信息
+    private String tail;
+    //构造函数
+    public Mail(AdvTemplate advTemplate){
+        this.contxt = advTemplate.getAdvContext();
+        this.subject = advTemplate.getAdvSubject();
+    }
+    @Override
+    public Mail clone(){
+        Mail mail =null;
+        try {
+            mail = (Mail)super.clone();
+        } catch (CloneNotSupportedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return mail;
+    }
+    //以下为getter/setter方法
+    public String getReceiver() {
+        return receiver;
+    }
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
+    public String getSubject() {
+        return subject;
+    }
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+    public String getAppellation() {
+        return appellation;
+    }
+    public void setAppellation(String appellation) {
+        this.appellation = appellation;
+    }
+    public String getContxt() {
+        return contxt;
+    }
+    public void setContxt(String contxt) {
+        this.contxt = contxt;
+    }
+    public String getTail() {
+        return tail;
+    }
+    public void setTail(String tail) {
+    this.tail = tail;
+    }
+}
+
+// 场景类
+public class Client {
+    //发送账单的数量，这个值是从数据库中获得
+    private static int MAX_COUNT = 6;
+    public static void main(String[] args) {
+        //模拟发送邮件
+        int i=0;
+        //把模板定义出来，这个是从数据库中获得
+        Mail mail = new Mail(new AdvTemplate());
+        mail.setTail("XX银行版权所有");
+        while(i<MAX_COUNT){
+            //以下是每封邮件不同的地方
+            Mail cloneMail = mail.clone();
+            cloneMail.setAppellation(getRandString(5)+" 先生（女士）");
+            cloneMail.setReceiver(getRandString(5)+"@"+getRandString(8)+".//然后发送邮件
+            sendMail(cloneMail);
+            i++;
+        }
+    }
+    //发送邮件
+    public static void sendMail(Mail mail){
+        System.out.println("标题："+mail.getSubject() + "\t收件人："+mail.getReceiver()+"\t...发送成功！");
+    }
+    //获得指定长度的随机字符串
+    public static String getRandString(int maxLength){
+        String source ="abcdefghijklmnopqrskuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        StringBuffer sb = new StringBuffer();
+        Random rand = new Random();
+        for(int i=0;i<maxLength;i++){
+            sb.append(source.charAt(rand.nextInt(source.length())));
+        }
+        return sb.toString();
+    }
+}
+
+```
+
+运行结果不变，一样完成了电子广告信的发送功能，而且sendMail即使是多线程也没有关系。注意，看Client类中的粗体字mail.clone()这个方法，把对象复制一份，产生一个新的对象，和原 有对象一样，然后再修改细节的数据，如设置称谓、设置收件人地址等。这种不通过new关键字来产生一个对象，而是通过对象复制来实现的模式就叫做原型模式
+
+
+## 访问者模式
+
+`访问者模式`: 封装一些作用于某种数据结构中的各元素的操作，它可以在不改变数据结构的前提下定义作用于这些元素的新的操作。
+
+### 访问者模式类图
+
+```plantuml
+@startuml
+
+title 访问者模式类图
+
+interface Visitor {
+    visit(ElementA e)
+    visit(ElementB e)
+}
+
+note top of Visitor
+访问者 （Visitor） 接口声明了一系列以对象结构的具体元素为参数的访问者方法。
+如果编程语言支持重载， 这些方法的名称可以是相同的， 但是其参数一定是不同的。
+end note
+
+class ConcreteVisitor {
+    visit(ElementA e)
+    visit(ElementB e)
+}
+
+note left of ConcreteVisitor
+具体访问者 （Concrete Visitor）
+会为不同的具体元素类实现相同行为的几个不同版本。
+end note
+
+interface Element {
+    + accept(Visitor v)
+}
+
+note top of Element
+元素 （Element） 接口声明了一个方法来 “接收” 访问者。 该
+方法必须有一个参数被声明为访问者接口类型。
+end note
+
+class ElementA implements Element {
+    + featureA()
+    + accept(Visitor v)
+}
+
+note left of ElementA::accept
+v.accept(this)
+end note
+
+class ElementB implements Element {
+    + featureB()
+    + accept(Visitor v)
+}
+
+note bottom of ElementB
+具体元素 （Concrete Element） 必须实现接收方法。
+该方法的目的是根据当前元素类将其调用重定向到相应访问者的方法。
+请注意， 即使元素基类实现了该方法，
+所有子类都必须对其进行重写并调用访问者对象中的合适方法。
+end note
+
+
+class Client {}
+
+note top of Client
+客户端 （Client） 通常会作为集合或其他复杂对象 （例如一个组合树） 的代表。
+客户端通常不知晓所有的具体元素类， 因为它们会通过抽象接口与集合中的对象进行交互。
+
+element.accept(new ConcreteVisitor())
+end note
+
+
+Element .left.> Visitor
+Visitor ..> ElementA
+Visitor ..> ElementB
+Client ..> Visitor
+Client ..> Element
+ConcreteVisitor .right.|> Visitor
+
+
+@enduml
+```
+
+### 访问者模式要点
+
+1. 访问者模式的优点
+    > - 符合单一职责原则: 具体元素角色也就是Employee抽象类的两个子类负责数据的加载，而Visitor类则负责报表的展现，两个不同的职责非常明确地分离开来，各自演绎变化。
+    > - 优秀的扩展性: 由于职责分开，继续增加对数据的操作是非常快捷的，例如，现在要增加一份给大老板的报表，这份报表格式又有所不同，直接在Visitor中增加一个方法，传递数据后进行整理打印。
+    > - 灵活性非常高:  访问者对象可以在与各种对象交互时收集一些有用的信息。 当你想要遍历一些复杂的对象结构 （例如对象树）， 并在结构中的每个对象上应用访问者时， 这些信息可能会有所帮助。
+    > - 开闭原则: 你可以引入在不同类对象上执行的新行为， 且无需对这些类做出修改。
+
+2. 访问者模式的缺点
+    > - 具体元素对访问者公布细节: 访问者要访问一个类就必然要求这个类公布一些方法和数据，也就是说访问者关注了其他类的内部细节，这是迪米特法则所不建议的。
+    > - 具体元素变更比较困难:  每次在元素层次结构中添加或移除一个类(或元素字段发送变化)时， 你都要更新所有的访问者。更新
+    > - 违背了依赖倒置转原则: 访问者依赖的是具体元素，而不是抽象元素，这破坏了依赖倒置原则，特别是在面向对象的编程中，抛弃了对接口的依赖，而直接依赖实现类，扩展比较难。
+
+3. 访问者模式的使用场景
+    > - 一个对象结构包含很多类对象，它们有不同的接口，而你想对这些对象实施一些依赖于其具体类的操作，也就说是用迭代器模式已经不能胜任的情景。
+    > - 需要对一个对象结构中的对象进行很多不同并且不相关的操作，而你想避免让这些操作“污染”这些对象的类。
+    > - 访问者模式通过在访问者对象中为多个目标类提供相同操作的变体， 让你能在属于不同类的一组对象上执行同一操作。
+    > - 当某个行为仅在类层次结构中的一些类中有意义， 而在其他类中没有意义时， 可使用该模式。
+
+### 访问者模式例子: 数据报表
+
+我们在前面讲过了组合模式和迭代器模式。通过组合模式能够把一个公司的人员组织机构树搭建起来，给管理带来非常大的便利，通过迭代器模式把每一个员工都遍历一遍，看看是不是 “有人 去世了还在领退休金”，“拿高工资而不干活的尸位素餐”等情况，我们今天要做的就是把这些情况统计成一个报表呈报上去，让领导看看这种恶劣的情况有多严重。
+
+我们公司有700名多技术人员，分布在全国各地，组织架构在组合模式中已经介绍过了，是很常见的家长领导型模式，每个技术人员的岗位都是固定的，你在组织机构的哪棵树下，充当的角色是什么，叶子节点都是非常明确的，每一个员工的信息（如名字、性别、薪水等）都是记录在数据库中，现在有这样一个需求，我要把公司中的所有人员信息都打印汇报上去。我们来看类图，如 图
+
+```plantuml
+@startuml
+
+title 员工信息类图
+
+class Client {}
+
+abstract class Employee {
+    - int salary
+    - String name
+    - int sex
+
+    + void report()
+    + void getOtherInfo()
+
+    + getter()
+    + setter()
+}
+
+note top of Employee : 抽象员工
+
+class CommonEmployee extends Employee {
+    - String job
+
+    + getter()
+    + setter()
+}
+
+note bottom of CommonEmployee : 普通员工
+
+class Manager extends Employee {
+    - String performance
+
+    + getter()
+    + setter()
+}
+
+note bottom of Manager : 管理层员工
+
+Client -right-> Employee
+
+@enduml
+```
+这个类图还是比较简单的，我们定义每个员工都有薪水salary、名称name、性别sex这3个属性，然后提供了一个抽象方法getOtherInfo由子类进行扩展，同时通过report方法打印出每一个员工 的信息，这里使用模板方法模式。我们先来看一下抽象类，如代码清单
+
+```java
+// 抽象员工
+public abstract class Employee {
+    public final static int MALE = 0; //0代表是男性
+    public final static int FEMALE = 1; //1代表是女性
+    //甭管是谁，都有工资
+    private String name;
+    //只要是员工那就有薪水
+    private int salary;
+    //性别很重要
+    private int sex;
+    //以下是简单的getter/setter
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public int getSalary() {
+        return salary;
+    }
+    public void setSalary(int salary) {
+        this.salary = salary;
+    }
+    public int getSex() {
+        return sex;
+    }
+    public void setSex(int sex) {
+        this.sex = sex;
+    }
+    //打印出员工的信息
+    public final void report(){
+        String info = "姓名：" + this.name + "\t";
+        info = info + "性别：" + (this.sex == FEMALE?"女":"男") + "\t";
+        info = info + "薪水：" + this.salary + "\t";
+        //获得员工的其他信息
+        info = info + this.getOtherInfo();
+        System.out.println(info);
+    }
+    //拼装员工的其他信息
+    protected abstract String getOtherInfo();
+}
+
+// 普通员工
+public class CommonEmployee extends Employee {
+    //工作内容，这非常重要，以后的职业规划就是靠它了
+    private String job;
+    public String getJob() {
+        return job;
+    }
+    public void setJob(String job) {
+        this.job = job;
+    }
+    protected String getOtherInfo(){
+        return "工作："+ this.job + "\t";
+    }
+}
+
+// 管理阶层
+public class Manager extends Employee {
+    //这类人物的职责非常明确：业绩
+    private String performance;
+    public String getPerformance() {
+        return performance;
+    }
+    public void setPerformance(String performance) {
+        this.performance = performance;
+    }
+    protected String getOtherInfo(){
+        return "业绩："+ this.performance + "\t";
+    }
+}
+
+// 场景类
+public class Client {
+    public static void main(String[] args) {
+        for(Employee emp:mockEmployee()){
+            emp.report();
+        }
+    }
+    //模拟出公司的人员情况，我们可以想象这个数据是通过持久层传递过来的
+    public static List<Employee> mockEmployee(){
+        List<Employee> empList = new ArrayList<Employee>();
+        //产生张三这个员工
+        CommonEmployee zhangSan = new CommonEmployee();
+        zhangSan.setJob("编写Java程序，绝对的蓝领、苦工加搬运工");
+        zhangSan.setName("张三");
+        zhangSan.setSalary(1800);
+        zhangSan.setSex(Employee.MALE);
+        empList.add(zhangSan);
+        //产生李四这个员工
+        CommonEmployee liSi = new CommonEmployee();
+        liSi.setJob("页面美工，审美素质太不流行了！");
+        liSi.setName("李四");
+        liSi.setSalary(1900);
+        liSi.setSex(Employee.FEMALE);
+        empList.add(liSi);
+        //再产生一个经理
+        Manager wangWu = new Manager();
+        wangWu.setName("王五");
+        wangWu.setPerformance("基本上是负值，但是我会拍马屁呀");
+        wangWu.setSalary(18750);
+        wangWu.setSex(Employee.MALE);
+        empList.add(wangWu);
+        return empList;
+    }
+}
+```
+结果出来了，非常正确。我们来想一想实际的情况，人力资源部门拿这份表格会给谁看呢？那当然是大老板了！大老板关心的是什么？关心部门经理的业绩！小兵的情况不是他要了解的，就像 战争时期一位将军说：“我一想到我的士兵也有孩子、妻子、父母，我就痛心疾首……但是这是战场，我只能认为他们是一群机器……”是啊，其实我们也一样啊，那问题就出来了：
+
+- 大老板就看部门经理的报表，小兵的报表可看可不看。
+- 多个大老板的“嗜好”是不同的，主管销售的，则主要关心营销的情况；主管会计的，则主要关心企业的整体财务运行状态；主管技术的，则主要看技术的研发情况。
+
+综合成一句话，这个报表会修改：数据的修改以及报表的展现修改，按照开闭原则，项目分析的时候已经考虑到这些可能引起变更的因素，就需要在设计时考虑通过扩展来避开未来需求变更而 引起的代码修改风险。我们来想一想，每个普通员工类和经理类都用一个方法report（从父类继承过来的），他无法为每一个子类定制特殊的属性，简化类图如图
+
+
+```plantuml
+@startuml
+
+title 简化类图
+
+abstract class Employee {
+    + void report()
+}
+class CommonEmployee extends Employee {}
+class Manager extends Employee {}
+
+@enduml
+```
+
+我们思考一下，如何提供一个能够为每个子类定制报表的方法呢？可以这样思考，普通员工和管理层员工是两个不同的对象，例如，我邀请一个人过来参观我的家，参观者参观完毕后分别进行 描述，那参观的对象不同，描述的结果也当然不同。好，按照这思路，我们把方法report提取到另外一个类Visitor中来实现，如图
+
+```plantuml
+@startuml
+
+title 改造后的简化类图
+
+abstract class Employee {
+}
+class CommonEmployee extends Employee {}
+class Manager extends Employee {}
+
+interface Visitor {
+    + void report()
+}
+
+CommonEmployee ..> Visitor
+Manager ..> Visitor
+
+@enduml
+```
+
+两个子类的report方法都不需要了，只有Visitor类来实现了report的方法，这个猛一看还真有点委托（intergration）的意味，我们实现出来你就知道这和委托有非常大的差距。详细类图如图
+
+```plantuml
+@startuml
+
+title 改造后的详细类图
+
+class Client {}
+
+interface IVisitor {
+    + visit(CommonEmployee commonEmployee)
+    + visit(Manager manager)
+}
+note right of IVisitor : 访问者
+
+class Visitor implements IVisitor {}
+
+abstract class Employee {
+    - int salary
+    - String name
+    - int sex
+
+    + void accept(IVisitor visitor)
+
+    + getter()
+    + setter()
+}
+
+note left of Employee : 抽象员工
+
+class CommonEmployee extends Employee {
+    - String job
+
+    + void accept(IVisitor visitor)
+    + getter()
+    + setter()
+}
+
+note bottom of CommonEmployee : 普通员工
+
+class Manager extends Employee {
+    - String performance
+
+    + void accept(IVisitor visitor)
+    + getter()
+    + setter()
+}
+
+note bottom of Manager : 管理层员工
+
+Client --> Employee
+Client --> IVisitor
+Employee .right.> IVisitor
+
+@enduml
+```
+
+在抽象类Employee中增加了accept方法，该方法是一个抽象方法，由子类实现，其意义就是说我这个类可以允许谁来访问，也就是定义一类访问者，在具体的实现类中调用访问者的方法。我们 先看访问者接口IVisitor程序，如代码清单
+
+```java
+// 访问者接口
+// 该接口的意义是：该接口可以访问两个对象，一个是普通员工，一个是高层员工。
+public interface IVisitor {
+    //首先，定义我可以访问普通员工
+    public void visit(CommonEmployee commonEmployee);
+    //其次，定义我还可以访问部门经理
+    public void visit(Manager manager);
+}
+
+// 访问者实现
+public class Visitor implements IVisitor {
+    //访问普通员工，打印出报表
+    public void visit(CommonEmployee commonEmployee) {
+        System.out.println(this.getCommonEmployee(commonEmployee));
+    }
+    //访问部门经理，打印出报表
+    public void visit(Manager manager) {
+        System.out.println(this.getManagerInfo(manager));
+    }
+    //组装出基本信息
+    private String getBasicInfo(Employee employee){
+        String info = "姓名：" + employee.getName() + "\t";
+        info = info + "性别：" + (employee.getSex() == Employee.FEMALE?"女":"男info = info + "薪水：" + employee.getSalary() + "\t";
+        return info;
+    }
+    //组装出部门经理的信息
+    private String getManagerInfo(Manager manager){
+        String basicInfo = this.getBasicInfo(manager);
+        String otherInfo = "业绩："+manager.getPerformance() + "\t";
+        return basicInfo + otherInfo;
+    }
+    //组装出普通员工信息
+    private String getCommonEmployee(CommonEmployee commonEmployee){
+        String basicInfo = this.getBasicInfo(commonEmployee);
+        String otherInfo = "工作："+commonEmployee.getJob()+"\t";
+        return basicInfo + otherInfo;
+    }
+}
+
+// 抽象员工类
+// 删除了report/getOtherInfo方法, 增加了accept方法，接受访问者的访问
+public abstract class Employee {
+    public final static int MALE = 0; //0代表是男性
+    public final static int FEMALE = 1; //1代表是女性
+    //甭管是谁，都有工资
+    private String name;
+    //只要是员工那就有薪水
+    private int salary;
+    //性别很重要
+    private int sex;
+    //以下是简单的getter/setter
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public int getSalary() {
+        return salary;
+    }
+    public void setSalary(int salary) {
+        this.salary = salary;
+    }
+    public int getSex() {
+        return sex;
+    }
+    public void setSex(int sex) {
+        this.sex = sex;
+    }
+    //我允许一个访问者访问
+    public abstract void accept(IVisitor visitor);
+}
+
+// 普通员工
+public class CommonEmployee extends Employee {
+    //工作内容，这非常重要，以后的职业规划就是靠它了
+    private String job;
+    public String getJob() {
+        return job;
+    }
+    public void setJob(String job) {
+        this.job = job;
+    }
+    //我允许访问者访问
+    @Override
+    public void accept(IVisitor visitor){
+        visitor.visit(this);
+    }
+}
+
+// 管理层员工
+public class Manager extends Employee {
+    //这类人物的职责非常明确：业绩
+    private String performance;
+    public String getPerformance() {
+        return performance;
+    }
+    public void setPerformance(String performance) {
+        this.performance = performance;
+    }
+    //部门经理允许访问者访问
+    @Override
+    public void accept(IVisitor visitor){
+        visitor.visit(this);
+    }
+}
+
+
+// 场景类
+// 运行结果也完全相同，那回过头来看看这个程序是怎么实现的:
+// 第一，通过循环遍历所有元素。
+// 第二，每个员工对象都定义了一个访问者。
+// 第三，员工对象把自己作为一个参数调用访问者visit方法。
+// 第四，访问者调用自己内部的计算逻辑，计算出相应的数据和表格元素。
+// 第五，访问者打印出报表和数据。
+public class Client {
+    public static void main(String[] args) {
+        for(Employee emp:mockEmployee()){
+            emp.accept(new Visitor());
+        }
+    }
+    //模拟出公司的人员情况，我们可以想象这个数据是通过持久层传递过来的
+    public static List<Employee> mockEmployee(){
+        List<Employee> empList = new ArrayList<Employee>();
+        //产生张三这个员工
+        CommonEmployee zhangSan = new CommonEmployee();
+        zhangSan.setJob("编写Java程序，绝对的蓝领、苦工加搬运工");
+        zhangSan.setName("张三");
+        zhangSan.setSalary(1800);
+        zhangSan.setSex(Employee.MALE);
+        empList.add(zhangSan);
+        //产生李四这个员工
+        CommonEmployee liSi = new CommonEmployee();
+        liSi.setJob("页面美工，审美素质太不流行了！");
+        liSi.setName("李四");
+        liSi.setSalary(1900);
+        liSi.setSex(Employee.FEMALE);
+        empList.add(liSi);
+        //再产生一个经理
+        Manager wangWu = new Manager();
+        wangWu.setName("王五");
+        wangWu.setPerformance("基本上是负值，但是我会拍马屁呀");
+        wangWu.setSalary(18750);
+        wangWu.setSex(Employee.MALE);
+        empList.add(wangWu);
+        return empList;
+    }
+}
+
+```
+
+事情的经过就是这个样子。那我们再来看看上面提到的数据和报表格式都会改变的情况。首先是数据的改变，数据改了当然都要改，说不上两个方案有什么优劣；其次是报表格式的修改，这个 方案绝对是有优势的，我只要再产生一个IVisitor的实现类就可以产生一个新的报表格式，而其他的类都不用修改，如果你用Spring开发，那就更好了，在Spring的配置文件中使用的是接口注 入，我只要把配置文件中的 ref修改一下就行了，其他的都不用修改了！这就是访问者模式的优势所在。

@@ -80,23 +80,65 @@
 @startuml
 
 class Context {
-    Strategy strategy
-    executeStrategy()
-    setStrategy(Strategy)
+    - Strategy strategy
+    + executeStrategy()
+    + setStrategy(Strategy)
 }
+
+note left of Context::executeStrategy
+strategy.execute()
+end note
+
+note top of Context
+上下文(Context) 维护指向具体策略的引用，
+且仅通过策略接口与该对象进行交流。
+
+当上下文需要运行算法时， 
+它会在其已连接的策略对象上调用执行方法。 
+上下文不清楚其所涉及的策略类型与算法的执行方式。
+end note
 
 interface Strategy {
-    doOperation()
+    + doOperation()
+}
+note top of Strategy
+策略(Strategy) 接口是所有具体策略的通用接口， 
+它声明了一个上下文用于执行策略的方法。
+end note
+
+package "具体策略实现" as ConcreteStrategy {
+    class ConcreteStrategyA implements Strategy {
+        + doOperation()
+    }
+    class ConcreteStrategyB implements Strategy {
+        + doOperation()
+    }
 }
 
-class ConcreteStrategyA implements Strategy {
-    doOperation()
-}
-class ConcreteStrategyB implements Strategy {
-    doOperation()
-}
+note bottom of ConcreteStrategy
+具体策略(Concrete Strategies)
+实现了上下文所用算法的各种不同变体。
+end note
 
-Context -right--> Strategy : Context(上下文)这个类的executeStrategy()被调用\n会委托给Strategy.doOperation()来处理
+class Client {}
+note left of Client
+客户端(Client) 会创建一个特定策略对象并将其传递给上下文。 
+上下文则会提供一个设置器以便客户端在运行时替换相关联的策略。
+end note
+
+note bottom of Client
+Strategy strategy = new ConcreteStrategyA();
+context.setStrategy(strategy);
+context.executeStrategy();
+// ...
+Strategy strategy = new ConcreteStrategyB();
+context.setStrategy(strategy);
+context.executeStrategy();
+end note
+
+Client -up-> Context
+Client .right.> ConcreteStrategy
+Context -right--* Strategy : Context(上下文)这个类的executeStrategy()被调用\n会委托给Strategy.doOperation()来处理
 
 @enduml
 ```
@@ -338,38 +380,81 @@ interface Subject {
     + removeObserver()
     + notifyObservers()
 }
-note right of Subject : 这是主题接口.\n对象使用这个接口注册为观察者,\n或把自己从观察者中移除
+note left of Subject
+主题(Subject)接口.
+对象使用这个接口注册为观察者,
+或把自己从观察者中移除
 
+会向其他对象发送值得关注的事件。 
+事件会在发布者自身状态改变或执行特定行为后发生。 
+发布者中包含一个允许新订阅者加入和当前订阅者离开列表的订阅构架。
+end note
 interface Observer {
-    + update()
+    + update(contxt)
 }
-note right of Observer : 所有潜在的观察者需要实现观察者接口.\n这个接口只有方法update(),\n当主题状态改变时被调用
+note right of Observer
+观察者(Observer)
+所有潜在的观察者需要实现观察者接口.
+这个接口只有方法update(),当主题状态改变时被调用
 
-Subject "1" --> "n" Observer : 每个主题可以有许多观察者
+观察者通常需要一些上下文信息来正确地处理更新。
+因此， 主题通常会将一些上下文数据作为通知方法的参数进行传递。 
+主题也可将自身作为参数进行传递， 使观察者直接获取所需的数据。
+end note
 
 class ConcreteSubject implements Subject {
-    + registerObserver() {...}
-    + removeObserver() {...}
-    + notifyObservers() {...}
+    - Observer[] observers
+    - state
+
+    + registerObserver()
+    + removeObserver()
+    + notifyObservers()
 
     + getState()
     + setState()
 }
 note bottom of ConcreteSubject 
+具体的主题(ConcreteSubject)
 一个具体的主题总是实现Subject(主题)接口
 除了注册和移除方法,具体主题还实现了notifyObservers()方法
 此方法用于在状态改变时更新当前所有观察者
 end note
-note right of ConcreteSubject::setState
+note left of ConcreteSubject::notifyObservers
+for(Observer observer : observers)
+    observer.update(this)
+end note
+note left of ConcreteSubject::setState
 具体主题也可能有设置和独具状态的方法
+
+state = newState
+notifyObservers()
 end note
 
 class ConcreteObserver implements Observer {
-    + update()
+    + update(context)
     // 其他观察者方法()
 }
-note bottom of ConcreteObserver : 具体观察者可以是实现观察者接口的类\n每个观察者注册具体主题以接收更新
-ConcreteSubject --> ConcreteObserver
+note bottom of ConcreteObserver
+具体观察者(ConcreteObserver)可以是实现观察者接口的类\n每个观察者注册具体主题以接收更新
+end note
+
+class Client {}
+
+note top of Client
+客户端(Client) 会分别创建发布者和订阅者对象， 
+然后为订阅者注册发布者更新。
+
+Observer observer = new ConcreteObserver();
+subject.registerObserver(observer);
+subject.setState(newState)
+end note
+
+Client --> Subject
+Client ..> Observer
+
+Subject "1" -right-> "n" Observer : 每个主题可以有许多观察者
+ConcreteSubject -right-> ConcreteObserver
+
 
 @enduml
 ```
@@ -665,9 +750,91 @@ public class PropertyChangeEventMain {
 
 ## 装饰者模式
 
-### 装饰者模式定义
+`装饰者模式` 动态地将额外责任附加到对象上.对于扩展功能,装饰者提供子类化之外的弹性替代方案
 
-***装饰者模式*** 动态地将额外责任附加到对象上.对于扩展功能,装饰者提供子类化之外的弹性替代方案
+### 装饰者模式类图
+
+```plantuml
+@startuml
+
+title 装饰者模式类图
+
+class Client {}
+
+note top of Client
+客户端(Client) 可以使用多层装饰来封装部件，
+只要它能使用通用接口与所有对象互动即可。
+
+a = new ConcreteComponent();
+b = ConcreteDecoratorB(a);
+c = ConcreteDecoratorC(b);
+c.exectue();
+// Decorator -> Decorator -> Component
+end note
+
+interface Component {
+   + exectue()
+}
+
+note top of Component
+部件(Component)声明封装器和被封装对象的公用接口。
+end note
+
+class BaseDecorator implements Component {
+    - Component wrappee
+    
+    + BaseDecorator(Component wrappee)
+    + exectue()
+}
+
+note bottom of BaseDecorator
+基础装饰(Base Decorator)
+类拥有一个指向被封装对象的引用成员变量。 
+该变量的类型应当被声明为通用部件接口， 
+这样它就可以引用具体的部件和装饰。 
+装饰基类会将所有操作委派给被封装的对象。
+end note
+note left of BaseDecorator::BaseDecorator
+this.wrappee = wrappee
+end note
+note left of BaseDecorator::exectue
+wrappee.exectue()
+end note
+
+class ConcreteDecorator extends BaseDecorator {
+    + exectue()
+    + extra()
+}
+note bottom of ConcreteDecorator
+具体装饰类(Concrete Decorators)
+定义了可动态添加到部件的额外行为。 
+具体装饰类会重写装饰基类的方法， 
+并在调用父类方法之前或之后进行额外的行为。
+end note
+note left of ConcreteDecorator::exectue
+// 添加额外行为
+extra();
+super.exectue();
+// 添加额外行为
+extra();
+end note
+
+class ConcreteComponent implements Component {
+    + exectue()
+}
+note bottom of ConcreteComponent
+具体部件(Concrete Component) 类是被封装对象所属的类。 
+它定义了基础行为， 但装饰类可以改变这些行为。
+end note
+
+
+Client -right-> Component
+
+' 样式控制无意义
+BaseDecorator -right[hidden]-> ConcreteComponent
+
+@enduml
+```
 
 ### 装饰者模式要点
 
@@ -1415,17 +1582,16 @@ public class VeggiePizza extends Pizza {
 ```plantuml
 @startuml
 
-skinparam linetype ortho
 abstract class Creator {
     + factoryMethod()
     + anOperation()
 }
-note top of Creator 
-Creator 是一个类, 
-包含操纵产品的所欧方法的实现, 
+note left of Creator 
+创建者(Creator) 类声明返回产品对象的工厂方法。 
+该方法的返回对象类型必须与产品接口相匹配。
+包含操纵产品的所有方法的实现, 
 除了工厂方法 factoryMethod
-end note
-note right of Creator::factoryMethod
+
 抽象 factoryMethod() 方法是
 所有 Creator 子类必须继承的
 end note
@@ -1433,6 +1599,12 @@ end note
 class ConcreteCreator extends Creator {
     + factoryMethod()
 }
+note left of ConcreteCreator::factoryMethod
+if (type == "A")
+    return ConcreteProductA();
+else if (type == "B")
+    return ConcreteProductB();
+end note
 
 interface Product {
 }
@@ -1441,19 +1613,37 @@ class ConcreteProduct implements Product {
 
 }
 
-note "所有产品必须实现相同的接口,\n这样,使用产品的类可以引用该接口\n而不是具体类" as concrete_product_note
-concrete_product_note .right. ConcreteProduct
-concrete_product_note .right. Product
+note right of Product 
+产品(Product) 所有产品必须实现相同的接口,
+这样,使用产品的类可以引用该接口
+而不是具体类
+end note
+note right of ConcreteProduct
+具体产品(Concrete Products)是产品接口的不同实现。
+end note
 
-ConcreteCreator -left--> ConcreteProduct
-Creator -left--> Product
+ConcreteCreator -right--> ConcreteProduct
+Creator -right--> Product
 
 
-note "ConcreteCreator负责创建一个或多个具体产品\n它是唯一直达如何创建这些产品的类" as concrete_creator_note
+note "具体创建者(Concrete Creators)负责创建一个或多个具体产品\n它是唯一直达如何创建这些产品的类" as concrete_creator_note
 concrete_creator_note .up. ConcreteCreator
-concrete_creator_note .up. ConcreteProduct
 
+class Client {}
 
+note top of Client
+Creator creator = new ConcreteCreator1();
+creator.factoryMethod("A");
+creator.factoryMethod("B");
+
+// 切换工厂
+Creator creator = new ConcreteCreator2();
+creator.factoryMethod("A");
+creator.factoryMethod("B");
+end note
+
+Client --> Creator
+Client --> Product
 @enduml
 ```
 
@@ -1831,20 +2021,30 @@ ChicagoStyleCheesePizza -up-> Pizza
 
 skinparam linetype ortho
 interface AbstractFactory {
-    createProductA()
-    createProductB()
+    + createProductA()
+    + createProductB()
 }
-note top of AbstractFactory : 抽象工厂定义了所有具体工厂都必须实现的接口, 这个接口包含一组生产产品的方法
+note top of AbstractFactory : 抽象工厂(AbstractFactory)定义了所有具体工厂都必须实现的接口, 这个接口包含一组生产产品的方法
 
 class ConcreteFactory1 implements AbstractFactory {
-    createProductA()
-    createProductB()
+    + createProductA()
+    + createProductB()
 }
 class ConcreteFactory2 implements AbstractFactory {
-    createProductA()
-    createProductB()
+    + createProductA()
+    + createProductB()
 }
-note "具体工厂实现不同的产品家族.\n 客户使用其中一个工厂创建产品,\n 绝对不用实例化产品对象" as ConcreteFactory_note
+note bottom of ConcreteFactory2
+createProductA() {
+    if (type = "A2")
+        return new ProductA2();
+    else if (type == "A21") {
+        return new ProductA21();
+    }
+}
+end note
+
+note "具体工厂(ConcreteFactory)实现不同的产品家族.\n 客户使用其中一个工厂创建产品,\n 绝对不用实例化产品对象" as ConcreteFactory_note
 ConcreteFactory_note .up. ConcreteFactory1
 ConcreteFactory_note .up. ConcreteFactory2
 
@@ -1871,7 +2071,19 @@ ConcreteFactory2 -right-> ProductB2
 class Client {
 
 }
-note top of Client : 客户针对抽象工厂编码, 运行时和实际工厂组合
+note top of Client
+客户(Client)针对抽象工厂编码, 运行时和实际工厂组合
+
+AbstractFactory factory = new ConcreteFactory1();
+AbstractProductA productA = factory.createProductA("A1");
+AbstractProductB productB = factory.createProductA("B1");
+// ...
+
+// 切换工厂
+AbstractFactory factory = new ConcreteFactory2();
+AbstractProductA productA = factory.createProductA("A2");
+AbstractProductB productB = factory.createProductA("B2");
+end note
 
 Client --> AbstractFactory
 Client --> AbstractProductA
@@ -2319,7 +2531,7 @@ class Singleton {
     static uniqueInstance
     // 其他有用的单例属性
     ..
-    static Singleton getInstance()
+    + static Singleton getInstance()
     // 其他有用的单例方法
 }
 
@@ -2327,6 +2539,12 @@ note left of Singleton::getInstance
 getInstance() 方法是静态的,这意味着它是一个类方法,
 因此你可以在代码的任何地方,方便地用 Singleton.getInstance()访问它
 就和访问全局变量一样容易,而且单例还有延迟实例化等优点
+
+if (uniqueInstance == null) {
+    // 注意: 如果程序需要支持多线程,你必须在这放置线程锁
+    uniqueInstance = new Singleton();
+}
+return uniqueInstance;
 end note
 
 note right of Singleton::uniqueInstance
@@ -2334,9 +2552,12 @@ uniqueInstance类变量持有唯一的单例实例
 end note
 
 note bottom of Singleton
-实现单例模式的类不只是一个单例, 它也是一般的类,
+单例(Singleton)模式的类不只是一个单例, 它也是一般的类,
 有自己的一套数据和方法
 end note
+
+class Client {}
+Client --> Singleton
 
 
 @enduml
@@ -2435,18 +2656,25 @@ public class Singleton {
 ```plantuml
 @startuml
 
-skinparam linetype ortho
 
 class Client {
 }
-note bottom of Client
+note left of Client
 Client 负责创建一个 ConcreteCommand (具体命令)
 并且设置 Receiver (接收者)
+
+Invoker invoker = new Invoker()
+Receiver receiver = new Receiver();
+Command command = new ConcreteCommand(receiver, params);
+invoker.setCommand(command);
+invoker.execute();
 end note
 
 class Invoker {
-    setCommand()
-    execute() // 或其它方法
+    - Command command
+
+    + setCommand()
+    + execute() // 或其它方法
 }
 note top of Invoker
 Invoker(调用者)持有一个命令, 并在某个时间点
@@ -2454,17 +2682,17 @@ Invoker(调用者)持有一个命令, 并在某个时间点
 end note
 
 class Receiver {
-    action()
+    + action(params)
 }
-note top of Receiver
+note bottom of Receiver
 Receiver(接收者) 知道如何执行履行请求所需的工作
 任何类都可以作为 Receiver
 在实践中, "聪明" 命令对象并不少见. 这些对象自己实现请求, 而不是委托给接收者
 end note
 
 interface Command {
-    execute()
-    undo()
+    + execute()
+    + undo()
 }
 note top of Command
 Command(命令)为所有命令声明了一个接口.
@@ -2473,13 +2701,22 @@ Command(命令)为所有命令声明了一个接口.
 end note
 
 class ConcreteCommand implements Command {
-    execute()
-    undo()
+    - Receiver receiver
+    - params
+
+    + ConcreteCommand(receiver , params)
+    + execute()
+    + undo()
 }
 note bottom of ConcreteCommand
+具体命令(Concrete Commands) 会实现各种类型的请求。 
+具体命令自身并不完成工作， 
+而是会将调用委派给一个业务逻辑对象。 
+但为了简化代码， 这些类可以进行合并。
+
 // execute() 方法调用履行请求所需接收者的动作
 public void execute() {
-    receiver.action()
+    receiver.action(params)
 }
 end note
 
@@ -2508,10 +2745,11 @@ public class MacroCommand implements Command {
 end note
 
 
-
-Client -right-> Receiver
-Client -right-> ConcreteCommand
+Client -down-> Receiver
+Client .right.> ConcreteCommand
+Client -right-> Invoker
 Invoker -right-> Command
+ConcreteCommand -left-> Receiver
 
 @enduml
 ```
@@ -3096,23 +3334,31 @@ command3 <-- store : 加载
 class Client {
 }
 
-note bottom of Client : 客户只看到目标接口
+note top of Client : 客户只看到目标接口
 
 interface Target {
-    request()
+    + request(params)
 }
 
 class Adapter implements Target {
-    request()
+    - Adaptee adaptee
+
+    + Adapter(Adaptee adaptee)
+    + request(params)
 }
 
+note left of Adapter::request
+data = convertToData(params);
+return adaptee.speciffcRequest(data);
+end note
+
 note "适配器实现目标接口" as Target_Adapter_note
-Target_Adapter_note .. Target
-Target_Adapter_note .. Adapter
+Target_Adapter_note .up. Target
+Target_Adapter_note .down. Adapter
 
 
 Class Adaptee {
-    speciffcRequest()
+    + speciffcRequest(data)
 }
 
 Client -> Target
@@ -3131,16 +3377,22 @@ class Client {
 
 
 class Target {
-    request()
+    + request(params)
 }
 
 Class Adaptee {
-    speciffcRequest()
+    + speciffcRequest(data)
 }
 
 class Adapter extends Target, Adaptee {
-    request()
+    + request(params)
+    + speciffcRequest(data)
 }
+note left of Adapter::request
+data = convertToData(params);
+return speciffcRequest(data);
+end note
+
 
 note bottom of Adapter
 适配器现在继承被适配者和目标类(多重继承)
@@ -3295,18 +3547,48 @@ public class DuckTestDrive {
 @startuml
 
 class Client {}
+note top of Client
+客户端(Client) 使用外观代替对子系统对象的直接调用。
+end note
 
-class Facade {}
+class Facade {
+    - linksToSubsystemObjects
+    - optionalAdditionalFacade
 
-package 子系统的类 {
+    + subsystemOptional()
+}
+note top of Facade
+外观(Facade)提供了一种访问特定子系统功能的便捷方式， 
+其了解如何重定向客户端请求， 知晓如何操作一切活动部件。
+end note
+
+class AdditionalFacade {
+    + anotherOptional()
+}
+note top of AdditionalFacade
+创建附加外观(Additional Facade)类
+可以避免多种不相关的功能污染单一外观， 
+使其变成又一个复杂结构。 
+客户端和其他外观都可使用附加外观。
+end note
+
+package "子系统的类" as subsystem {
     class Service1 {}
     class Service2 {}
     class Service3 {}
 
     Service1 -> Service3
 }
+note bottom of subsystem
+复杂子系统(Complex Subsystem)由数十个不同对象构成。 
+如果要用这些对象完成有意义的工作， 你必须深入了解子系统的实现细节， 
+比如按照正确顺序初始化对象和为其提供正确格式的数据。
+
+子系统类不会意识到外观的存在， 它们在系统内运作并且相互之间可直接进行交互
+end note
 
 Client -right-> Facade
+Facade -right-> AdditionalFacade
 Facade -down-> Service1
 Facade -down-> Service2
 @enduml
@@ -3581,14 +3863,25 @@ abstract AbstractClass {
     # {abstract} abstract primitiveOperation2()
     # hook()
 }
+note top of AbstractClass
+抽象类(Abstract­Class)会声明作为算法步骤的方法， 
+以及依次调用它们的实际模板方法。 
+算法步骤可以被声明为 抽象类型， 也可以提供一些默认实现。
+end note
 
 note left of AbstractClass::templateMethod
 AbstractClass (抽象类) 包含模板方法
-
 模板方法用原语操作来实现算法
 它从这些操作的实际实现解耦
-primitiveOperation1();
-primitiveOperation12
+
+public void primitiveOperation1() {
+    // 原语操作1, 子类必须实现
+    primitiveOperation1();
+    // 原语操作2, 子类必须实现
+    primitiveOperation2();
+    // 钩子函数: 有默认实现, 子类可以选择是否忽略
+    hook();
+}
 end note
 note "以及模板方法所用到的操作的抽象方法\nprimitiveOperation1\nprimitiveOperation2" as primitiveOperation_note
 primitiveOperation_note .left. AbstractClass::primitiveOperation1
@@ -3604,6 +3897,10 @@ class ConcreteClass extends AbstractClass {
     # primitiveOperation1()
     # primitiveOperation2()
 }
+note bottom of ConcreteClass
+具体类(Concrete­Class)可以重写所有步骤，
+但不能重写模板方法自身。
+end note
 
 note left of ConcreteClass
 可能由很多 ConcreteClass (忽略钩子的具体类)
@@ -3623,7 +3920,7 @@ class ConcreteWithHookClass extends AbstractClass {
 }
 
 note bottom of ConcreteWithHookClass
-实现钩子的具体类
+实现钩子的具体类(ConcreteWithHookClass)
 end note
 
 @enduml
@@ -4001,20 +4298,20 @@ public class DuckSortTestDrive {
 @startuml
 
 interface Aggregate<T> {
-    Iterator createIterator()
+    + Iterator createIterator()
 }
 
 note top of Aggregate
-聚合由一个共同的接口, 这对客户来说是很方便
+聚合(Aggregate)有一个共同的接口, 这对客户来说是很方便
 它把客户从集合对象的实现解耦
 end note
 
 class ConcreteAggregate<T> implements Aggregate {
-    Iterator createIterator()
+    + Iterator createIterator()
 }
 
 note bottom of ConcreteAggregate
-ConcreteAggregate 有一个对象的集合,
+具体聚合(ConcreteAggregate) 有一个对象的集合,
 并实现一个方法, 该方法返回集合的迭代器
 每一个 ConcreteAggregate 负责实例化一个能够遍历其对象集合的 ConcreteIterator
 end note
@@ -4030,26 +4327,26 @@ Clinet -left----> Aggregate
 Clinet -right----> Iterator
 
 interface Iterator<T> {
-    boolean hasNext()
-    T next()
-    boolean remove()
+    + boolean hasNext()
+    + T next()
+    + boolean remove()
 }
 
 note top of Iterator
-Iterator接口提供了所有迭代器都必须实现的接口
+迭代器(Iterator)接口提供了所有迭代器都必须实现的接口
 它提供了一个遍历集合元素的方法集
 在这里, 我们用的是java.util.Iterator
 如果你不想用Java的迭代器接口可以创建自己的接口
 end note
 
 class ConcreteIterator<T> implements Iterator {
-    boolean hasNext()
-    T next()
-    boolean remove()
+    + boolean hasNext()
+    + T next()
+    + boolean remove()
 }
 
 note bottom of ConcreteIterator
-ConcreteIterator 负责管理当前遍历的位置
+具体迭代器(ConcreteIterator) 负责管理当前遍历的位置
 end note
 
 note "迭代器模式的类图于工厂模式的类图相似" as all_note
@@ -4393,42 +4690,43 @@ class Client {
 }
 
 note top of Client
-Client 使用 Component 接口来奥在组合中的对象
+Client 使用 Component 接口来使用组合中的对象
 end note
 
 abstract class Component {
-    operation()
-    add(Component component)
-    remove(Component component)
-    getChild(int i)
+    + operation()
+    + add(Component component)
+    + remove(Component component)
+    + getChild(int i)
 }
 
 note top of Component
-Component 为组合中的所有对象定义一个接口, 包括 组合 和 叶子
+组件(Component) 为组合中的所有对象定义一个接口, 包括 组合 和 叶子
 Component 可能为 add(), remove(), getChild() 以及它的操作实现缺省行为(比如抛出异常)
 end note
 
 class Left extends Component {
-    operation()
+    + operation()
 }
 
 note bottom of Left
+叶子节点(Left)
 1. 叶子节点也继承像add(),remove(),getChild()这样的方法,这些方法对叶子节点不一定有意义
 2. 叶子节点没有孩子节点
 3. 通过实现 Composite 支持的操作, 叶子为 Composite 内的元素定义行为
 end note
 
 class Composite extends Component {
-    List<Component> childs
+    - List<Component> childs
 
-    operation()
-    add(Component component)
-    remove(Component component)
-    getChild(int i)
+    + operation()
+    + add(Component component)
+    + remove(Component component)
+    + getChild(int i)
 }
 
 note bottom of Composite
-Composite的角色是定义有孩子的组件的行为
+组合/容器(Composite)是定义有孩子的组件的行为
 Composite也实现叶子相关的操作. 主要其中一些操作可能对 Composite没有意义,因此这个情况下可能会产生异常
 end note
 
@@ -4911,44 +5209,81 @@ public class MenuTestDrive {
 @startuml
 
 class Context {
-    State currentState
-    State state1
-    State state2
-    request()
-}
+    - State currentState
+    - State stateA
+    - State stateB
 
+    + Context()
+    + request()
+    + changeState(State state)
+    + State getStateA()
+    + State getStateB()
+}
 note left of Context::currentState
 当前状态,无论和时Context上的request()被调用,
 就会被委托给状态(当前状态)来处理
 end note
-note left of Context::state1
-Context(上下文)这个类有很多内部状态.
+
+note left of Context::stateA
+上下文(Context)这个类有很多内部状态.
+end note
+
+note left of Context::Context
+// 初始化所有状态
+this.stateA = new ConcreteStateA(this);
+this.stateB = new ConcreteStateB(this);
+// 初始化当前状态
+this.currentState = stateA;
+// ...
 end note
 
 
+note left of Context::request
+this.currentState.handle();
+end note
+
 abstract class State {
-    handle()
+    + handle()
 }
 
 note top of State
-State接口定义了一个所有具体状态的共同接口
+状态(State)接口定义了一个所有具体状态的共同接口
 所有状态都实现了这个相同的接口, 这一就可以互换
 end note
 
 
 
 class ConcreteStateA extends State {
-    handle()
+    - Context context
+
+    + ConcreteStateA(Context context)
+    + handle()
 }
 class ConcreteStateB extends State {
-    handle()
+    - Context context
+
+    + ConcreteStateB(Context context)
+    + handle()
 }
+note left of ConcreteStateA::handle
+// ...
+// 可能切换上下文中的状态(动态时由State控制)
+// 一般状态迁移固定时适合由Context控制
+this.context.changeState(this.context.getStateB());
+end note
 
 note "ConcreteState(具体状态)处理来自Context的请求.\n每一个ConcreteState都提供它自己对于请求的实现.\n这样,当Context改变状态时,行为也跟着改变" as ConcreteState_note
-ConcreteState_note .left. ConcreteStateA
-ConcreteState_note .left. ConcreteStateB
+ConcreteState_note .up. ConcreteStateA
+
+class Client {}
+note top of Client
+Context context = new Context();
+context.request(); // 相当于执行    : stateA.handle()
+context.request(); // 状态迁移相当于: stateB.handle()
+end note
 
 
+Client --> Context
 Context -right-> State
 
 @enduml
@@ -5409,7 +5744,7 @@ public class GumballMachineTestDrive {
 @startuml
 
 interface Subject {
-    request()
+    + request()
 }
 
 note top of Subject
@@ -5418,7 +5753,7 @@ Proxy和RealSubject都实现了Subject接口
 end note
 
 class RealSubject implements Subject {
-    request()
+    + request()
 }
 
 note bottom of RealSubject
@@ -5427,8 +5762,8 @@ Proxy 控制对它的访问
 end note
 
 class Proxy implements Subject {
-    Subject subject
-    request()
+    - Subject subject
+    + request()
 }
 
 note bottom of Proxy
@@ -5436,7 +5771,12 @@ Proxy持有Subject的引用, 应此必要是它可以将请求转发给Subjects
 Proxy通常实例化或处理RealSubject对象的创建和销毁
 end note
 
-Proxy -left--> RealSubject : subject
+note left of Proxy::request
+if (如果可以访问)
+    subject.request();
+end note
+
+Proxy -right--* RealSubject : subject
 
 @enduml
 ```
@@ -6736,7 +7076,8 @@ end note
 ```plantuml
 @startuml
 abstract class Abstraction {
-    operation()
+    - Implementor implementor
+    + operation()
 }
 
 note top of Abstraction
@@ -6747,7 +7088,7 @@ Abstraction(抽象化角色)
 end note
 
 interface Implementor {
-    operationImpl()
+    + operationImpl()
 }
 
 note top of Implementor
@@ -6756,7 +7097,7 @@ Implementor(实现化角色)
 end note
 
 class RefinedAbstraction extends Abstraction {
-
+    + operation()
 }
 
 note bottom of RefinedAbstraction
@@ -6764,15 +7105,29 @@ RefinedAbstraction(修正抽象化角色)
 它引用实现化角色对抽象化角色进行修正。
 end note
 
-class ConcreteImplementor implements Implementor {
+note left of RefinedAbstraction::operation
+// ...
+super.implementor.operationImpl();
+// ...
+end note
 
+class ConcreteImplementor implements Implementor {
+    + operationImpl()
 }
 
 note bottom of ConcreteImplementor
 ConcreteImplementor(具体实现化角色)
 它实现接口或抽象类定义的方法和属性。
 end note
+
+class Client {}
+note top of Client
+abstraction.operation()
+end note
+
+Client -right-> Abstraction
 Abstraction -right-> Implementor
+
 @enduml
 ```
 
@@ -7169,42 +7524,76 @@ public class Client {
 @startuml
 
 class Director {
-    Construct()
+    - Builder builder
+    + Director(Builder builder)
+    + make(type)
 }
 note top of Director
-Director导演类
-负责安排已有模块的顺序
-然后告诉Builder开始建造
+主管(Director)类定义调用构造步骤的顺序， 
+这样你就可以创建和复用特定的产品配置。
+end note
+note left of Director::make
+builder.reset();
+if (type == "simple") {
+    builder.buildStepA();
+} else {
+    builder.buildStepB();
+    builder.buildStepC();
+}
 end note
 
-abstract class Builder {
-    BuildPart()
+interface Builder {
+    + reset()
+    + buildStepA()
+    + buildStepB()
+    + buildStepB()
+    + getResult()
 }
+
+
 note top of Builder
-Builder抽象建造者
-规范产品的组建，一般是由子类实现
+生成器(Builder)
+接口声明在所有类型生成器中通用的产品构造步骤。
 end note
 
 class ConcreteBuilder extends Builder {
+    - Product result
 
+    + reset()
+    + buildStepA()
+    + buildStepB()
+    + buildStepB()
+    + getResult()
 }
 note bottom of ConcreteBuilder
-ConcreteBuilder具体建造者
-实现抽象类定义的所有方法
-并且返回一个组建好的对象
+具体生成器(Concrete Builders)
+提供构造过程的不同实现。 
+具体生成器也可以构造不遵循通用接口的产品。
 end note
-
+note right of ConcreteBuilder::reset
+result = new ConcreteProduct();
+end note
 class Product {
 
 }
 note bottom of Product
-Product产品类
-通常是实现了模板方法模式
-也就是有模板方法和基本方法
+产品(Products)是最终生成的对象。 
+由不同生成器构造的产品无需属于同一类层次结构或接口。
+end note
+
+class Client {}
+note bottom of Client
+客户端(Client)必须将某个生成器对象与主管类关联。 
+一般情况下， 你只需通过主管类构造函数的参数进行一次性关联即可。
+此后主管类就能使用生成器对象完成后续所有的构造任务。 
+但在客户端将生成器对象传递给主管类制造方法时还有另一种方式。 
+在这种情况下， 你在使用主管类生产产品时每次都可以使用不同的生成器。
 end note
 
 Director -right-> Builder
-ConcreteBuilder -right-> Product
+ConcreteBuilder -left-> Product
+Client -up-> Director
+Client -right-> Product
 
 @enduml
 ```
@@ -7667,9 +8056,21 @@ public class Client {
 class Client {}
 
 note right of Client
-客户端, 可根据程序逻辑一次性或者动态地生成链。
+客户端(Client), 可根据程序逻辑一次性或者动态地生成链。
 值得注意的是， 请求可发送给链上的任意一个处理者， 
 而非必须是第一个处理者。
+end note
+
+note left of Client
+h1 = new HandlerA();
+h2 = new HandlerB();
+h3 = new HandlerC();
+
+h1.setNext(h2);
+h2.setNext(h3);
+
+// ...
+h1.handle(request)
 end note
 
 interface Handler {
@@ -7678,19 +8079,23 @@ interface Handler {
 }
 
 note right of Handler
-处理者（Handler） 声明了所有具体处理者的通用接口。 
+处理者(Handler)声明了所有具体处理者的通用接口。 
 该接口通常仅包含单个方法用于请求处理， 
 但有时其还会包含一个设置链上下个处理者的方法。
 end note
 
 abstract class AbstractHandler implements Handler {
-    - Handler next
+    # Handler next
     + setNext(Handler handler)
     + handle(request)
 }
+note left of AbstractHandler::handle
+if (next != null)
+    next.handle(request);
+end note
 
 note right of AbstractHandler
-抽象处理者 （Abstract Handler） 是一个可选的类， 
+抽象处理者(Abstract Handler)是一个可选的类， 
 你可以将所有处理者共用的样本代码放置在其中。
 通常情况下， 该类中定义了一个保存对于下个处理者引用的成员变量。 
 客户端可通过将处理者传递给上个处理者的构造函数或设定方法来创建链。
@@ -7701,8 +8106,16 @@ class ConcreteHandler extends AbstractHandler {
     + handle(request)
 }
 
+note left of ConcreteHandler::handle
+if (canHandle(request)) {
+    // ...
+} else {
+    super.handle(request);
+}
+end note
+
 note right of ConcreteHandler
-具体处理者 （Concrete Handlers） 包含处理请求的实际代码。 
+具体处理者(Concrete Handlers)包含处理请求的实际代码。 
 每个处理者接收到请求后， 都必须决定是否进行处理， 以及是否沿着链传递请求。
 处理者通常是独立且不可变的， 需要通过构造函数一次性地获得所有必要地数据。
 end note
@@ -8094,7 +8507,7 @@ note "享元模式只是一种优化。\n在应用该模式之前，\n你要确�
 class Client {}
 
 note top of Client
-客户端 （Client） 负责计算或存储享元的外在状态。 
+客户端(Client) 负责计算或存储享元的外在状态。 
 在客户端看来， 享元是一种可在运行时进行配置的模板对象， 
 具体的配置方式为向其方法中传入一些情景数据参数。
 end note
@@ -8108,7 +8521,7 @@ class Context {
 }
 
 note right of Context
-情景 （Context） 类包含原始对象中各不相同的外在状态。 
+情景(Context) 类包含原始对象中各不相同的外在状态。 
 情景与享元对象组合在一起就能表示原始对象的全部状态。
 通常情况下， 原始对象的行为会保留在享元类中。 
 因此调用享元方法必须提供部分外在状态作为参数。 
@@ -8141,7 +8554,7 @@ class FlyweightFactory {
 }
 
 note bottom of FlyweightFactory
-享元工厂 （Flyweight Factory） 会对已有享元的缓存池进行管理。 
+享元工厂(Flyweight Factory)会对已有享元的缓存池进行管理。 
 有了工厂后， 客户端就无需直接创建享元， 
 它们只需调用工厂并向其传递目标享元的一些内在状态(reparationState)即可。 
 工厂会根据参数在之前已创建的享元中进行查找， 
@@ -8158,7 +8571,7 @@ note right of Flyweight::reparationState
 end note
 
 note bottom of Flyweight
-享元 （Flyweight） 类包含原始对象中部分能在多个对象中共享的状态。 
+享元(Flyweight)类包含原始对象中部分能在多个对象中共享的状态。 
 同一享元对象可在许多不同情景中使用。 
 享元中存储的状态被称为 “内在状态(Flyweight内部字段)”。 
 传递给享元方法的状态被称为 “外在状态(uniqueState)”
@@ -8672,7 +9085,7 @@ interface Mediator {
 }
 
 note top of Mediator
-中介者 （Mediator） 接口声明了与组件交流的方法， 
+中介者(Mediator)接口声明了与组件交流的方法， 
 但通常仅包括一个通知方法。 
 组件可将任意上下文 （包括自己的对象） 
 作为该方法的参数， 只有这样接收组件和发送者类之间才不会耦合。
@@ -8692,7 +9105,7 @@ class ConcreteMediator {
 }
 
 note bottom of ConcreteMediator
-具体中介者 （Concrete Mediator） 封装了多种组件间的关系。 
+具体中介者(Concrete Mediator)封装了多种组件间的关系。 
 具体中介者通常会保存所有组件的引用并对其进行管理， 
 甚至有时会对其生命周期进行管理。
 
@@ -8714,7 +9127,7 @@ class ComponentC {
     + operationC()
 }
 note right of ComponentC
-组件（Component） 是各种包含业务逻辑的类。 
+组件(Component)是各种包含业务逻辑的类。 
 每个组件都有一个指向中介者的引用， 
 该引用被声明为中介者接口类型。 
 组件不知道中介者实际所属的类， 
@@ -9215,7 +9628,7 @@ class Originator {
 }
 
 note bottom of Originator
-原发器 （Originator）类可以生成自身状态的快照， 
+原发器(Originator)类可以生成自身状态的快照， 
 也可以在需要时通过快照恢复自身状态。
 end note
 
@@ -9227,7 +9640,7 @@ class Memento {
 }
 
 note bottom of Memento
-备忘录 （Memento） 是原发器状态快照的值对象 （value object）。
+备忘录(Memento) 是原发器状态快照的值对象 （value object）。
 通常做法是将备忘录设为不可变的， 并通过构造函数一次性传递数据。
 end note
 
@@ -9251,7 +9664,7 @@ originator.restore(m)
 end note
 
 note top of Caretaker
-负责人 （Caretaker） 仅知道 “何时” 和 “为何” 捕捉原发器的状态， 以及何时恢复状态。
+负责人(Caretaker) 仅知道 “何时” 和 “为何” 捕捉原发器的状态， 以及何时恢复状态。
 
 负责人通过保存备忘录栈来记录原发器的历史状态。 
 当原发器需要回溯历史状态时， 负责人将从栈中获取最顶部的备忘录， 
@@ -9890,7 +10303,7 @@ class Client {
 
 }
 note top of Client
-客户端 （Client） 可以复制实现了原型接口的任何对象。
+客户端(Client) 可以复制实现了原型接口的任何对象。
 copy = existing.clone()
 end note
 
@@ -9899,7 +10312,7 @@ interface Prototype {
 }
 
 note top of Prototype
-原型 （Prototype） 接口将对克隆方法进行声明。
+原型(Prototype) 接口将对克隆方法进行声明。
 在绝大多数情况下， 其中只会有一个名为 clone克隆的方法。
 end note
 
@@ -9912,7 +10325,7 @@ class ConcretePrototype implements Prototype {
 }
 
 note right of ConcretePrototype
-具体原型 （Concrete Prototype） 类将实现克隆方法。
+具体原型(Concrete Prototype) 类将实现克隆方法。
 除了将原始对象的数据复制到克隆体中之外，
 该方法有时还需处理克隆过程中的极端情况，
 例如克隆关联对象和梳理递归依赖等等。
@@ -10401,22 +10814,22 @@ public class Client {
 title 访问者模式类图
 
 interface Visitor {
-    visit(ElementA e)
-    visit(ElementB e)
+    + visit(ElementA e)
+    + visit(ElementB e)
 }
 
 note top of Visitor
-访问者 （Visitor） 接口声明了一系列以对象结构的具体元素为参数的访问者方法。
+访问者(Visitor)接口声明了一系列以对象结构的具体元素为参数的访问者方法。
 如果编程语言支持重载， 这些方法的名称可以是相同的， 但是其参数一定是不同的。
 end note
 
 class ConcreteVisitor {
-    visit(ElementA e)
-    visit(ElementB e)
+    + visit(ElementA e)
+    + visit(ElementB e)
 }
 
 note left of ConcreteVisitor
-具体访问者 （Concrete Visitor）
+具体访问者(Concrete Visitor)
 会为不同的具体元素类实现相同行为的几个不同版本。
 end note
 
@@ -10425,7 +10838,7 @@ interface Element {
 }
 
 note top of Element
-元素 （Element） 接口声明了一个方法来 “接收” 访问者。 该
+元素(Element)接口声明了一个方法来 “接收” 访问者。 该
 方法必须有一个参数被声明为访问者接口类型。
 end note
 
@@ -10444,7 +10857,7 @@ class ElementB implements Element {
 }
 
 note bottom of ElementB
-具体元素 （Concrete Element） 必须实现接收方法。
+具体元素(Concrete Element)必须实现接收方法。
 该方法的目的是根据当前元素类将其调用重定向到相应访问者的方法。
 请注意， 即使元素基类实现了该方法，
 所有子类都必须对其进行重写并调用访问者对象中的合适方法。
@@ -10454,7 +10867,7 @@ end note
 class Client {}
 
 note top of Client
-客户端 （Client） 通常会作为集合或其他复杂对象 （例如一个组合树） 的代表。
+客户端(Client)通常会作为集合或其他复杂对象 （例如一个组合树） 的代表。
 客户端通常不知晓所有的具体元素类， 因为它们会通过抽象接口与集合中的对象进行交互。
 
 element.accept(new ConcreteVisitor())

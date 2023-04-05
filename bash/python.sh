@@ -23,6 +23,8 @@ default_map["setuptools_init_python_version"]="3.6"
 default_map["setuptools_init_packages"]=""
 # 项目默认开源协议
 default_map["setuptools_init_license"]="MIT License"
+# 项目默认元数据配置. dynamic : setup.py , static : setup.cfg
+default_map["setuptools_init_setup_model"]="dynamic"
 
 
 ACTION=$1
@@ -83,6 +85,9 @@ setuptoolsInit_init_py() {
     # 配置项目python包的版本
     touch $project_name/src/$project_name/__init__.py
 
+    # 配置项目test init 文件
+    touch $project_name/tests/$project_name/__init__.py
+    touch $project_name/tests/__init__.py
 }
 
 # setuptoolsInit 初始化setup.cfg文件
@@ -145,7 +150,7 @@ setuptoolsInit_setup_cfg() {
     packages=$(echo -e $package_json | jq -e)
      
 
-    test -z $model && model="dynamic"
+    test -z $model && model=${default_map['setuptools_init_setup_model']}
 
     if [[ "$model" == "static" ]]; then
         # 静态元数据        
@@ -168,6 +173,7 @@ classifiers =
 [options]
 package_dir =
     = src
+# test_suite = "tests",
 packages = find:
 python_requires = >=3.6
 
@@ -204,6 +210,7 @@ setuptools.setup(
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
+    test_suite="tests",
     python_requires=">='$python_version'",
     install_requires=get_install_requires()
 )' >  $project_name/setup.py
@@ -307,7 +314,7 @@ setuptoolsInstall() {
 
 # 打包本地python项目
 setuptoolsBuild() {
-    python3 -m build
+    python setup.py build
 }
 
 # 关于python构建/打包的相关操作, 如果python版本过低需要执行: python.sh setuptools env

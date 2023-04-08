@@ -1,4 +1,5 @@
-# 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/bash_completion.d/下，这样在下次登录终端时即可自动source自动补全脚本。
+# 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/ 或 /etc/bash_completion.d/下，这样在下次登录终端时即可自动source自动补全脚本。
+# git 补全脚本: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
 # complete -F _complete_func git
 complete -F _complete_func git.sh
 complete -F _complete_func python.sh
@@ -19,11 +20,16 @@ _complete_func() {
     local original_cmd=${COMP_WORDS[0]}
 
     # cmd_list 编写规则:
-    # 格式如下 : cmd_list=("$cmd_item $cmd_item {key} '{key}' [cmd] '[cmd]'  ...")
+    # 格式如下 : cmd_list=("$cmd_item $cmd_item  '{option:value}'  ...")
     # 1. cmd_list中的每个元素为提示的完整命令行
-    # 2. cmd_item支持{key}形式 : 输出{key},并且不比较与原始的shell命令
-    # 3. cmd_item支持[cmd]形式 : 输出执行的cmd结果,并且不比较与原始的shell命令
     # 4. 如果cmd_item带空格可以用''(单引号)包裹
+    # 3. cmd_item支持{option:value}形式 : 该形式,并且不比较与原始的shell命令, option支持如下情况
+    #   3.1 {value} : 原样输出{value}目的是为了提示后面输入
+    #   3.2 {cmd:value} : 输出value执行结果即 eval $value
+    #   3.3 {-filenames} : 非提示, 但是将 complete 改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
+    # 通用的命令提示如下
+    # 1. {cmd:_comp_file_direct_} : 提示的文件列表
+
     local cmd_list=()
     if [[ "$original_cmd" == "python.sh" ]]; then
         cmd_list=("python.sh --help" # 查看帮助文档 
@@ -31,6 +37,7 @@ _complete_func() {
             "python.sh setuptools init {项目名}" # 初始化一个可打包python项目
             "python.sh setuptools install" # 将本地python项目安装到site-packages
             "python.sh setuptools build" # 打包本地python项目,在./dist 生成文件夹
+            "python.sh test {cmd:_comp_file_direct_}" # 运行单元测试用例, 等价于 python setup.py test
         )
     elif [[ "$original_cmd" == "git" ]]; then
         cmd_list=("git --help" # 查看帮助文档
@@ -56,16 +63,16 @@ _complete_func() {
             "git.sh github repos {github组织} {pageSize:30}" # git clone github上一个组织(organizations)下的所有存储库
             "git.sh github upstreamUrl" # 解析github项目上游url
             "git.sh reset version {git_commit_id}" # git回滚到某个版本
-            "git.sh reset add {file_path_list}" # git撤销add 文件
+            "git.sh reset add {cmd:_comp_file_direct_}" # git撤销add 文件列表
             "git.sh init_server {项目名}" # 初始化git服务端项目,供git clone user@ip:/项目路径
             "git.sh pull" # 将当前目录下的所有git项目pull
         )
     elif [[ "$original_cmd" == "mvn.sh" ]]; then
         cmd_list=("mvn.sh --help" # 查看mvn.sh脚本帮助文档
             "mvn.sh find_main {过滤字符1} {过滤字符2}" # 扫描本目录下所有的main java
-            "mvn.sh deploy '[mvn.sh find_main src/main]'" # 部署maven项目,运行前强制打包编译
-            "mvn.sh run '[mvn.sh find_main src/main]'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
-            "mvn.sh debug '[mvn.sh find_main src/main]'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
+            "mvn.sh deploy '{cmd:mvn.sh find_main src/main}'" # 部署maven项目,运行前强制打包编译
+            "mvn.sh run '{cmd:mvn.sh find_main src/main}'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
+            "mvn.sh debug '{cmd:mvn.sh find_main src/main}'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
             "mvn.sh init jar" # 初始化普通maven项目, 打包为jar
         )
     elif [[ "$original_cmd" == "download.sh" ]]; then
@@ -82,7 +89,7 @@ _complete_func() {
     elif [[ "$original_cmd" == "vimspector.sh" ]]; then
         cmd_list=("vimspector.sh --help" # 查看帮助文档
             "vimspector.sh language" # 查看支持的语言
-            "vimspector.sh config '[vimspector.sh language]'" # 复制对应语言的配置到本目录下,在本地生成 .vimspector.json 文件
+            "vimspector.sh config '{cmd:vimspector.sh language}'" # 复制对应语言的配置到本目录下,在本地生成 .vimspector.json 文件
         )
     elif [[ "$original_cmd" == "you-get" ]]; then
         cmd_list=("you-get -l {视频网址}" # 下载视频列表(下载多个)
@@ -93,8 +100,8 @@ _complete_func() {
     COMPREPLY=()
     local command_name="${COMP_WORDS[COMP_CWORD]}"
 
-    # key: 在cmd_item , value: 提示值
-    declare -A local completion_map=()
+    # 提示值数组
+    local completion_cmd_list=""
 
     local i
     for(( i=0; i<${#cmd_list[@]}; i++)) do
@@ -115,11 +122,8 @@ _complete_func() {
             
             if [[ $cmd_item == "$original_cmd_item" ]]; then
                 (( match_num=match_num+1 ))
-            # 支持{key}形式,{key} : 为任意支持只是作为提示
+            # 支持{option:value}形式, 根据option对value进行处理
             elif grep -E '^\{.*\}$' <<< "$cmd_item" > /dev/null; then
-                (( match_num=match_num+1 ))
-            # 支持[cmd]形式 : 为任意支持,但提示内容通过cmd执行,cmd使用'@'替换空格防止二维数组遍历失败
-            elif grep -E '^\[.*\]$' <<< "$cmd_item" > /dev/null; then
                 (( match_num=match_num+1 ))
             else
                 break
@@ -128,24 +132,92 @@ _complete_func() {
 
         if (( match_num == COMP_CWORD )); then
             local completion_cmd=${cmd_item_list[match_num]}
-            if grep -E '^\[.*\]$' <<< "$completion_cmd" > /dev/null; then
-                local run_completion_cmd=${completion_cmd%]*}
-                run_completion_cmd=${run_completion_cmd#*[}
-                completion_map[$completion_cmd]=$(eval $run_completion_cmd)
-            else
-                completion_map[$completion_cmd]=$completion_cmd
-            fi
-
+            completion_cmd_list="$completion_cmd_list '$completion_cmd'"
         fi
     done
 
     local completion_txt=""
-    local value
-    for value in ${completion_map[@]}; do
-        completion_txt="$completion_txt $value"
+    eval completion_cmd_list=($completion_cmd_list)
+
+    local completion_cmd_stack=()
+
+    for completion_cmd in "${completion_cmd_list[@]}"; do
+
+        # 将命令推到completion_cmd_stack中
+        completion_cmd_stack[${#completion_cmd_stack[@]}]="$completion_cmd"
+
+        # 遍历completion_cmd_stack直到数组为空
+        while (( ${#completion_cmd_stack[@]} > 0 )); do
+
+            local completion_stack_cmd=${completion_cmd_stack[${#completion_cmd_stack[@]}-1]}
+            unset completion_cmd_stack[${#completion_cmd_stack[@]}-1]
+
+            if ! grep -E '^\{.*\}$' <<< "$completion_stack_cmd" > /dev/null; then
+                # 如果不是 {} 包裹的命令直接追加到提示中
+                completion_txt="$completion_txt $completion_stack_cmd"
+            elif grep -E '^\{cmd:' <<< "$completion_stack_cmd" > /dev/null; then
+                # 如果 option 是cmd, 则需要执行cmd命令并将结果 push 到 completion_cmd_stack
+                local completion_normaliza_cmd=$(_cmd_normaliza_ "$completion_stack_cmd" "cmd")
+                local completion_normaliza_cmd_result=$(eval $completion_normaliza_cmd)
+                # 使用eval保证 '' 包裹起来的元素不被拆分
+                eval completion_normaliza_cmd_result=($completion_normaliza_cmd_result)
+                local completion_normaliza_cmd_item
+                for completion_normaliza_cmd_item in "${completion_normaliza_cmd_result[@]}"; do
+                    completion_cmd_stack[${#completion_cmd_stack[@]}]=$completion_normaliza_cmd_item
+                done
+
+            elif [[ "$completion_stack_cmd" == "{-filenames}" ]]; then
+                
+                # use a hack to enable file mode in bash < 4
+                # 将 compgen 提示模式改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
+                compopt -o filenames +o nospace 2>/dev/null ||
+                compgen -f /non-existing-dir/ >/dev/null ||
+                true
+            else
+                # 未知的情况为了不报错也追加到提示中
+                completion_txt="$completion_txt $completion_stack_cmd"
+            fi
+
+        done
+
     done
+
 
     # 输出tab提示
     COMPREPLY=($(compgen -W "${completion_txt}" -- ${command_name}))
     return 0
+}
+
+# 将 {option:cmd} 格式的字符串 中的cmd提取出来
+_cmd_normaliza_() {
+    local cmd=$1
+    local option=$2
+
+    cmd=$(echo $cmd | sed 's/{'$option':\(.*\)}/\1/g')
+
+    echo $cmd
+}
+
+
+# 文件提示(提示会有多少文件), 请注意调用这个模式后会倒置 compgen 提示模式改成文件提示模式
+_comp_file_direct_() {
+
+    # 认为最后输入的那个字符为要提示的文件名
+    local file_path="${COMP_WORDS[COMP_CWORD]}"
+    
+    # 最后要输出的文件提示数组用空格分开
+    local file_path_text=""
+
+    # 提示的文件列表
+    local file_path_list=($(compgen -f -- $file_path))
+
+    # 将数组分割符 \n -> 空格
+    local file
+    for file in "${file_path_list[@]}"; do
+        file_path_text="$file_path_text $file"
+    done
+
+
+    # 将 compgen 提示模式改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
+    echo "'{-filenames}' $file_path_text"
 }

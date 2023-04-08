@@ -24,6 +24,20 @@ if [[ "\$\{${1:arr}[@]\}" =~ "\$\{${2:item}\}" ]]; then
 fi
 endsnippet
 
+snippet arrAdd "往数组的最后追加元素, 比如 (1 2) -> (1 2 3)" w
+${1:arr}[${#$1[@]}]=${2:value}
+endsnippet
+
+snippet arrPop "获取并删除数组中的元素最后一个元素 , 比如 (1 2 3) -> (1 2)"
+${1:element}=\$\{${2:arr}[${#$2[@]}-1]\}
+unset $2[${#$2[@]}-1]
+$0
+endsnippet
+
+snippet arrDel "根据下标删除数组元素, 比如 (0 1 2) -> (0 null 2), 请注意该删除会导致数组长度变成 2 , 但只存在 arr[0] 和 arr[2] 的数组元素 arr[1] 丢失(会导致断层), 这可能会导致用下标for异常, 这个可以用mapFor替代"
+unset ${1:arr}[${2:index}]
+endsnippet
+
 # #!/bin/bash
 # fun() {
 #     local __tmp_arr_var=$(declare -p "$1")
@@ -92,6 +106,14 @@ for ${2:value} in \$\{${1:map_var_name}[@]\}; do
     $0
 done
 endsnippet
+snippet mapPut "往map中put数据" w
+${1:map}[${2:key}]=${3:value}
+endsnippet
+
+snippet mapDel "删除map中的某个key"
+unset ${1:map}[${2:key}]
+endsnippet
+
 
 # #!/bin/bash
 # fun() {

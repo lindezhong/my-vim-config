@@ -70,6 +70,12 @@ setuptools : 关于python构建/打包的相关操作, 如果python版本过低�
     setuptools build : 打包本地python项目
         python.sh setuptools build
         return : 在./dist 生成文件夹
+
+test : 运行单元测试用例, 等价于 python setup.py test
+    python test {要运行的单元测试python:为空则运行所有的单元测试}
+    $1 : 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
+    return : 运行单元测试结果
+
     '
 }
 
@@ -317,6 +323,7 @@ setuptoolsBuild() {
     python setup.py build
 }
 
+
 # 关于python构建/打包的相关操作, 如果python版本过低需要执行: python.sh setuptools env
 setuptools() {
     local SETUPTOOLS_ACTION=$1
@@ -343,12 +350,34 @@ setuptools() {
     esac
 }
 
+# 运行单元测试用例
+# $1 : 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
+test() {
+    local test_py=$1
+
+    if [[ -z $test_py ]]; then
+        read -p "请输入要进行单元测试的python文件路径,如果不输入则默认运行所有单元测试 : " test_py
+    fi
+
+    if [[ -z $test_py ]]; then
+        python setup.py test
+    elif [ ! -f $test_py ]; then
+        echo "$test_py 文件不存在请检查"
+        exit 1
+    else
+        python setup.py test -s $test_py
+    fi
+}
+
 case $ACTION in
     --help )
         help
         ;;
     setuptools )
         setuptools $*
+        ;;
+    test )
+        test $*
         ;;
     * )
         echo "未知操作请查看帮助文档"

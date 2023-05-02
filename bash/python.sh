@@ -352,7 +352,7 @@ setuptools() {
 
 # 运行单元测试用例
 # $1 : 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
-test() {
+python_test() {
     local test_py=$1
 
     if [[ -z $test_py ]]; then
@@ -377,7 +377,7 @@ case $ACTION in
         setuptools $*
         ;;
     test )
-        test $*
+        python_test $*
         ;;
     * )
         echo "未知操作请查看帮助文档"

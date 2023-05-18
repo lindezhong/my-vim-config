@@ -36,6 +36,11 @@ autocmd VimEnter * silent highlight CocMenuSel ctermbg=7
 autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray
 autocmd VimEnter * silent highlight CocFloating ctermbg=LightMagenta
 
+" 设置背景色兼容 coc location
+autocmd VimEnter * silent highlight Normal ctermbg=Black
+" 设置选中行颜色
+autocmd VimEnter * silent highlight Visual ctermfg=Black
+
 " 树莓派兼容
 set backspace=2
 set nocompatible

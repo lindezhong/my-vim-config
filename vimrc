@@ -32,9 +32,13 @@ colorscheme default
 " 如果你想为 vim 使用 GUI，你应该考虑使用 guibg和 guifg
 " :h gui-colors
 " 修改coc 选择框颜色 CocMenuSel 为分组
-autocmd VimEnter * silent highlight CocMenuSel ctermbg=7
-autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray
-autocmd VimEnter * silent highlight CocFloating ctermbg=LightMagenta
+" coc浮动窗口选中行颜色
+autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
+" coc浮动窗口颜色
+autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
+" coc 调用链颜色: 去除 for highlight ranges of outgoing calls.
+autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black
+
 
 " 设置背景色兼容 coc location
 autocmd VimEnter * silent highlight Normal ctermbg=Black

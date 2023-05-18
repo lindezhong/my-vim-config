@@ -1,7 +1,18 @@
 {
   "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/clangd/bin/clangd",
   "translator.engines": ["bing","google","youdao","haici"],
-  "java.home": "/opt/jdk17",
+  "java.jdt.ls.java.home": "/opt/jdk17",
+  "java.configuration.runtimes": [
+      {
+          "name": "JavaSE-1.8",
+          "path": "/opt/jdk8",
+          "default": true
+      },
+      {
+          "name": "JavaSE-17",
+          "path": "/opt/jdk17"
+      }
+  ],
   "note.tree.key.toggle": "coc-tree(coc树)的展开或关闭节点快捷键",
   "tree.key.toggle": "<tab>",
   "note.tree.key.actions": "coc-tree(coc树)触发coc树节点上的操作",

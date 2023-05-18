@@ -33,12 +33,13 @@ colorscheme default
 " :h gui-colors
 " 修改coc 选择框颜色 CocMenuSel 为分组
 " coc浮动窗口选中行颜色
+set background=dark
 autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
 " coc浮动窗口颜色
 autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"""""" 在背景是暗色但vim set background=light 的时候启用以下配置""""""""""""
+""""""""""""""""""""  在终端背景是暗色但的时候启用以下配置""""""""""""""""""
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " coc 调用链颜色: 去除 for highlight ranges of outgoing calls.
 autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black

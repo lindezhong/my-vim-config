@@ -36,10 +36,12 @@ colorscheme default
 autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
 " coc浮动窗口颜色
 autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""" 在背景是暗色但vim set background=light 的时候启用以下配置""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " coc 调用链颜色: 去除 for highlight ranges of outgoing calls.
 autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black
-
-
 " 设置背景色兼容 coc location
 autocmd VimEnter * silent highlight Normal ctermbg=Black
 " 设置选中行颜色

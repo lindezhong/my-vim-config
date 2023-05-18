@@ -33,7 +33,6 @@ colorscheme default
 " :h gui-colors
 " 修改coc 选择框颜色 CocMenuSel 为分组
 " coc浮动窗口选中行颜色
-set background=dark
 autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
 " coc浮动窗口颜色
 autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta

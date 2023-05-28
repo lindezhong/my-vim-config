@@ -69,8 +69,8 @@ debug : 运行maven项目,只是编译不打包,开启远程debug,远程端口50
 find_main : 扫描本目录下所有的main java
     mvn.sh find_main {路径中要包含的字符:默认不过滤} {路径中要包含的字符:默认不过滤}
     $2: 路径中要包含的字符,默认不过滤,一般为src/main或src/test 用来区分是否为测试类
-    $3: 路径中要包含的字符,默认不过滤,一般为类名
-    return 本目录下所有的main java全路径(package.class_name)
+    $3: 路径中要包含的字符,默认不过滤,一般为类名, 如果过滤字符包含模块名会被去除比如 module_name/com.class_name -> com.class_name
+    return 本目录下所有的main 模块名/java全路径(module_name/package.class_name)
 
 init : 初始化maven项目
 
@@ -103,10 +103,23 @@ _findMainClass_() {
     local class_file_path=""
     for(( i=0;i<${#class_file_path_list[@]};i++)) do
         class_file_path=${class_file_path_list[i]}
+        local module_name_path=$class_file_path
+
         class_file_path=${class_file_path#*src/main/java/}
         class_file_path=${class_file_path#*src/test/java/}
         class_file_path=${class_file_path//\//.}
         class_file_path=${class_file_path%.java*}
+
+
+        module_name_path=${module_name_path%%/src/main/java/*}
+        module_name_path=${module_name_path%%/src/main/java/*}
+        module_name_path=${module_name_path/\./}
+        module_name_path=${module_name_path/\//}
+
+        if [[ ! -z $module_name_path ]]; then
+            # 如果模块名不为空说明是子模块的类,类路径需要添加上模块名
+            class_file_path="${module_name_path}/$class_file_path"
+        fi
 
         class_file_path_list_txt="$class_file_path_list_txt $class_file_path"
     done
@@ -119,6 +132,9 @@ _selectClass() {
 
     local filter_class1=$1
     local filter_class2=$2
+
+    # 对于第二个参数需要去除模块名
+    filter_class2=${filter_class2##*/}
 
     local class_file_path=''
     local class_file_path_list=($(_findMainClass_ "$filter_class1" "$filter_class2"))
@@ -171,6 +187,18 @@ deploy() {
 
     install
 
+    _selectClass "src/main" $filter_class
+    local class_file_path=$_select_class_result
+
+
+    local module_name_path=${class_file_path%/*}
+    if [[ ! -z $module_name_path ]]; then
+        # 如果模块名不为空, 即main_class_path中有 '/' 需要重新处理 main_class_path, 并且进入模块目录
+        class_file_path=${class_file_path##*/}
+        echo "进入模块 $module_name_path , 主类为 $class_file_path"
+        pushd $module_name_path
+    fi
+
     local jar_path_list=($(find ./ -name "*.jar" | grep -v "/lib"))
     local jar_num=${#jar_path_list[@]}
 
@@ -179,10 +207,13 @@ deploy() {
         exit 1
     fi
 
+    # 选择jar逻辑, 正常已经不会出现如果出现需要看是否是代码错误
     local i
     local jar_path_index
     local jar_path=${jar_path_list[0]}
     if (( $jar_num > 1 )); then
+
+        echo "存在多个jar? 是否选择一个jar, 查看是否mvn脚本逻辑错误, 如果需要中断输入 CTRL + C"
 
         while [ -z `grep -E '^[0-9][0-9]*$' <<< "$jar_path_index"` ] || [ $jar_path_index -lt 0 ] || [ $jar_path_index -gt ${#jar_path_list[@]} ]; do
             for(( i=0; i<${#jar_path_list[@]}; i++)) do
@@ -197,8 +228,6 @@ deploy() {
 
     fi
 
-    _selectClass "src/main" $filter_class
-    local class_file_path=$_select_class_result
 
     if [[ -z $class_file_path ]]; then
         echo "java ${default_map['remote_debug']} -jar $jar_path"
@@ -215,85 +244,6 @@ deploy() {
 # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005
 run() {
     local filter_class=$1
-    mvn compiler:compile
-    local class_path_list=($(find ./ -name "classes" | grep "/target/classes"))
-
-    # maven 自身jar
-    local local_mvn_jar_path=""
-    local class_path=""
-    local i
-    for(( i=0; i<${#class_path_list[@]}; i++)) do
-        local class_path_item=${class_path_list[i]}
-        if (( i>0 )); then
-            class_path=":${class_path}"
-        fi
-        class_path="${class_path_item}${class_path}"
-
-        class_path_item=$(echo $class_path_item | sed 's/classes//g')
-
-        # 进入目录
-        pushd $class_path_item
-
-        local_mvn_jar_path="$local_mvn_jar_path $(find ./ -maxdepth 1 -name '*.jar')"
-
-        # 退出目录
-        popd
-    done
-
-    local_mvn_jar_path=$(echo $local_mvn_jar_path | sed 's/\.\///g')
-    echo "本地jar: [$local_mvn_jar_path]"
-    local_mvn_jar_path=($local_mvn_jar_path)
-
-    # 查找maven依赖的jar
-    local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar"))
-    local mvn_jar_path_list_length=${#mvn_jar_path_list[@]}
-
-    let local push_num=0
-    # 认为父子项目只有一级
-    if (( mvn_jar_path_list_length > 1)); then
-        echo "找到数量不对的maven jar路径,mvn jar 路径数量:[$mvn_jar_path_list_length],该项目是否为父项目?"
-        local maven_dir_list=($(ls -d */))
-        local maven_dir_index
-        while [ -z `grep -E '^[0-9][0-9]*$' <<< "$maven_dir_index"` ] || [ $maven_dir_index -lt 0 ] || [ $maven_dir_index -gt ${#maven_dir_list[@]} ]; do
-            for(( i=0; i<${#maven_dir_list[@]}; i++)) do
-                if [ -z "$maven_dir_index" ] || [ ! -z `grep -E '^[0-9][0-9]*$' <<< "$maven_dir_index"`  ] || [ ! -z `grep "${maven_dir_index}" <<< "${maven_dir_list[i]}"` ]; then
-                    echo "$i) ${maven_dir_list[i]}"
-                fi
-            done
-            read -p "选择进入的子项目 : " maven_dir_index
-        done
-        maven_dir=${maven_dir_list[$maven_dir_index]}
-        echo "选择 [$maven_dir_index] , 进入目录 : [$maven_dir],重新解析mvn jar 依赖路径"
-        pushd $maven_dir
-        # 记录pushd的次数,用作后面的popd返回原始位置
-        let push_num++
-        local mvn_jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar"))
-    fi
-
-    local local_mvn_jar_path_item=""
-
-    local mvn_jar_paths=(${mvn_jar_path_list//:/${IFS}})
-
-
-    # local mvn_jar_paths=($($(echo $mvn_jar_path_list | sed 's/:/ /g')))
-    mvn_jar_path_list=""
-    for mvn_jar_path_item in "${mvn_jar_paths[@]}"; do
-        local match_mvn_jar_path_item=${mvn_jar_path_item##*/}
-        if [[ "${local_mvn_jar_path[@]}" =~ "${match_mvn_jar_path_item}" ]]; then
-            echo "跳过: $mvn_jar_path_item"
-        else
-            mvn_jar_path_list="$mvn_jar_path_list:$mvn_jar_path_item"
-        fi
-    done
-
-    local use_mvn_jar_path=$mvn_jar_path_list
-    # if [[ ! -z $use_mvn_jar_path ]]; then
-    #     use_mvn_jar_path=":$use_mvn_jar_path"
-    # fi
-
-    echo "使用的maven jar path : [$use_mvn_jar_path]"
-    echo "使用class_path : [${class_path}]"
-
     _selectClass "src/main" $filter_class
     local main_class_path=$_select_class_result
     if [[ -z $main_class_path ]]; then
@@ -301,12 +251,14 @@ run() {
         return 1
     fi
 
-    # 回到原始位置
-    for(( i=0; i<push_num; i++)) do
-        popd
-    done
-    echo "java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path"
-    java ${default_map['remote_debug']} -classpath ${class_path}${use_mvn_jar_path} $main_class_path
+    local module_name_path=${main_class_path%/*}
+    if [[ ! -z $module_name_path ]]; then
+        # 如果模块名不为空, 即main_class_path中有 '/' 需要重新处理 main_class_path
+        main_class_path=${main_class_path##*/}
+        mvn exec:exec -pl ${module_name_path} -Dexec.executable="java" -Dexec.args="-classpath %classpath ${default_map['remote_debug']} ${main_class_path}"
+    fi
+
+    mvn exec:exec -Dexec.executable="java" -Dexec.args="-classpath %classpath ${default_map['remote_debug']} ${main_class_path}"
 }
 
 # 初始化普通maven项目

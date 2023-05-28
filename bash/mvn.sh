@@ -138,10 +138,16 @@ _selectClass() {
 
     local class_file_path=''
     local class_file_path_list=($(_findMainClass_ "$filter_class1" "$filter_class2"))
-
-    local class_index
-    local i
     local class_file_path_list_langth=${#class_file_path_list[@]}
+
+
+    if  [[ ! -z $filter_class2 ]] && (( $class_file_path_list_langth == 1  )) ; then
+        # 如果存在过滤, 并且过滤后只有一个类说明过滤成功则直接结束
+        _select_class_result=${class_file_path_list[0]}
+        return 0
+    fi
+
+    local i
     while /bin/true; do
         for(( i=0;i<$class_file_path_list_langth;i++)) do
             class_file_path=${class_file_path_list[i]}
@@ -256,9 +262,10 @@ run() {
         # 如果模块名不为空, 即main_class_path中有 '/' 需要重新处理 main_class_path
         main_class_path=${main_class_path##*/}
         mvn exec:exec -pl ${module_name_path} -Dexec.executable="java" -Dexec.args="-classpath %classpath ${default_map['remote_debug']} ${main_class_path}"
+    else
+        mvn exec:exec -Dexec.executable="java" -Dexec.args="-classpath %classpath ${default_map['remote_debug']} ${main_class_path}"
     fi
 
-    mvn exec:exec -Dexec.executable="java" -Dexec.args="-classpath %classpath ${default_map['remote_debug']} ${main_class_path}"
 }
 
 # 初始化普通maven项目

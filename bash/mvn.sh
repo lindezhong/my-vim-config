@@ -258,14 +258,33 @@ run() {
     fi
 
     local module_name_path=${main_class_path%/*}
-    if [[ ! -z $module_name_path ]]; then
-        # 如果模块名不为空, 即main_class_path中有 '/' 需要重新处理 main_class_path
-        main_class_path=${main_class_path##*/}
-        mvn exec:exec -pl ${module_name_path} -Dexec.executable="java" -Dexec.args="-classpath %classpath ${default_map['remote_debug']} ${main_class_path}"
-    else
+    if [[ "$module_name_path" == "$main_class_path" ]]; then
         mvn exec:exec -Dexec.executable="java" -Dexec.args="-classpath %classpath ${default_map['remote_debug']} ${main_class_path}"
+        return 0
     fi
+    # 如果模块名不为空, 即main_class_path中有 '/' 需要重新处理 main_class_path
+    main_class_path=${main_class_path##*/}
+    local class_path_list=($(find ./ -name "classes" | grep "/target/classes"))
 
+    # 当前目录
+    local current_path=$(pwd)
+
+    # maven 自身jar
+    local class_path=""
+    local i
+    for(( i=0; i<${#class_path_list[@]}; i++)) do
+        local class_path_item=${class_path_list[i]}
+        
+        # 将 ./ 替换成真实目录否则正常使用
+        if [[ "$class_path_item" == \.* ]]; then
+            class_path_item=${class_path_item/./$current_path}
+        fi
+
+        class_path="${class_path_item}:${class_path}"
+    done
+
+    mvn exec:exec -pl ${module_name_path} -Dexec.executable="java" -Dexec.args="-classpath ${class_path}%classpath ${default_map['remote_debug']} ${main_class_path}"
+ 
 }
 
 # 初始化普通maven项目

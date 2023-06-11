@@ -25,5 +25,9 @@
       "border": false,
       "note.rounded": "当 border 为真时使用圆角边框。",
       "rounded": false
-  }
+  },
+  "note.markdown-preview-enhanced.scrollSync": "markdown 自动滚动同步(markdown预览光标和vim光标位置同步)",
+  "markdown-preview-enhanced.scrollSync": false,
+  "noot.markdown-preview-enhanced.singlePreview": "关闭单个markdown支持markdown的文件切换",
+  "markdown-preview-enhanced.singlePreview": false
 }

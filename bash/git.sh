@@ -247,7 +247,7 @@ initServer() {
 
     echo ""
     echo ""
-    echo "请执行git clone命令下项目 : git clone $USER@localhost:${current_path}"
+    echo "请执行git clone命令下项目 : git clone ssh://$USER@localhost:22${current_path}"
 }
 
 # 将当前目录下的所有git项目pull

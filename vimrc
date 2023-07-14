@@ -46,6 +46,11 @@ autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black
 autocmd VimEnter * silent highlight Normal ctermbg=Black
 " 设置选中行颜色
 autocmd VimEnter * silent highlight Visual ctermfg=Black
+" 设置vim diff 颜色
+autocmd VimEnter * silent highlight DiffChange ctermfg=White ctermbg=Black
+autocmd VimEnter * silent highlight DiffText ctermfg=Black ctermbg=Red
+autocmd VimEnter * silent highlight DiffAdd ctermfg=Black ctermbg=Blue
+autocmd VimEnter * silent highlight DiffDelete ctermfg=Black ctermbg=Blue
 
 " 树莓派兼容
 set backspace=2

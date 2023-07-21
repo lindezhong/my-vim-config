@@ -41,7 +41,12 @@ autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMa
 """"""""""""""""""""  在终端背景是暗色但的时候启用以下配置""""""""""""""""""
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " coc 调用链颜色: 去除 for highlight ranges of outgoing calls.
+" coc 范围选择颜色, 兼容代码片段提示
 autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black
+" coc 镶嵌提示颜色, 兼容提示函数的参数列表
+autocmd VimEnter * silent highlight CocInlayHint ctermbg=Black
+autocmd VimEnter * silent highlight CocInlayHintType ctermbg=Black
+autocmd VimEnter * silent highlight CocInlayHintParameter ctermbg=Black
 " 设置背景色兼容 coc location
 autocmd VimEnter * silent highlight Normal ctermbg=Black
 " 设置选中行颜色

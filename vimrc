@@ -165,6 +165,15 @@ imap <C-left> <Esc>`^<C-o>
 imap <C-RIGHT> <Esc>`^<C-i>
 imap <ESC> <Esc>`^
 nmap <silent><S-u> :redo<CR>
+" 支持从vim复制到剪切版
+" 需要vim支持clipboard
+" 执行 `vim --version | grep clipboard` 有 + 号
+" 如果不支持clipboard则安装vim-gtk(直接执行apt install vim-gtk不用卸载原始vim)
+" 支持在在Visual模式下, 通过C-y复制到系统剪切板
+vnoremap <C-y> "+y
+" 支持在normal模式下, 通过C-y粘贴系统剪切板
+nnoremap <C-y> "*p
+
 " 替换 :[range]s/{pattern}/{string}/[flags] [count]
 " range 1,3:1-3行 .:$:当前行-最后一行 .:+4:当前行-后4行 %:当前所有行
 " flags  g:要替换当前行中所有出现的搜索模式 c:要确认每次替换  i:忽略搜索模式的大小写

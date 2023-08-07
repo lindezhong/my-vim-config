@@ -13,6 +13,8 @@
           "path": "/opt/jdk17"
       }
   ],
+  "note.java.jdt.ls.lombokSupport.enabled": "是否从项目类路径加载lombok处理器, 默认操作会加载失败, 关闭, 使用插件coc-java-lombok处理",
+  "java.jdt.ls.lombokSupport.enabled": false,
   "note.tree.key.toggle": "coc-tree(coc树)的展开或关闭节点快捷键",
   "tree.key.toggle": "<tab>",
   "note.tree.key.actions": "coc-tree(coc树)触发coc树节点上的操作",

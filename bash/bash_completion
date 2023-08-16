@@ -8,6 +8,7 @@ complete -F _complete_func download.sh
 complete -F _complete_func mvn
 complete -F _complete_func vimspector.sh
 complete -F _complete_func you-get # 爬取视频工具,使用 `pip3 install you-get` 安装
+# complete -F _complete_func pandoc # 文件格式转换工具, 比如epub转pdf 
 _complete_func() {
 
     # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
@@ -16,6 +17,48 @@ _complete_func() {
     # COMP_WORDBREAKS: 类型为字符串，表示单词之间的分隔符
     # COMP_LINE: 类型为字符串，表示当前的命令行输入字符
     # COMP_POINT: 类型为整数，表示光标在当前命令行的哪个位置
+
+
+    # 命令参数
+    # "-o bashdefault”：如果没有生成补全条目，就使用bash默认的其它补全。
+    # "-o default”：如果没有生成补全条目，就使用"readline”默认的文件名补全。
+    # "-o dirnames”：如果没有生成补全条目，就进行目录名补全。
+    # "-o filenames”：告诉"readline”生成文件名，以便进行与文件名相关的处理，例如在目录名后面加上斜杠，引用特殊字符，去掉行尾的空格，目的是用于shell函数。
+    # "-o noquote”：告诉"readline”不引用文件名，默认会进行引用。
+    # "-o nospace”：告诉"readline”在补全的名称后不添加空格，默认添加空格。
+    # "-o plusdirs”：生成补全条目之后，还会进行目录名补全并把结果添加到其它动作得到的结果中。
+    # "-A alias”：别名，同选项"-a”。
+    # "-A arrayvar”：数组变量名。
+    # "-A binding”："readline”键绑定名。
+    # "-A builtin”：shell内建命令名，同选项"-b”。
+    # "-A command”：命令名，同选项"-c”。
+    # "-A directory”：目录名，同选项"-d”。
+    # "-A disabled”：不可用的shell内建命令名。
+    # "-A enabled”：可用的shell内建命令名。
+    # "-A export”：导出的shell变量名，同选项"-e”。
+    # "-A file”：文件名，同选项"-f”。
+    # "-A function”：shell函数名。
+    # "-A group”：组名，同选项"-g”。
+    # "-A helptopic”：内建命令help支持的帮助主题。
+    # "-A hostname”：主机名，从shell环境变量HOSTFILE中获取。
+    # "-A job”：作业名，同选项"-j”。
+    # "-A keyword”：shell保留字，同选项"-k”。
+    # "-A running”：正在运行的作业名。
+    # "-A service”：服务名，同选项"-s”。
+    # "-A setopt”：内建命令set的选项"-o”可用的参数。
+    # "-A shopt”：内建命令shopt可接受的选项名。
+    # "-A signal”：信号名。
+    # "-A stopped”：暂停的作业名。
+    # "-A user”：用户名，同选项"-u”。
+    # "-A variable”：所有的shell变量名，同选项"-v”。
+    # "-C command”：在子shell中执行命令，并把其结果作为补全条目。
+    # "-F function”：在当前的shell环境中执行函数function，执行时，参数"$1”表示那个参数正在进行补全的命令名，参数"$2”表示补全的名称，参数"$3”表示补全的名称前面的单词，表示结束执行时，从数组变量COMPREPLY中获取补全条目。
+    # "-G globpat”：使用文件名扩展模式globpat进行扩展以生成可能的补全条目。
+    # "-P prefix”：在所有的选项应用到补全结果后，在结果前添加前缀prefix。
+    # "-S suffix”：在所有的选项应用到补全结果后，在结果后添加后缀suffix。
+    # "-W wordlist”：使用特殊变量IFS中的字符拆分单词列表wordlist，并扩展拆分后的每个单词，结果中与待补全单词匹配的条目就是补全条目。
+    # "-X filterpat”：filterpat是进行文件名扩展时使用的模式，它作用于通过前面的选项和参数生成的补全列表，并把每个与过滤模式匹配的条目删除，模式中前导的叹号表示否定，这时会删除与过滤模式不匹配的条目。
+
 
     local original_cmd=${COMP_WORDS[0]}
 
@@ -94,7 +137,11 @@ _complete_func() {
     elif [[ "$original_cmd" == "you-get" ]]; then
         cmd_list=("you-get -l {视频网址}" # 下载视频列表(下载多个)
             "you-get {视频网址}" # 下载单个视频
-            )
+        )
+    elif [[ "$original_cmd" == "pandoc" ]]; then
+        cmd_list=("pandoc {cmd:_comp_file_direct_} -o {输出文件名} --pdf-engine=xelatex" # pandoc 文件格式转换如果需要转pdf需要安装latex 
+        )
+
     fi
 
     COMPREPLY=()

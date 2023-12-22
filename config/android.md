@@ -23,6 +23,30 @@ adb devices
 # adb退出
 exit
 ```
+# 安卓-Phantom-Process-Killing-机制
+
+Phantom Process Killing : Android 12以上的设备只要Termux进后台，运行桌面环境这类占用高CPU的程序，便有可能被Android系统杀死。此时Termux会抛出一个"Process completed (signal 9) - press Enter"信息。
+
+出处: https://github.com/agnostic-apollo/Android-Docs/blob/master/en/docs/apps/processes/phantom-cached-and-empty-processes.md
+
+禁止Phantom Process Killing 机制
+
+```shell
+# 使用adb连接到安卓
+
+# 再来，按照系统版本输入命令，不需要root权限
+# Android 12L和Android 13
+./adb shell "settings put global settings_enable_monitor_phantom_procs false"
+
+# Android 12，无GMS
+./adb shell "/system/bin/device_config put activity_manager max_phantom_processes 2147483647"
+
+# Android 12，有GMS
+./adb shell "/system/bin/device_config set_sync_disabled_for_tests persistent; /system/bin/device_config put activity_manager max_phantom_processes 2147483647"
+
+# 重开机，Termux在后台运行时应该就不会被杀
+```
+
 
 # termux
 
@@ -104,20 +128,4 @@ ps -ef | grep vnc
 
 ## Termux防止杀后台 解决signal 9错误 
 
-```shell
-# 使用adb连接到安卓
-
-# 再来，按照系统版本输入命令，不需要root权限
-# Android 12L和Android 13
-./adb shell "settings put global settings_enable_monitor_phantom_procs false"
-
-# Android 12，无GMS
-./adb shell "/system/bin/device_config put activity_manager max_phantom_processes 2147483647"
-
-# Android 12，有GMS
-./adb shell "/system/bin/device_config set_sync_disabled_for_tests persistent; /system/bin/device_config put activity_manager max_phantom_processes 2147483647"
-
-# 重开机，Termux在后台运行时应该就不会被杀
-```
-
-
+可通过禁止 [安卓 Phantom Process Killing 机制](#安卓-Phantom-Process-Killing-机制) 解决

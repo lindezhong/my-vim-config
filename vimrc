@@ -129,11 +129,11 @@ imap <silent><ESC><C-p> <Esc>`^:Leaderf rg<CR>
 " 缓冲文件
 " :ls 查看缓冲文件
 set hidden
-nmap <silent><ESC><right> :bn <CR>
-nmap <silent><ESC><left> :bp <CR>
+nmap <silent><C-right> :bn <CR>
+nmap <silent><C-left> :bp <CR>
 nmap <silent><ESC><w> :bd <CR>
-imap <silent><ESC><right> <Esc>`^:bn <CR>i
-imap <silent><ESC><left> <Esc>`^:bp <CR>i
+imap <silent><C-right> <Esc>`^:bn <CR>i
+imap <silent><C-left> <Esc>`^:bp <CR>i
 imap <silent><ESC><w> <Esc>`^:bd <CR>i
 " 缓冲文件兼容ubuntu
 nmap <silent><A-right> :bn <CR>
@@ -159,10 +159,10 @@ imap <silent><ESC><C-k> <Esc>`^<C-w><C-j>
 nmap <C-S> :w!<CR>i
 vmap <C-S> <C-C>:w!<CR>
 imap <C-S> <Esc>:w!<CR>i
-nmap <C-left> <C-o>
-nmap <C-RIGHT> <C-i>
-imap <C-left> <Esc>`^<C-o>
-imap <C-RIGHT> <Esc>`^<C-i>
+nmap <A-left> <C-o>
+nmap <A-RIGHT> <C-i>
+imap <A-left> <Esc>`^<C-o>
+imap <A-RIGHT> <Esc>`^<C-i>
 imap <ESC> <Esc>`^
 nmap <silent><S-u> :redo<CR>
 " 支持从vim复制到剪切版

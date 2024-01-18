@@ -1,0 +1,11 @@
+alias transz="trans en:zh"
+alias transe="trans zh:en"
+
+alias mvninstall="mvn clean install -Dmaven.test.skip=true"
+alias mvnsource="mvn dependency:sources -DdownloadJavadocs=true"
+alias mvntree="mvn dependency:tree"
+alias mvndebug='export MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspen=n"'
+
+# 需要pip3 install pyotp
+alias 2fa_git='python -c "import pyotp; print(pyotp.TOTP(\"3NQ2ZK7MF2GQP4LE\").now())"'
+

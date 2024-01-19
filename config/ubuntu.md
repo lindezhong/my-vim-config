@@ -37,7 +37,7 @@ gconftool -s --type bool /apps/update-notifier/auto_launch false
 要重新启用Update Manager自动通知，请运行以下命令：
 gconftool -s --type bool /apps/update-notifier/auto_launch true
 
-# 禁用切换上、下工作区快捷键:
+# 禁用切换上、下工作区快捷键
 gsettings set "org.gnome.desktop.wm.keybindings" switch-to-workspace-left "['']"
 gsettings set "org.gnome.desktop.wm.keybindings" switch-to-workspace-right "['']"
 gsettings set "org.gnome.desktop.wm.keybindings" move-to-workspace-right "['']"

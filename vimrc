@@ -152,7 +152,14 @@ imap <silent><ESC><C-j> <Esc>`^<C-w><C-h>
 imap <silent><ESC><C-l> <Esc>`^<C-w><C-l>
 imap <silent><ESC><C-i> <Esc>`^<C-w><C-k>
 imap <silent><ESC><C-k> <Esc>`^<C-w><C-j>
-
+nmap <silent><C-A-left> <C-w><C-h>
+nmap <silent><C-A-right> <C-w><C-l>
+nmap <silent><C-A-up> <C-w><C-k>
+nmap <silent><C-A-down> <C-w><C-j>
+imap <silent><C-A-left> <Esc>`^<C-w><C-h>
+imap <silent><C-A-right> <Esc>`^<C-w><C-l>
+imap <silent><C-A-up> <Esc>`^<C-w><C-k>
+imap <silent><C-A-down> <Esc>`^<C-w><C-j>
 
 
 " 日常使用键
@@ -532,6 +539,10 @@ nmap <silent> j<F5> :CocCommand java.debug.vimspector.start<CR>
 nmap <silent> <F7> <Plug>VimspectorStepInto
 " F8单步跳过
 nmap <silent> <F8> <Plug>VimspectorStepOver
+" PageUp单步跳入
+nmap <silent> <PageUp> <Plug>VimspectorStepInto
+" PageDown单步跳过
+nmap <silent> <PageDown> <Plug>VimspectorStepOver
 " F9添加断点
 nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
 " F6运行到下个断点

@@ -232,7 +232,8 @@ let g:coc_global_extensions = [
             \ 'coc-java-lombok',
             \ 'coc-pyright',
             \ 'coc-tsserver',
-            \ 'coc-clangd'
+            \ 'coc-clangd',
+            \ 'coc-sh'
             \ ]
 " # 插件安装需要做的事
 " ## coc-clangd

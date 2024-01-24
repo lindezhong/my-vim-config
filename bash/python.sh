@@ -53,15 +53,15 @@ setuptools : 关于python构建/打包的相关操作, 如果python版本过低�
         $3 : 项目名,用来创建一个文件夹
         return : 下当前目录下创建一个python项目/文件夹,其中目录结构如下
         {项目名}/
-        ├── LICENSE
-        ├── pyproject.toml
+        ├── {项目名}/
+        │   ├── __init__.py
+        │   └── example.py
         ├── README.md
-        ├── setup.cfg
-        ├── src/
-        │   └── {项目名}/
-        │       ├── __init__.py
-        │       └── example.py
+        ├── pyproject.toml
+        ├── setup.py
         └── tests/
+            ├── __init__.py
+            └── test_example.py
 
     setuptools instll : 将本地python项目安装到site-packages
         python.sh setuptools install
@@ -89,10 +89,9 @@ setuptoolsEnv() {
 setuptoolsInit_init_py() {
     local project_name=$1
     # 配置项目python包的版本
-    touch $project_name/src/$project_name/__init__.py
+    touch $project_name/$project_name/__init__.py
 
     # 配置项目test init 文件
-    touch $project_name/tests/$project_name/__init__.py
     touch $project_name/tests/__init__.py
 }
 
@@ -177,14 +176,10 @@ classifiers =
     Operating System :: OS Independent
 
 [options]
-package_dir =
-    = src
 # test_suite = "tests",
 packages = find:
 python_requires = >=3.6
-
-[options.packages.find]
-where = src' > $project_name/setup.cfg 
+' > $project_name/setup.cfg 
 
     elif [[ "$model" == "dynamic" ]]; then
         # 动态元数据
@@ -214,8 +209,6 @@ setuptools.setup(
         "License :: OSI Approved :: '$license'",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
     test_suite="tests",
     python_requires=">='$python_version'",
     install_requires=get_install_requires()
@@ -238,7 +231,7 @@ build-backend = "setuptools.build_meta"' > $project_name/pyproject.toml
 # 初始化example.py文件和相关测试文件test_example.py
 setuptoolsInit_example_py() {
     local project_name=$1
-    echo '#!/usr/bin/env python' > $project_name/src/$project_name/example.py
+    echo '#!/usr/bin/env python' > $project_name/$project_name/example.py
 
     echo '#!/usr/bin/env python
 import unittest
@@ -281,7 +274,7 @@ if __name__ == "__main__" :
     # suite.addTest(TestExample("test_fun"))
     # runner = unittest.TextTestRunner()
     # runner.run(suite)
-' > $project_name/tests/$project_name/test_example.py
+' > $project_name/tests/test_example.py
 
 }
 
@@ -298,8 +291,8 @@ setuptoolsInit() {
         return 1
     fi
 
-    mkdir -p $project_name/src/$project_name
-    mkdir -p $project_name/tests/$project_name
+    mkdir -p $project_name/$project_name
+    mkdir -p $project_name/tests
     touch $project_name/README.md
 
     # 初始化setup.cfg文件

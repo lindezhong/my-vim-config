@@ -589,3 +589,8 @@ endsnippet
 snippet eval "eval:1.要在命令的最前面2.扫描eval后面的命令两遍第一遍替换变量，第二遍执行 arr_v='1 2',eval arr=($arr_v) => arr=(1 2)"
 eval
 endsnippet
+
+snippet template_engine "使用eval命令实现模板引擎,模板文件中出现特殊字符使用'\'转义比如 \->\\ `->`\` 双引号->\双引号"
+eval "echo \"$(cat ${1:模板引擎文件路径})\" > ${2:生成文件路径}"
+$0
+endsnippet

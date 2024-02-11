@@ -25,6 +25,8 @@ default_map["setuptools_init_packages"]=""
 default_map["setuptools_init_license"]="MIT License"
 # 项目默认元数据配置. dynamic : setup.py , static : setup.cfg
 default_map["setuptools_init_setup_model"]="dynamic"
+# 是否为C和Python混合项目, y:是 n:否
+default_map["setuptools_init_c_project"]="n"
 
 
 ACTION=$1
@@ -108,11 +110,14 @@ setuptoolsInit() {
         return 1
     fi
 
+    read -p "是否为C和Python混合项目, y:是 n:否 , 默认[${default_map["setuptools_init_c_project"]}] : " is_c_project
+    test -z "$is_c_project" && is_c_project="${default_map["setuptools_init_c_project"]}"
+
     mkdir -p $project_name/$project_name
     mkdir -p $project_name/tests
     touch $project_name/README.md
     touch $project_name/requirements.txt
-
+    
     # 初始化setup.cfg文件
     # 元数据有两种类型：静态和动态。
     # 静态元数据（setup.cfg）：保证每次都相同。这更简单，更易于阅读，并且避免了许多常见错误，例如编码错误。
@@ -174,6 +179,13 @@ setuptoolsInit() {
     # 初始化example.py文件和相关测试文件test_example.py
     eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/example.py)\" > $project_name/$project_name/example.py"
     eval "echo \"$(cat ${home_path}/python_project_example/tests/test_example.py)\" > $project_name/tests/test_example.py"
+    # 如果为C和Python混合项目则创建相关文件
+    if [[ $is_c_project == "y" ]]; then
+        mkdir -p $project_name/$project_name/api/example
+        eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/api/__init__.py)\" > $project_name/$project_name/api/__init__.py"
+        eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/api/example/c_fun.c)\" > $project_name/$project_name/api/example/c_fun.c"
+        eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/api/example/pybind11.cpp)\" > $project_name/$project_name/api/example/pybind11.cpp"
+    fi
 
 }
 

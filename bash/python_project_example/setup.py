@@ -1,4 +1,86 @@
 import setuptools
+`
+if [[ $is_c_project == "y" ]]; then
+    echo "import platform"
+    echo '
+def get_ext_modules() -> list:
+    """
+    获取三方模块
+    Linux和Windows需要编译封装接口
+    Mac由于缺乏二进制库支持无法使用
+    """
+    if platform.system() == "Linux":
+        extra_compile_flags = [
+            "-std=c++17",
+            "-O3",
+            "-Wno-delete-incomplete",
+            "-Wno-sign-compare",
+        ]
+        extra_link_args = ["-lstdc++"]
+        runtime_library_dirs = ["$ORIGIN"]
+
+    elif platform.system() == "Windows":
+        extra_compile_flags = ["-O2", "-MT"]
+        extra_link_args = []
+        runtime_library_dirs = []
+
+    else:
+        return []
+
+    # module = setuptools.Extension(
+    #     "'${project_name}'.accumulate",
+    #     [
+    #         "api/accumulate.c",
+    #     ],
+    #     # include_dirs=["vnpy_ctptest/api/include","vnpy_ctptest/api/vnctp"],
+    #     define_macros=[],
+    #     undef_macros=[],
+    #     # library_dirs=["vnpy_ctptest/api/libs", "vnpy_ctptest/api"],
+    #     # libraries=["thostmduserapi_se", "thosttraderapi_se"],
+    #     extra_compile_args=extra_compile_flags,
+    #     extra_link_args=extra_link_args,
+    #     runtime_library_dirs=runtime_library_dirs,
+    #     depends=[],
+    #     language="cpp",
+    # )
+    c_module = setuptools.Extension(
+        "'${project_name}'.api.example.cfun",
+        [
+          "'${project_name}'/api/example/c_fun.c",
+        ],
+        # include_dirs=["'${project_name}'/api/include","'${project_name}'/api/vnctp"],
+        define_macros=[],
+        undef_macros=[],
+        # library_dirs=["vnpy_ctptest/api/libs", "vnpy_ctptest/api"],
+        # libraries=["thostmduserapi_se", "thosttraderapi_se"],
+        extra_compile_args=extra_compile_flags,
+        extra_link_args=extra_link_args,
+        runtime_library_dirs=runtime_library_dirs,
+        depends=[],
+        language="cpp",
+    )
+    pybind11_module = setuptools.Extension(
+        "'${project_name}'.api.example.pybind11",
+        [
+          "'${project_name}'/api/example/pybind11.cpp",
+        ],
+        # include_dirs=["'${project_name}'/api/include","'${project_name}'/api/vnctp"],
+        define_macros=[],
+        undef_macros=[],
+        # library_dirs=["vnpy_ctptest/api/libs", "vnpy_ctptest/api"],
+        # libraries=["thostmduserapi_se", "thosttraderapi_se"],
+        extra_compile_args=extra_compile_flags,
+        extra_link_args=extra_link_args,
+        runtime_library_dirs=runtime_library_dirs,
+        depends=[],
+        language="cpp",
+    )
+
+
+    return [c_module, pybind11_module]
+    '
+fi
+`
 
 def get_install_requires():
     with open('requirements.txt', 'r', encoding='utf-8') as fh:
@@ -34,5 +116,10 @@ setuptools.setup(
     ],
     test_suite='tests',
     python_requires='>=$python_version',
-    install_requires=get_install_requires()
+    install_requires=get_install_requires(),
+`    
+if [[ $is_c_project == "y" ]]; then
+echo '    ext_modules = get_ext_modules(),'
+fi
+`
 )

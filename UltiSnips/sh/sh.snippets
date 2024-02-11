@@ -576,86 +576,9 @@ done
 $0
 endsnippet
 
-# #jq
-# -R : 将json 转字符串
-# -r : 将字符串转json(标准化)。
-#      echo '{"k": "v"}' | jq -r ".k" # 输出: v
-#      echo '{"k": "v"}' | jq ".k" # 输出: "v"
-# -s : 将换行符号转 '\n' 配合保证-R 使用保证json转字符串只有一行
-snippet jqGet "jq获取一个字段,key由参数传递, key结构如下 : .第一层key.第二层key (使用'.'分割),key可以使用变量"
-${3:var}=\$(echo \$${1:json变量} | jq -r --arg key  "${2:key}" '.[\$key]')
-$0
-endsnippet
-snippet jqArrFor "jq遍历jq数组/list 需要 json list 为 : [] 格式"
-${1:length}=$(echo \$\{${2:json list变量}\} | jq '. | length')
-for (( ${3:i}=0; $3<$1; $3++ )); do
-    ${4:jsonListItem}=\$(echo \$$2 | jq -r ".[\$$3]")
-    $0
-done
-endsnippet
-snippet jqPutStr "jq put string 类型到json,key/value可以使用变量 例子 : {} -> {'k': '[1,2]'}"
-${1:json变量}=\$(echo -n \$\{$1\} | jq --arg key  "${2:key}"  --arg value  "${3:value}"  '.[\$key]=\$value')
-$0
-endsnippet
-snippet jqPutJson "jq put string 类型到json,key/value可以使用变量 例子 : {} -> {'k': [1,2]}"
-${1:json变量}=\$(echo -n \$\{$1\} | jq --arg key "${2:key}" --argjson value "${3:value}" '.[\$key]=\$value')
-$0
-endsnippet
-snippet jqDel "jq 删除key,key可以使用变量 : {'k': 'v', 'k1': 'v1'} -> {'k': 'v'}"
-${1:json变量}=\$(echo -n \$\{$1\} | jq --arg key "${2:key}" 'del(.[\$key])')
-$0
-endsnippet
-snippet jqKeys "获取json的所有key"
-${2:var,返回格式为json:["k"]}=\$(echo -n \$${1:json_var} | jq 'keys')
-$0
-endsnippet
-snippet jqArrAdd "jq 往数组的index赋予值 : [1] -> [1,2],key/value/index可以使用变量, 如果追加的元素是字符串将value前的标识 --argjson -> --arg"
-${1:json}=$(echo -n "\$$1" | jq --arg key "${2:key}" --argjson index "${3:index}" --argjson value "${4:value}" '.[\$key][\$index]=\$value')
-$0
-endsnippet
-snippet jqArrAddLength "jq 往数组的最后追加元素 : [1] -> [1,2],value可以使用变量, 如果追加的元素是字符串将value前的标识 --argjson -> --arg"
-${1:json}=$(echo -n "\$$1" | jq --arg key "${2:key}" --argjson value "${3:value}" '.[\$key][.[\$key] | length]=\$value')
-$0
-endsnippet
-snippet jqArrDel "jq 删除数组中的元素(根据下标),key/index可以使用变量 : echo '[1,2]' | jq 'del(.[0])' -> [2]"
-${1:json变量}=\$(echo -n \$\{$1\} | jq --arg key "${2:key}" --argjson index "${3:index}" 'del(.[\$key][\$index])')
-$0
-endsnippet
-snippet jqArrDelLength "jq 删除数组中的元素最后一个元素,key可以使用变量 : echo '[1,2]' | jq 'del(.[length])' -> [1]"
-${1:json变量}=\$(echo -n \$\{$1\} | jq --arg key "${2:key}" 'del(.[\$key][.[$key] | length - 1])')
-$0
-endsnippet
-
 # #awk
 snippet awk "awk 指定分割符,并且打印某个分割后的值"
 awk -v FS="${1:分割符}" '{print \$${2:index以1为启始位}}'
-endsnippet
-
-# #curl
-snippet curlGet "curl get"
-curl -X GET '${1:url}' \
-  -H 'Accept: application/json, text/plain, */*' \
-  -H 'Connection: keep-alive'
-endsnippet
-snippet curlPost "curl post"
-curl -X POST '${1:url}' \
-  -H 'Accept: application/json'  \
-  -H 'Content-Type: application/json'  \
-  -H 'Connection: keep-alive'  \
-  --data-raw '${2:json data}'
-endsnippet
-snippet curlUploadFile "curl上传文件"
-curl '${1:url}' \
-  -H 'Content-Type: multipart/form-data'  \
-  -H 'Connection: keep-alive'  \
-  -F 'file=@${2:filePath}' \
-  -F '${3:key普通参数，value不带@}=${4:value}'
-endsnippet
-snippet curlHeadCookie "添加cookie"
--H "Cookie: $cookie" \
-endsnippet
-snippet curlHeadLanguage "curl 语言"
--H 'Accept-Language: zh-CN,zh;'  \
 endsnippet
 
 # #其他shell命令/shell

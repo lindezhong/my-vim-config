@@ -57,11 +57,24 @@ Phantom Process Killing : Android 12以上的设备只要Termux进后台，运�
 termux-change-repo
 ```
 
+## 访问手机存储空间
+
+```shell
+# 需要在手机上执行, 不能通过远程ssh执行
+termux-setup-storage
+```
+
 ## ssh
 
 ```shell
+# 安装OpenSSL
+pkg install openssl
+
 # 安装OpenSSH
 pkg install openssh
+
+# 生成ssh key
+ssh-keygen -A
 
 # 运行SSH Server
 sshd

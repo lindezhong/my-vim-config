@@ -135,6 +135,12 @@ nmap <silent><ESC><w> :bd <CR>
 imap <silent><C-right> <Esc>`^:bn <CR>i
 imap <silent><C-left> <Esc>`^:bp <CR>i
 imap <silent><ESC><w> <Esc>`^:bd <CR>i
+nmap <silent><C-l> :bn <CR>
+nmap <silent><C-h> :bp <CR>
+imap <silent><C-l> <Esc>`^:bn <CR>i
+imap <silent><C-h> <Esc>`^:bp <CR>i
+
+
 " 缓冲文件兼容ubuntu
 nmap <silent><A-right> :bn <CR>
 nmap <silent><A-left> :bp <CR>
@@ -144,14 +150,14 @@ imap <silent><A-left> <Esc>`^:bp <CR>i
 imap <silent><A-w> <Esc>`^:bd <CR>i
 
 " 窗口跳转
-nmap <silent><ESC><C-j> <C-w><C-h>
+nmap <silent><ESC><C-h> <C-w><C-h>
 nmap <silent><ESC><C-l> <C-w><C-l>
-nmap <silent><ESC><C-i> <C-w><C-k>
-nmap <silent><ESC><C-k> <C-w><C-j>
-imap <silent><ESC><C-j> <Esc>`^<C-w><C-h>
+nmap <silent><ESC><C-k> <C-w><C-k>
+nmap <silent><ESC><C-j> <C-w><C-j>
+imap <silent><ESC><C-h> <Esc>`^<C-w><C-h>
 imap <silent><ESC><C-l> <Esc>`^<C-w><C-l>
-imap <silent><ESC><C-i> <Esc>`^<C-w><C-k>
-imap <silent><ESC><C-k> <Esc>`^<C-w><C-j>
+imap <silent><ESC><C-k> <Esc>`^<C-w><C-k>
+imap <silent><ESC><C-j> <Esc>`^<C-w><C-j>
 nmap <silent><C-A-left> <C-w><C-h>
 nmap <silent><C-A-right> <C-w><C-l>
 nmap <silent><C-A-up> <C-w><C-k>
@@ -170,13 +176,17 @@ nmap <A-left> <C-o>
 nmap <A-RIGHT> <C-i>
 imap <A-left> <Esc>`^<C-o>
 imap <A-RIGHT> <Esc>`^<C-i>
+nmap <A-h> <C-o>
+nmap <A-l> <C-i>
+imap <A-h> <Esc>`^<C-o>
+imap <A-l> <Esc>`^<C-i>
 imap <ESC> <Esc>`^
 nmap <silent><S-u> :redo<CR>
 " 窗口大小调整
-nmap <C-j> <C-w><
-nmap <C-l> <C-w>>
-nmap <C-i> <C-w>+
-nmap <C-k> <C-w>-
+nmap <C-[> <C-w><
+nmap <C-]> <C-w>>
+nmap <C-PageUp> <C-w>+
+nmap <C-PageDown> <C-w>-
 
 " 支持从vim复制到剪切版
 " 需要vim支持clipboard
@@ -364,11 +374,19 @@ imap <silent> <C-down> <Esc><plug>(coc-definition)
 imap <silent> <C-A-down> <Esc><plug>(coc-implementation)
 imap <silent> <A-down> <Esc><plug>(coc-implementation)
 imap <silent> <C-up> <Esc><plug>(coc-references)
+nmap <silent> <C-j> <plug>(coc-definition)
+nmap <silent> <A-j> <plug>(coc-implementation)
+nmap <silent> <C-k> <plug>(coc-references)
+imap <silent> <C-j> <Esc><plug>(coc-definition)
+imap <silent> <C-A-j> <Esc><plug>(coc-implementation)
+imap <silent> <A-j> <Esc><plug>(coc-implementation)
+imap <silent> <C-k> <Esc><plug>(coc-references)
+
 
 " coc调用链, 使用 <tab> 展开调用链 , t 字母打开操作 
 " showIncomingCalls : 查看谁调用了自己, showOutgoingCalls: 我调用了谁
-nmap <silent> <C-h> :call CocActionAsync('showIncomingCalls')<CR>
-imap <silent> <C-h> <Esc>`^:call CocActionAsync('showIncomingCalls')<CR>
+nmap <silent> <ESC><C-i> :call CocActionAsync('showIncomingCalls')<CR>
+imap <silent> <ESC><C-i> <Esc>`^:call CocActionAsync('showIncomingCalls')<CR>
 " nmap <silent> <leader><S-h> :call CocActionAsync('showOutgoingCalls')
 
 

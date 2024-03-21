@@ -16,55 +16,55 @@ set nu
 " =================== 原生支持 =====================
 " 缓冲文件
 " :ls 查看缓冲文件
-nmap <silent><C-right> :bn <CR>
-nmap <silent><C-left> :bp <CR>
-nmap <silent><ESC><w> :bd <CR>
-imap <silent><C-right> <Esc>`^:bn <CR>i
-imap <silent><C-left> <Esc>`^:bp <CR>i
-imap <silent><ESC><w> <Esc>`^:bd <CR>i
+nmap <silent><C-Right> :bn <CR>
+nmap <silent><C-Left> :bp <CR>
+nmap <silent><Esc><w> :bd <CR>
+imap <silent><C-Right> <Esc>`^:bn <CR>i
+imap <silent><C-Left> <Esc>`^:bp <CR>i
+imap <silent><Esc><w> <Esc>`^:bd <CR>i
 nmap <silent><C-l> :bn <CR>
 nmap <silent><C-h> :bp <CR>
 imap <silent><C-l> <Esc>`^:bn <CR>i
 imap <silent><C-h> <Esc>`^:bp <CR>i
 " 缓冲文件兼容ubuntu
-nmap <silent><A-right> :bn <CR>
-nmap <silent><A-left> :bp <CR>
+nmap <silent><A-Right> :bn <CR>
+nmap <silent><A-Left> :bp <CR>
 nmap <silent><A-w> :bd <CR>
-imap <silent><A-right> <Esc>`^:bn <CR>i
-imap <silent><A-left> <Esc>`^:bp <CR>i
+imap <silent><A-Right> <Esc>`^:bn <CR>i
+imap <silent><A-Left> <Esc>`^:bp <CR>i
 imap <silent><A-w> <Esc>`^:bd <CR>i
 
 " 窗口跳转
-nmap <silent><ESC><C-h> <C-w><C-h>
-nmap <silent><ESC><C-l> <C-w><C-l>
-nmap <silent><ESC><C-k> <C-w><C-k>
-nmap <silent><ESC><C-j> <C-w><C-j>
-imap <silent><ESC><C-h> <Esc>`^<C-w><C-h>
-imap <silent><ESC><C-l> <Esc>`^<C-w><C-l>
-imap <silent><ESC><C-k> <Esc>`^<C-w><C-k>
-imap <silent><ESC><C-j> <Esc>`^<C-w><C-j>
-nmap <silent><C-A-left> <C-w><C-h>
-nmap <silent><C-A-right> <C-w><C-l>
-nmap <silent><C-A-up> <C-w><C-k>
-nmap <silent><C-A-down> <C-w><C-j>
-imap <silent><C-A-left> <Esc>`^<C-w><C-h>
-imap <silent><C-A-right> <Esc>`^<C-w><C-l>
-imap <silent><C-A-up> <Esc>`^<C-w><C-k>
-imap <silent><C-A-down> <Esc>`^<C-w><C-j>
+nmap <silent><Esc><C-h> <C-w><C-h>
+nmap <silent><Esc><C-l> <C-w><C-l>
+nmap <silent><Esc><C-k> <C-w><C-k>
+nmap <silent><Esc><C-j> <C-w><C-j>
+imap <silent><Esc><C-h> <Esc>`^<C-w><C-h>
+imap <silent><Esc><C-l> <Esc>`^<C-w><C-l>
+imap <silent><Esc><C-k> <Esc>`^<C-w><C-k>
+imap <silent><Esc><C-j> <Esc>`^<C-w><C-j>
+nmap <silent><C-A-Left> <C-w><C-h>
+nmap <silent><C-A-Right> <C-w><C-l>
+nmap <silent><C-A-Up> <C-w><C-k>
+nmap <silent><C-A-Down> <C-w><C-j>
+imap <silent><C-A-Left> <Esc>`^<C-w><C-h>
+imap <silent><C-A-Right> <Esc>`^<C-w><C-l>
+imap <silent><C-A-Up> <Esc>`^<C-w><C-k>
+imap <silent><C-A-Down> <Esc>`^<C-w><C-j>
 
 " 日常使用键
 nmap <C-S> :w!<CR>i
-vmap <C-S> <C-C>:w!<CR>
+vmap <C-S> <C-c>:w!<CR>
 imap <C-S> <Esc>:w!<CR>i
-nmap <A-left> <C-o>
-nmap <A-RIGHT> <C-i>
-imap <A-left> <Esc>`^<C-o>
-imap <A-RIGHT> <Esc>`^<C-i>
+nmap <A-Left> <C-o>
+nmap <A-Right> <C-i>
+imap <A-Left> <Esc>`^<C-o>
+imap <A-Right> <Esc>`^<C-i>
 nmap <A-h> <C-o>
 nmap <A-l> <C-i>
 imap <A-h> <Esc>`^<C-o>
 imap <A-l> <Esc>`^<C-i>
-imap <ESC> <Esc>`^
+imap <Esc> <Esc>`^
 nmap <silent><S-u> :redo<CR>
 
 " 窗口大小调整
@@ -100,7 +100,7 @@ nnoremap <C-y> "*p
 " | line('.')   | 行号               |
 " | printf()    | 格式化字符串打印   |
 nmap <C-r> :%s///g
-imap <C-r> <ESC>:%s///g
+imap <C-r> <Esc>:%s///g
 
 
 " =================== Vimspector =====================
@@ -127,13 +127,13 @@ nmap <silent> <F6> <Plug>VimspectorRunToCursor
 
 " =================== NERDTree =====================
 " NERDTree配置 打开侧边目录
-nmap <silent><ESC><C-n> :NERDTreeToggle<CR>
+nmap <silent><Esc><C-n> :NERDTreeToggle<CR>
 " 快速定位到当前文件
-nmap <silent><ESC><S-n> :NERDTreeFind<CR>
+nmap <silent><Esc><S-n> :NERDTreeFind<CR>
 " NERDTree配置 打开侧边目录
-imap <silent><ESC><C-n> <Esc>`^:NERDTreeToggle<CR>
+imap <silent><Esc><C-n> <Esc>`^:NERDTreeToggle<CR>
 " 快速定位到当前文件
-imap <silent><ESC><S-n> <Esc>`^:NERDTreeFind<CR>
+imap <silent><Esc><S-n> <Esc>`^:NERDTreeFind<CR>
 
 " =================== leaderF ======================
 " leaderF配置(查找) Yggdroot/LeaderF
@@ -146,8 +146,8 @@ nmap <silent><C-p> :LeaderfFile<CR>
 imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
 nmap <silent><C-f> :LeaderfLine<CR>
 imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
-nmap <silent><ESC><C-p> :Leaderf rg<CR>
-imap <silent><ESC><C-p> <Esc>`^:Leaderf rg<CR>
+nmap <silent><Esc><C-p> :Leaderf rg<CR>
+imap <silent><Esc><C-p> <Esc>`^:Leaderf rg<CR>
 
 " ==================== coc ====================
 " Use tab for trigger completion with characters ahead and navigate.
@@ -182,17 +182,17 @@ nmap <silent> <C-e> :CocDiagnostics<CR>
 imap <silent> <C-e> <Esc>`^:CocDiagnostics<CR>
 
 " GoTo code navigation.
-nmap <silent> <c-b> <plug>(coc-definition)
+nmap <silent> <C-b> <plug>(coc-definition)
 nmap <silent> <S-b> <plug>(coc-type-definition)
-nmap <silent> <ESC><c-b> <plug>(coc-implementation)
-nmap <silent> <ESC>b <plug>(coc-references)
-nmap <silent> <C-down> <plug>(coc-definition)
-nmap <silent> <A-down> <plug>(coc-implementation)
-nmap <silent> <C-up> <plug>(coc-references)
-imap <silent> <C-down> <Esc><plug>(coc-definition)
-imap <silent> <C-A-down> <Esc><plug>(coc-implementation)
-imap <silent> <A-down> <Esc><plug>(coc-implementation)
-imap <silent> <C-up> <Esc><plug>(coc-references)
+nmap <silent> <Esc><c-b> <plug>(coc-implementation)
+nmap <silent> <Esc>b <plug>(coc-references)
+nmap <silent> <C-Down> <plug>(coc-definition)
+nmap <silent> <A-Down> <plug>(coc-implementation)
+nmap <silent> <C-Up> <plug>(coc-references)
+imap <silent> <C-Down> <Esc><plug>(coc-definition)
+imap <silent> <C-A-Down> <Esc><plug>(coc-implementation)
+imap <silent> <A-Down> <Esc><plug>(coc-implementation)
+imap <silent> <C-Up> <Esc><plug>(coc-references)
 nmap <silent> <C-j> <plug>(coc-definition)
 nmap <silent> <A-j> <plug>(coc-implementation)
 nmap <silent> <C-k> <plug>(coc-references)
@@ -208,16 +208,16 @@ imap <silent> <C-d> <Esc>`^:call <SID>show_documentation()<CR>i
 
 " coc调用链, 使用 <tab> 展开调用链 , t 字母打开操作 
 " showIncomingCalls : 查看谁调用了自己, showOutgoingCalls: 我调用了谁
-nmap <silent> <ESC><C-i> :call CocActionAsync('showIncomingCalls')<CR>
-imap <silent> <ESC><C-i> <Esc>`^:call CocActionAsync('showIncomingCalls')<CR>
-" nmap <silent> <leader><S-h> :call CocActionAsync('showOutgoingCalls')
+nmap <silent> <Esc><C-i> :call CocActionAsync('showIncomingCalls')<CR>
+imap <silent> <Esc><C-i> <Esc>`^:call CocActionAsync('showIncomingCalls')<CR>
+" nmap <silent> <Leader><S-h> :call CocActionAsync('showOutgoingCalls')
 
 " Symbol renaming.
-nmap <leader>rn <Plug>(coc-rename)
+nmap <Leader>rn <Plug>(coc-rename)
 
 " Formatting selected code.
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
+xmap <Leader>f  <Plug>(coc-format-selected)
+nmap <Leader>f  <Plug>(coc-format-selected)
 
 " Mappings for CoCList
 " Show all diagnostics.
@@ -238,28 +238,28 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 " 命令面板
-" nmap <ESC><S-p> :CocCommand<CR>
-" imap <ESC><S-p> <Esc>`^:CocCommand<CR>
+" nmap <Esc><S-p> :CocCommand<CR>
+" imap <Esc><S-p> <Esc>`^:CocCommand<CR>
 " 代码自动生成
-nmap <silent><ESC><S-i> <Plug>(coc-codeaction-cursor)
-nmap <silent><ESC><ENTER> <Plug>(coc-codeaction-cursor)
-imap <silent><ESC><S-i> <Esc>`^<Plug>(coc-codeaction-cursor)i
-imap <silent><ESC><ENTER> <Esc>`^<Plug>(coc-codeaction-cursor)i
+nmap <silent><Esc><S-i> <Plug>(coc-codeaction-cursor)
+nmap <silent><Esc><Enter> <Plug>(coc-codeaction-cursor)
+imap <silent><Esc><S-i> <Esc>`^<Plug>(coc-codeaction-cursor)i
+imap <silent><Esc><Enter> <Esc>`^<Plug>(coc-codeaction-cursor)i
 
 
 
 " Applying codeAction to the selected region.
 " Example: `<leader>aap` for current paragraph
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a  <Plug>(coc-codeaction-selected)
+xmap <Leader>a  <Plug>(coc-codeaction-selected)
+nmap <Leader>a  <Plug>(coc-codeaction-selected)
 
 " Remap keys for applying codeAction to the current buffer.
-nmap <leader>ac  <Plug>(coc-codeaction)
+nmap <Leader>ac  <Plug>(coc-codeaction)
 " Apply AutoFix to problem on the current line.
-nmap <leader>qf  <Plug>(coc-fix-current)
+nmap <Leader>qf  <Plug>(coc-fix-current)
 
 " Run the Code Lens action on the current line.
-nmap <leader>cl  <Plug>(coc-codelens-action)
+nmap <Leader>cl  <Plug>(coc-codelens-action)
 
 " Map function and class text objects
 " NOTE: Requires 'textDocument.documentSymbol' support from the language server.

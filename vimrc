@@ -548,6 +548,8 @@ nmap <silent> <PageDown> <Plug>VimspectorStepInto
 nmap <silent> <PageUp> <Plug>VimspectorStepOver
 " F9添加断点
 nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
+" F9添加条件断点
+nmap <silent> <Leader><F9> <Plug>VimspectorToggleConditionalBreakpoint
 " F6运行到下个断点
 nmap <silent> <F6> <Plug>VimspectorRunToCursor
 

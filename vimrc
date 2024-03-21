@@ -172,6 +172,12 @@ imap <A-left> <Esc>`^<C-o>
 imap <A-RIGHT> <Esc>`^<C-i>
 imap <ESC> <Esc>`^
 nmap <silent><S-u> :redo<CR>
+" 窗口大小调整
+nmap <Leader><Left> <C-w><
+nmap <Leader><Right> <C-w>>
+nmap <Leader><Up> <C-w>+
+nmap <Leader><Down> <C-w>-
+
 " 支持从vim复制到剪切版
 " 需要vim支持clipboard
 " 执行 `vim --version | grep clipboard` 有 + 号

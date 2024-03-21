@@ -6,9 +6,323 @@ set autoindent
 set cindent
 " 默认字符过多不换行, 使用 set wrap 恢复换行
 set nowrap
-" 使用autcmd命令兼容coc的调用链
-
+set hidden
 set nu
+
+" ==================================================
+" =================== 快捷键配置 ===================
+" ==================================================
+
+" =================== 原生支持 =====================
+" 缓冲文件
+" :ls 查看缓冲文件
+nmap <silent><C-right> :bn <CR>
+nmap <silent><C-left> :bp <CR>
+nmap <silent><ESC><w> :bd <CR>
+imap <silent><C-right> <Esc>`^:bn <CR>i
+imap <silent><C-left> <Esc>`^:bp <CR>i
+imap <silent><ESC><w> <Esc>`^:bd <CR>i
+nmap <silent><C-l> :bn <CR>
+nmap <silent><C-h> :bp <CR>
+imap <silent><C-l> <Esc>`^:bn <CR>i
+imap <silent><C-h> <Esc>`^:bp <CR>i
+" 缓冲文件兼容ubuntu
+nmap <silent><A-right> :bn <CR>
+nmap <silent><A-left> :bp <CR>
+nmap <silent><A-w> :bd <CR>
+imap <silent><A-right> <Esc>`^:bn <CR>i
+imap <silent><A-left> <Esc>`^:bp <CR>i
+imap <silent><A-w> <Esc>`^:bd <CR>i
+
+" 窗口跳转
+nmap <silent><ESC><C-h> <C-w><C-h>
+nmap <silent><ESC><C-l> <C-w><C-l>
+nmap <silent><ESC><C-k> <C-w><C-k>
+nmap <silent><ESC><C-j> <C-w><C-j>
+imap <silent><ESC><C-h> <Esc>`^<C-w><C-h>
+imap <silent><ESC><C-l> <Esc>`^<C-w><C-l>
+imap <silent><ESC><C-k> <Esc>`^<C-w><C-k>
+imap <silent><ESC><C-j> <Esc>`^<C-w><C-j>
+nmap <silent><C-A-left> <C-w><C-h>
+nmap <silent><C-A-right> <C-w><C-l>
+nmap <silent><C-A-up> <C-w><C-k>
+nmap <silent><C-A-down> <C-w><C-j>
+imap <silent><C-A-left> <Esc>`^<C-w><C-h>
+imap <silent><C-A-right> <Esc>`^<C-w><C-l>
+imap <silent><C-A-up> <Esc>`^<C-w><C-k>
+imap <silent><C-A-down> <Esc>`^<C-w><C-j>
+
+" 日常使用键
+nmap <C-S> :w!<CR>i
+vmap <C-S> <C-C>:w!<CR>
+imap <C-S> <Esc>:w!<CR>i
+nmap <A-left> <C-o>
+nmap <A-RIGHT> <C-i>
+imap <A-left> <Esc>`^<C-o>
+imap <A-RIGHT> <Esc>`^<C-i>
+nmap <A-h> <C-o>
+nmap <A-l> <C-i>
+imap <A-h> <Esc>`^<C-o>
+imap <A-l> <Esc>`^<C-i>
+imap <ESC> <Esc>`^
+nmap <silent><S-u> :redo<CR>
+
+" 窗口大小调整
+nmap <C-[> <C-w><
+nmap <C-]> <C-w>>
+nmap <C-PageUp> <C-w>+
+nmap <C-PageDown> <C-w>-
+
+" 支持从vim复制到剪切版
+" 需要vim支持clipboard
+" 执行 `vim --version | grep clipboard` 有 + 号
+" 如果不支持clipboard则安装vim-gtk(直接执行apt install vim-gtk不用卸载原始vim)
+" 支持在在Visual模式下, 通过C-y复制到系统剪切板
+vnoremap <C-y> "+y
+" 支持在normal模式下, 通过C-y粘贴系统剪切板
+nnoremap <C-y> "*p
+
+" 替换 :[range]s/{pattern}/{string}/[flags] [count]
+" range 1,3:1-3行 .:$:当前行-最后一行 .:+4:当前行-后4行 %:当前所有行
+" flags  g:要替换当前行中所有出现的搜索模式 c:要确认每次替换  i:忽略搜索模式的大小写
+" pattern \<单词\>:要搜索整个单词 
+" :.,$s/var*/var/gci 
+" :5,20s/^/#/ 注释行（在行前添加#）从5到20
+" :5,20s/^#// 取消注释的第5行到第20行，恢复之前的更改
+" :%s/apple\|orange\|mango/fruit/g 将“苹果”，“橙色”和“芒果”的所有实例替换为“水果”
+" :%s/\s\+$//e 删除每行末尾的尾随空格
+"
+" 使用表达式替换: 就是对\=之后的表达式求值用来做替换
+" :%s@X@\=line('.') # 将大写X替换成行号
+" :%s@X@\=printf("%03d", line('.')) # 将大写X替换成行号, 用print格式化
+" | 表达式      | 功能               |
+" | ----------- | ------------------ |
+" | line('.')   | 行号               |
+" | printf()    | 格式化字符串打印   |
+nmap <C-r> :%s///g
+imap <C-r> <ESC>:%s///g
+
+
+" =================== Vimspector =====================
+" 用于vim debug
+" F5启动通用debug
+nmap <silent> <F5> <Plug>VimspectorContinue
+" j+F5(先按j)启动java debug
+nmap <silent> j<F5> :CocCommand java.debug.vimspector.start<CR>
+" F7单步跳入
+nmap <silent> <F7> <Plug>VimspectorStepInto
+" F8单步跳过
+nmap <silent> <F8> <Plug>VimspectorStepOver
+" PageDown单步跳入
+nmap <silent> <PageDown> <Plug>VimspectorStepInto
+" PageUp单步跳过
+nmap <silent> <PageUp> <Plug>VimspectorStepOver
+" F9添加断点
+nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
+" F9添加条件断点
+nmap <silent> <Leader><F9> <Plug>VimspectorToggleConditionalBreakpoint
+" F6运行到下个断点
+nmap <silent> <F6> <Plug>VimspectorRunToCursor
+
+
+" =================== NERDTree =====================
+" NERDTree配置 打开侧边目录
+nmap <silent><ESC><C-n> :NERDTreeToggle<CR>
+" 快速定位到当前文件
+nmap <silent><ESC><S-n> :NERDTreeFind<CR>
+" NERDTree配置 打开侧边目录
+imap <silent><ESC><C-n> <Esc>`^:NERDTreeToggle<CR>
+" 快速定位到当前文件
+imap <silent><ESC><S-n> <Esc>`^:NERDTreeFind<CR>
+
+" =================== leaderF ======================
+" leaderF配置(查找) Yggdroot/LeaderF
+" :LeaderfFile搜索当前目录下的文件
+" :LeaderfBuffer搜索当前的Buffer
+" :LeaderfMru 搜索最近使用过的文件( search most recently used files)就是Mru
+" :LeaderfLine 搜索当前文件中有的某个单词
+" :LeaderfFunction 搜索当前文件的函数(这个很有意思，如下图列出该文件中所有的函数和变量)
+nmap <silent><C-p> :LeaderfFile<CR>
+imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
+nmap <silent><C-f> :LeaderfLine<CR>
+imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
+nmap <silent><ESC><C-p> :Leaderf rg<CR>
+imap <silent><ESC><C-p> <Esc>`^:Leaderf rg<CR>
+
+" ==================== coc ====================
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Make <CR> auto-select the first completion item and notify coc.nvim to
+" format on enter, <cr> could be remapped by other vim plugin
+" 回车自动选择旧版
+" inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
+"                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+" 回车自动选择新版
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> <C-e> :CocDiagnostics<CR>
+imap <silent> <C-e> <Esc>`^:CocDiagnostics<CR>
+
+" GoTo code navigation.
+nmap <silent> <c-b> <plug>(coc-definition)
+nmap <silent> <S-b> <plug>(coc-type-definition)
+nmap <silent> <ESC><c-b> <plug>(coc-implementation)
+nmap <silent> <ESC>b <plug>(coc-references)
+nmap <silent> <C-down> <plug>(coc-definition)
+nmap <silent> <A-down> <plug>(coc-implementation)
+nmap <silent> <C-up> <plug>(coc-references)
+imap <silent> <C-down> <Esc><plug>(coc-definition)
+imap <silent> <C-A-down> <Esc><plug>(coc-implementation)
+imap <silent> <A-down> <Esc><plug>(coc-implementation)
+imap <silent> <C-up> <Esc><plug>(coc-references)
+nmap <silent> <C-j> <plug>(coc-definition)
+nmap <silent> <A-j> <plug>(coc-implementation)
+nmap <silent> <C-k> <plug>(coc-references)
+imap <silent> <C-j> <Esc><plug>(coc-definition)
+imap <silent> <C-A-j> <Esc><plug>(coc-implementation)
+imap <silent> <A-j> <Esc><plug>(coc-implementation)
+imap <silent> <C-k> <Esc><plug>(coc-references)
+
+" Use <C-d> to show documentation in preview window.
+nnoremap <silent> <C-d> :call <SID>show_documentation()<CR>
+imap <silent> <C-d> <Esc>`^:call <SID>show_documentation()<CR>i
+
+
+" coc调用链, 使用 <tab> 展开调用链 , t 字母打开操作 
+" showIncomingCalls : 查看谁调用了自己, showOutgoingCalls: 我调用了谁
+nmap <silent> <ESC><C-i> :call CocActionAsync('showIncomingCalls')<CR>
+imap <silent> <ESC><C-i> <Esc>`^:call CocActionAsync('showIncomingCalls')<CR>
+" nmap <silent> <leader><S-h> :call CocActionAsync('showOutgoingCalls')
+
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code.
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+" Mappings for CoCList
+" Show all diagnostics.
+nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions.
+nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+" Show commands.
+nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document.
+nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols.
+nnoremap <silent><nowait> <C-t>  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list.
+nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+
+" 命令面板
+" nmap <ESC><S-p> :CocCommand<CR>
+" imap <ESC><S-p> <Esc>`^:CocCommand<CR>
+" 代码自动生成
+nmap <silent><ESC><S-i> <Plug>(coc-codeaction-cursor)
+nmap <silent><ESC><ENTER> <Plug>(coc-codeaction-cursor)
+imap <silent><ESC><S-i> <Esc>`^<Plug>(coc-codeaction-cursor)i
+imap <silent><ESC><ENTER> <Esc>`^<Plug>(coc-codeaction-cursor)i
+
+
+
+" Applying codeAction to the selected region.
+" Example: `<leader>aap` for current paragraph
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+" Remap keys for applying codeAction to the current buffer.
+nmap <leader>ac  <Plug>(coc-codeaction)
+" Apply AutoFix to problem on the current line.
+nmap <leader>qf  <Plug>(coc-fix-current)
+
+" Run the Code Lens action on the current line.
+nmap <leader>cl  <Plug>(coc-codelens-action)
+
+" Map function and class text objects
+" NOTE: Requires 'textDocument.documentSymbol' support from the language server.
+xmap if <Plug>(coc-funcobj-i)
+omap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap af <Plug>(coc-funcobj-a)
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
+
+" Remap <C-f> and <C-b> for scroll float windows/popups.
+" 使用 <C-f> <S-down> 和 <C-b> <S-up> 对浮动窗口上下翻页
+if has('nvim-0.4.0') || has('patch-8.2.0750')
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+  inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+  inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+  vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+
+  nnoremap <silent><nowait><expr> <S-down> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  nnoremap <silent><nowait><expr> <S-up> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+  inoremap <silent><nowait><expr> <S-down> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+  inoremap <silent><nowait><expr> <S-up> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+  vnoremap <silent><nowait><expr> <S-down> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  vnoremap <silent><nowait><expr> <S-up> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+endif
+
+" Use CTRL-S for selections ranges.
+" Requires 'textDocument/selectionRange' support of language server.
+nmap <silent> <C-s> <Plug>(coc-range-select)
+xmap <silent> <C-s> <Plug>(coc-range-select)
+
+" vim-ultisnips 插件
+" coc.vim vim-ultisnips 配合 ultisnips使用 
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? coc#_select_confirm() :
+      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+
+
+" coc-translator 翻译插件
+" NOTE: do NOT use `nore` mappings
+" popup
+nmap <Leader>t <Plug>(coc-translator-p)
+vmap <Leader>t <Plug>(coc-translator-pv)
+" echo
+nmap <Leader>e <Plug>(coc-translator-e)
+vmap <Leader>e <Plug>(coc-translator-ev)
+" replace
+nmap <Leader>r <Plug>(coc-translator-r)
+vmap <Leader>r <Plug>(coc-translator-rv)
+" coc-markdown-preview-enhanced markdown 插件
+" 快捷键 \v 快速带开markdown预览
+nmap <Leader>v :CocCommand markdown-preview-enhanced.openPreview<CR>
+
+" ==================================================
+" =================== 快捷键配置 ===================
+" ==================================================
+
 " 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
 set maxmempattern=2000
 
@@ -82,33 +396,12 @@ filetype plugin indent on
 " D: 删除书签
 " m: 文件操作,新增文件/文件夹，删除文件/文件夹
 "
-" NERDTree配置 打开侧边目录
-nmap <silent><ESC><C-n> :NERDTreeToggle<CR>
-" 快速定位到当前文件
-nmap <silent><ESC><S-n> :NERDTreeFind<CR>
-" NERDTree配置 打开侧边目录
-imap <silent><ESC><C-n> <Esc>`^:NERDTreeToggle<CR>
-" 快速定位到当前文件
-imap <silent><ESC><S-n> <Esc>`^:NERDTreeFind<CR>
 " NERDTree防止在窗口打开
 " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
 autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
     \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
 " 当 NERDTree 是最后一个窗口时，自动关闭 vim
 autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-
-" leaderF配置(查找) Yggdroot/LeaderF
-" :LeaderfFile搜索当前目录下的文件
-" :LeaderfBuffer搜索当前的Buffer
-" :LeaderfMru 搜索最近使用过的文件( search most recently used files)就是Mru
-" :LeaderfLine 搜索当前文件中有的某个单词
-" :LeaderfFunction 搜索当前文件的函数(这个很有意思，如下图列出该文件中所有的函数和变量)
-nmap <silent><C-p> :LeaderfFile<CR>
-imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
-nmap <silent><C-f> :LeaderfLine<CR>
-imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
-nmap <silent><ESC><C-p> :Leaderf rg<CR>
-imap <silent><ESC><C-p> <Esc>`^:Leaderf rg<CR>
 
 
 " auto-pairs配置(自动匹配括号) jiangmiao/auto-pairs
@@ -126,96 +419,6 @@ imap <silent><ESC><C-p> <Esc>`^:Leaderf rg<CR>
 " Markdown预览插件 iamcco/mathjax-support-for-mkdp(latex数学公式支持) iamcco/markdown-preview.vim
 " :MarkdownPreview 打开预览 :MarkdownPreviewStop 关闭预览
 
-" 缓冲文件
-" :ls 查看缓冲文件
-set hidden
-nmap <silent><C-right> :bn <CR>
-nmap <silent><C-left> :bp <CR>
-nmap <silent><ESC><w> :bd <CR>
-imap <silent><C-right> <Esc>`^:bn <CR>i
-imap <silent><C-left> <Esc>`^:bp <CR>i
-imap <silent><ESC><w> <Esc>`^:bd <CR>i
-nmap <silent><C-l> :bn <CR>
-nmap <silent><C-h> :bp <CR>
-imap <silent><C-l> <Esc>`^:bn <CR>i
-imap <silent><C-h> <Esc>`^:bp <CR>i
-
-
-" 缓冲文件兼容ubuntu
-nmap <silent><A-right> :bn <CR>
-nmap <silent><A-left> :bp <CR>
-nmap <silent><A-w> :bd <CR>
-imap <silent><A-right> <Esc>`^:bn <CR>i
-imap <silent><A-left> <Esc>`^:bp <CR>i
-imap <silent><A-w> <Esc>`^:bd <CR>i
-
-" 窗口跳转
-nmap <silent><ESC><C-h> <C-w><C-h>
-nmap <silent><ESC><C-l> <C-w><C-l>
-nmap <silent><ESC><C-k> <C-w><C-k>
-nmap <silent><ESC><C-j> <C-w><C-j>
-imap <silent><ESC><C-h> <Esc>`^<C-w><C-h>
-imap <silent><ESC><C-l> <Esc>`^<C-w><C-l>
-imap <silent><ESC><C-k> <Esc>`^<C-w><C-k>
-imap <silent><ESC><C-j> <Esc>`^<C-w><C-j>
-nmap <silent><C-A-left> <C-w><C-h>
-nmap <silent><C-A-right> <C-w><C-l>
-nmap <silent><C-A-up> <C-w><C-k>
-nmap <silent><C-A-down> <C-w><C-j>
-imap <silent><C-A-left> <Esc>`^<C-w><C-h>
-imap <silent><C-A-right> <Esc>`^<C-w><C-l>
-imap <silent><C-A-up> <Esc>`^<C-w><C-k>
-imap <silent><C-A-down> <Esc>`^<C-w><C-j>
-
-
-" 日常使用键
-nmap <C-S> :w!<CR>i
-vmap <C-S> <C-C>:w!<CR>
-imap <C-S> <Esc>:w!<CR>i
-nmap <A-left> <C-o>
-nmap <A-RIGHT> <C-i>
-imap <A-left> <Esc>`^<C-o>
-imap <A-RIGHT> <Esc>`^<C-i>
-nmap <A-h> <C-o>
-nmap <A-l> <C-i>
-imap <A-h> <Esc>`^<C-o>
-imap <A-l> <Esc>`^<C-i>
-imap <ESC> <Esc>`^
-nmap <silent><S-u> :redo<CR>
-" 窗口大小调整
-nmap <C-[> <C-w><
-nmap <C-]> <C-w>>
-nmap <C-PageUp> <C-w>+
-nmap <C-PageDown> <C-w>-
-
-" 支持从vim复制到剪切版
-" 需要vim支持clipboard
-" 执行 `vim --version | grep clipboard` 有 + 号
-" 如果不支持clipboard则安装vim-gtk(直接执行apt install vim-gtk不用卸载原始vim)
-" 支持在在Visual模式下, 通过C-y复制到系统剪切板
-vnoremap <C-y> "+y
-" 支持在normal模式下, 通过C-y粘贴系统剪切板
-nnoremap <C-y> "*p
-
-" 替换 :[range]s/{pattern}/{string}/[flags] [count]
-" range 1,3:1-3行 .:$:当前行-最后一行 .:+4:当前行-后4行 %:当前所有行
-" flags  g:要替换当前行中所有出现的搜索模式 c:要确认每次替换  i:忽略搜索模式的大小写
-" pattern \<单词\>:要搜索整个单词 
-" :.,$s/var*/var/gci 
-" :5,20s/^/#/ 注释行（在行前添加#）从5到20
-" :5,20s/^#// 取消注释的第5行到第20行，恢复之前的更改
-" :%s/apple\|orange\|mango/fruit/g 将“苹果”，“橙色”和“芒果”的所有实例替换为“水果”
-" :%s/\s\+$//e 删除每行末尾的尾随空格
-"
-" 使用表达式替换: 就是对\=之后的表达式求值用来做替换
-" :%s@X@\=line('.') # 将大写X替换成行号
-" :%s@X@\=printf("%03d", line('.')) # 将大写X替换成行号, 用print格式化
-" | 表达式      | 功能               |
-" | ----------- | ------------------ |
-" | line('.')   | 行号               |
-" | printf()    | 格式化字符串打印   |
-nmap <C-r> :%s///g
-imap <C-r> <ESC>:%s///g
 
 
 " ultisnips 代码片段 SirVer/ultisnips honza/vim-snippets
@@ -224,13 +427,6 @@ let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
 let g:coc_snippet_next = '<tab>'
-
-" coc.vim vim-ultisnips 配合 ultisnips使用 
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? coc#_select_confirm() :
-      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
 
 
 
@@ -268,18 +464,6 @@ let g:coc_global_extensions = [
 " ## coc-ultisnips-select
 " 如果想要选择snippets后自动展开snippets将 coc/coc-ultisnips-select 下的所有文件复制到 ~/.config/coc/extensions/node_modules/coc-ultisnips-select
 
-" coc-translator 翻译插件
-" NOTE: do NOT use `nore` mappings
-" popup
-nmap <Leader>t <Plug>(coc-translator-p)
-vmap <Leader>t <Plug>(coc-translator-pv)
-" echo
-nmap <Leader>e <Plug>(coc-translator-e)
-vmap <Leader>e <Plug>(coc-translator-ev)
-" replace
-nmap <Leader>r <Plug>(coc-translator-r)
-vmap <Leader>r <Plug>(coc-translator-rv)
-
 " coc-markdown-preview-enhanced coc markdown 预览插件
 " 如果需要隐藏头部title(由插件 coc-webview 提供) 修改文件 ~/.config/coc/extensions/node_modules/coc-webview/lib/index.js
 " 中div id = title 元素隐藏(可以搜索menu-list定位) <div id="title" style="display: none;visibility: none" >
@@ -290,8 +474,6 @@ vmap <Leader>r <Plug>(coc-translator-rv)
 " | markdown-preview-enhanced.syncPreview      | Sync preview / Sync source |
 " | markdown-preview-enhanced.runCodeChunk     | Run code chunk             |
 " | markdown-preview-enhanced.runAllCodeChunks | Run all code chunks        |
-" 快捷键 \v 快速带开markdown预览
-nmap <Leader>v :CocCommand markdown-preview-enhanced.openPreview<CR>
 
 " 忽略开启警告(比如vim版本问题的警告)
 let g:coc_disable_startup_warning = 1
@@ -325,69 +507,10 @@ else
   set signcolumn=yes
 endif
 
-" Use tab for trigger completion with characters ahead and navigate.
-" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
-" other plugin before putting this into your config.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
 function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
-
-" Use <c-space> to trigger completion.
-if has('nvim')
-  inoremap <silent><expr> <c-space> coc#refresh()
-else
-  inoremap <silent><expr> <c-@> coc#refresh()
-endif
-
-" Make <CR> auto-select the first completion item and notify coc.nvim to
-" format on enter, <cr> could be remapped by other vim plugin
-" 回车自动选择旧版
-" inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
-"                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-" 回车自动选择新版
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
-                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-
-" Use `[g` and `]g` to navigate diagnostics
-" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-nmap <silent> <C-e> :CocDiagnostics<CR>
-imap <silent> <C-e> <Esc>`^:CocDiagnostics<CR>
-
-" GoTo code navigation.
-nmap <silent> <c-b> <plug>(coc-definition)
-nmap <silent> <S-b> <plug>(coc-type-definition)
-nmap <silent> <ESC><c-b> <plug>(coc-implementation)
-nmap <silent> <ESC>b <plug>(coc-references)
-nmap <silent> <C-down> <plug>(coc-definition)
-nmap <silent> <A-down> <plug>(coc-implementation)
-nmap <silent> <C-up> <plug>(coc-references)
-imap <silent> <C-down> <Esc><plug>(coc-definition)
-imap <silent> <C-A-down> <Esc><plug>(coc-implementation)
-imap <silent> <A-down> <Esc><plug>(coc-implementation)
-imap <silent> <C-up> <Esc><plug>(coc-references)
-nmap <silent> <C-j> <plug>(coc-definition)
-nmap <silent> <A-j> <plug>(coc-implementation)
-nmap <silent> <C-k> <plug>(coc-references)
-imap <silent> <C-j> <Esc><plug>(coc-definition)
-imap <silent> <C-A-j> <Esc><plug>(coc-implementation)
-imap <silent> <A-j> <Esc><plug>(coc-implementation)
-imap <silent> <C-k> <Esc><plug>(coc-references)
-
-
-" coc调用链, 使用 <tab> 展开调用链 , t 字母打开操作 
-" showIncomingCalls : 查看谁调用了自己, showOutgoingCalls: 我调用了谁
-nmap <silent> <ESC><C-i> :call CocActionAsync('showIncomingCalls')<CR>
-imap <silent> <ESC><C-i> <Esc>`^:call CocActionAsync('showIncomingCalls')<CR>
-" nmap <silent> <leader><S-h> :call CocActionAsync('showOutgoingCalls')
 
 
 function! s:check_back_space() abort
@@ -397,10 +520,6 @@ endfunction
 
 let g:coc_snippet_next = '<tab>'
 
-
-" Use <C-h> to show documentation in preview window.
-nnoremap <silent> <C-d> :call <SID>show_documentation()<CR>
-imap <silent> <C-d> <Esc>`^:call <SID>show_documentation()<CR>i
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -415,13 +534,6 @@ endfunction
 " 同单词高亮 Highlight the symbol and its references when holding the cursor.
 " autocmd CursorHold * silent call CocActionAsync('highlight')
 
-" Symbol renaming.
-nmap <leader>rn <Plug>(coc-rename)
-
-" Formatting selected code.
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
 augroup mygroup
   autocmd!
   " Setup formatexpr specified filetype(s).
@@ -429,53 +541,6 @@ augroup mygroup
   " Update signature help on jump placeholder.
   autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
 augroup end
-
-" Applying codeAction to the selected region.
-" Example: `<leader>aap` for current paragraph
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a  <Plug>(coc-codeaction-selected)
-
-" Remap keys for applying codeAction to the current buffer.
-nmap <leader>ac  <Plug>(coc-codeaction)
-" Apply AutoFix to problem on the current line.
-nmap <leader>qf  <Plug>(coc-fix-current)
-
-" Run the Code Lens action on the current line.
-nmap <leader>cl  <Plug>(coc-codelens-action)
-
-" Map function and class text objects
-" NOTE: Requires 'textDocument.documentSymbol' support from the language server.
-xmap if <Plug>(coc-funcobj-i)
-omap if <Plug>(coc-funcobj-i)
-xmap af <Plug>(coc-funcobj-a)
-omap af <Plug>(coc-funcobj-a)
-xmap ic <Plug>(coc-classobj-i)
-omap ic <Plug>(coc-classobj-i)
-xmap ac <Plug>(coc-classobj-a)
-omap ac <Plug>(coc-classobj-a)
-
-" Remap <C-f> and <C-b> for scroll float windows/popups.
-" 使用 <C-f> <S-down> 和 <C-b> <S-up> 对浮动窗口上下翻页
-if has('nvim-0.4.0') || has('patch-8.2.0750')
-  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-  inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
-  inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
-  vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-  vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-
-  nnoremap <silent><nowait><expr> <S-down> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-  nnoremap <silent><nowait><expr> <S-up> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-  inoremap <silent><nowait><expr> <S-down> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
-  inoremap <silent><nowait><expr> <S-up> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
-  vnoremap <silent><nowait><expr> <S-down> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-  vnoremap <silent><nowait><expr> <S-up> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-endif
-
-" Use CTRL-S for selections ranges.
-" Requires 'textDocument/selectionRange' support of language server.
-nmap <silent> <C-s> <Plug>(coc-range-select)
-xmap <silent> <C-s> <Plug>(coc-range-select)
 
 " Add `:Format` command to format current buffer.
 command! -nargs=0 Format :call CocActionAsync('format')
@@ -490,33 +555,6 @@ command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.org
 " NOTE: Please see `:h coc-status` for integrations with external plugins that
 " provide custom statusline: lightline.vim, vim-airline.
 set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
-
-" Mappings for CoCList
-" Show all diagnostics.
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
-" Manage extensions.
-nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
-" Show commands.
-nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
-" Find symbol of current document.
-nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
-" Search workspace symbols.
-nnoremap <silent><nowait> <C-t>  :<C-u>CocList -I symbols<cr>
-" Do default action for next item.
-nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
-" Do default action for previous item.
-nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
-" Resume latest coc list.
-nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
-
-" 命令面板
-" nmap <ESC><S-p> :CocCommand<CR>
-" imap <ESC><S-p> <Esc>`^:CocCommand<CR>
-" 代码自动生成
-nmap <silent><ESC><S-i> <Plug>(coc-codeaction-cursor)
-nmap <silent><ESC><ENTER> <Plug>(coc-codeaction-cursor)
-imap <silent><ESC><S-i> <Esc>`^<Plug>(coc-codeaction-cursor)i
-imap <silent><ESC><ENTER> <Esc>`^<Plug>(coc-codeaction-cursor)i
 
 " vimspector 远程debug插件,使用vscode的dap(Debug Adaptor Protocol)实现
 " 支持语言如下(包含开启方法)
@@ -558,24 +596,6 @@ imap <silent><ESC><ENTER> <Esc>`^<Plug>(coc-codeaction-cursor)i
 " | `<Plug>VimspectorUpFrame`                     | Move up a frame in the current call stack                           | `vimspector#UpFrame()`                                            |
 " | `<Plug>VimspectorDownFrame`                   | Move down a frame in the current call stack                         | `vimspector#DownFrame()`                                          |
 " | `<Plug>VimspectorBalloonEval`                 | Evaluate expression under cursor (or visual) in popup               | *internal*                                                        |
-" F5启动通用debug
-nmap <silent> <F5> <Plug>VimspectorContinue
-" j+F5(先按j)启动java debug
-nmap <silent> j<F5> :CocCommand java.debug.vimspector.start<CR>
-" F7单步跳入
-nmap <silent> <F7> <Plug>VimspectorStepInto
-" F8单步跳过
-nmap <silent> <F8> <Plug>VimspectorStepOver
-" PageDown单步跳入
-nmap <silent> <PageDown> <Plug>VimspectorStepInto
-" PageUp单步跳过
-nmap <silent> <PageUp> <Plug>VimspectorStepOver
-" F9添加断点
-nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
-" F9添加条件断点
-nmap <silent> <Leader><F9> <Plug>VimspectorToggleConditionalBreakpoint
-" F6运行到下个断点
-nmap <silent> <F6> <Plug>VimspectorRunToCursor
 
 " vim latex 配置插件 gillescastel/latex-snippets lervag/vimtex KeitaNakamura/tex-conceal.vim 
 " 配置参考: https://github.com/gillescastel/latex-snippets

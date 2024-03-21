@@ -173,10 +173,10 @@ imap <A-RIGHT> <Esc>`^<C-i>
 imap <ESC> <Esc>`^
 nmap <silent><S-u> :redo<CR>
 " 窗口大小调整
-nmap <Leader><Left> <C-w><
-nmap <Leader><Right> <C-w>>
-nmap <Leader><Up> <C-w>+
-nmap <Leader><Down> <C-w>-
+nmap <C-j> <C-w><
+nmap <C-l> <C-w>>
+nmap <C-i> <C-w>+
+nmap <C-k> <C-w>-
 
 " 支持从vim复制到剪切版
 " 需要vim支持clipboard

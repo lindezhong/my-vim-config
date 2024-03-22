@@ -110,7 +110,7 @@ imap <C-r> <Esc>:%s///g
 " F5启动通用debug
 nmap <silent> <F5> <Plug>VimspectorContinue
 " j+F5(先按j)启动java debug
-nmap <silent> j<F5> :CocCommand java.debug.vimspector.start<CR>
+nmap <silent> <F5>j :CocCommand java.debug.vimspector.start<CR>
 " F7单步跳入
 nmap <silent> <F7> <Plug>VimspectorStepInto
 " F8单步跳过

@@ -66,6 +66,8 @@ imap <A-h> <Esc>`^<C-o>
 imap <A-l> <Esc>`^<C-i>
 imap <Esc> <Esc>`^
 nmap <silent><S-u> :redo<CR>
+nmap <S-j> <C-f>
+nmap <S-k> <C-b>
 
 " 窗口大小调整
 nmap <C-[> <C-w><

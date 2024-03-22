@@ -70,10 +70,10 @@ nmap <S-j> <C-f>
 nmap <S-k> <C-b>
 
 " 窗口大小调整
-nmap <C-[> <C-w><
-nmap <C-]> <C-w>>
-nmap <C-PageUp> <C-w>+
-nmap <C-PageDown> <C-w>-
+nmap <silent><C-[> :vertical res-1<CR>
+nmap <silent><C-]> :vertical res+1<CR>
+nmap <silent><C-PageUp> :res+1<CR>
+nmap <silent><C-PageDown> :res-1<CR>
 
 " 支持从vim复制到剪切版
 " 需要vim支持clipboard

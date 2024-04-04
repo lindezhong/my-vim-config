@@ -1,4 +1,4 @@
-# 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/ 或 /etc/bash_completion.d/下，这样在下次登录终端时即可自动source自动补全脚本。
+# 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/bash_completion 或 /etc/bash_completion.d/bash_completion下，这样在下次登录终端时即可自动source自动补全脚本。
 # git 补全脚本: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
 # complete -F _complete_func git
 complete -F _complete_func git.sh
@@ -162,34 +162,30 @@ _complete_func() {
     local i
     for(( i=0; i<${#cmd_list[@]}; i++)) do
         local cmd=${cmd_list[i]}
-        eval local cmd_item_list=($cmd)
-        local cmd_item_list_length=${#cmd_item_list[@]}
-
-        if (( "$cmd_item_list_length" <= "$COMP_CWORD" )); then
-            continue
-        fi
-
+        
         # 匹配的次数/要提示的位置
-        local match_num=0
+        local match_index=0
         local index=0
+        
         for(( index=0; index<$COMP_CWORD; index++)) do
             local cmd_item=${cmd_item_list[index]}
-            local original_cmd_item=${COMP_WORDS[index]}
             
-            if [[ $cmd_item == "$original_cmd_item" ]]; then
-                (( match_num=match_num+1 ))
-            # 支持{option:value}形式, 根据option对value进行处理
-            elif grep -E '^\{.*\}$' <<< "$cmd_item" > /dev/null; then
-                (( match_num=match_num+1 ))
-            else
+
+            eval local is_match_result_arr=($(_is_match_cmd "$cmd" "$match_index" "$index"))
+
+            if (( ${is_match_result_arr[0]}<0 )); then
                 break
+            else
+                # 下移匹配下标
+                (( match_index=match_index+${is_match_result_arr[0]} ))
+
+                # 将匹配到的命令行追加到提示中, 从下标为1的地方开始(0是其他标志)
+                local j
+                for(( j=1; j<${#is_match_result_arr[@]}; j++)) do
+                    completion_cmd_list="$completion_cmd_list '${is_match_result_arr[j]}'"
+                done
             fi
         done
-
-        if (( match_num == COMP_CWORD )); then
-            local completion_cmd=${cmd_item_list[match_num]}
-            completion_cmd_list="$completion_cmd_list '$completion_cmd'"
-        fi
     done
 
     local completion_txt=""
@@ -208,10 +204,10 @@ _complete_func() {
             local completion_stack_cmd=${completion_cmd_stack[${#completion_cmd_stack[@]}-1]}
             unset completion_cmd_stack[${#completion_cmd_stack[@]}-1]
 
-            if ! grep -E '^\{.*\}$' <<< "$completion_stack_cmd" > /dev/null; then
+            if ! `grep -E '^\{.*\}$' <<< "$completion_stack_cmd" > /dev/null`; then
                 # 如果不是 {} 包裹的命令直接追加到提示中
                 completion_txt="$completion_txt $completion_stack_cmd"
-            elif grep -E '^\{cmd:' <<< "$completion_stack_cmd" > /dev/null; then
+            elif `grep -E '^\{cmd:' <<< "$completion_stack_cmd" > /dev/null`; then
                 # 如果 option 是cmd, 则需要执行cmd命令并将结果 push 到 completion_cmd_stack
                 local completion_normaliza_cmd=$(_cmd_normaliza_ "$completion_stack_cmd" "cmd")
                 local completion_normaliza_cmd_result=$(eval $completion_normaliza_cmd)
@@ -243,6 +239,40 @@ _complete_func() {
     COMPREPLY=($(compgen -W "${completion_txt}" -- ${command_name}))
     return 0
 }
+
+# 是否命令行匹配
+# result_0: match下标下移数量, 如果小于0则说明不匹配了需要结束
+# result_1-: 要添加的命令
+_is_match_cmd() {
+    
+    # 提示命令(可以拆分成数组)
+    eval local cmd_item_list=("$1")
+    # 提示命令项下标
+    local item_index="$2"
+    # 匹配的位置
+    local comp_index="$3"
+
+    # 要比较的子命令项
+    local cmd_item=${cmd_item_list[item_index]}
+
+    local cmd_item_list_length=${#cmd_item_list[@]}
+
+    local completion_cmd=""
+    if (( item_index == COMP_CWORD-1 && item_index+1 <  cmd_item_list_length )); then
+        completion_cmd=${cmd_item_list[item_index+1]}
+    fi
+
+    local original_cmd_item=${COMP_WORDS[comp_index]}
+    if [[ $cmd_item == "$original_cmd_item" ]]; then
+        echo "1 $completion_cmd"
+    # 支持{option:value}形式, 根据option对value进行处理
+    elif `grep -E '^\{.*\}$' <<< "$cmd_item" > /dev/null`; then
+        echo "1 $completion_cmd"
+    else
+        echo -1
+    fi
+}
+
 
 # 将 {option:cmd} 格式的字符串 中的cmd提取出来
 _cmd_normaliza_() {

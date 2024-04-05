@@ -10,6 +10,30 @@ complete -F _complete_func vimspector.sh
 complete -F _complete_func you-get # 爬取视频工具,使用 `pip3 install you-get` 安装
 # complete -F _complete_func pandoc # 文件格式转换工具, 比如epub转pdf 
 # complete -F _complete_func pandoc # 文件格式转换工具, 比如epub转pdf, 使用 `apt install calibre` 安装
+
+
+
+# 提示列表
+cmd_list=()
+# 某一个具体的提示命令
+cmd_item_list=()
+# cmd_item_list长度
+cmd_item_list_length=0
+# cmd_item_list的某个提示项
+cmd_item=""
+# cmd_item运行参赛
+cmd_item_data=("type: cmd类型" 
+    "index: 需要添加提示下标列表(该下标相对于item_index)比如 (-1 0 1 2) 真实下标为 (item_index-1 item_index item_index+1 item_index+2)"
+)
+# cmd 转换成list的匹配下标
+item_index=0
+# 用户输入的匹配下标
+comp_index=0
+# 用户输入的匹配项
+comp_cmd_item=""
+# 最后提示的命令文本
+global_completion_txt=""
+
 _complete_func() {
 
     # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
@@ -60,6 +84,8 @@ _complete_func() {
     # "-W wordlist”：使用特殊变量IFS中的字符拆分单词列表wordlist，并扩展拆分后的每个单词，结果中与待补全单词匹配的条目就是补全条目。
     # "-X filterpat”：filterpat是进行文件名扩展时使用的模式，它作用于通过前面的选项和参数生成的补全列表，并把每个与过滤模式匹配的条目删除，模式中前导的叹号表示否定，这时会删除与过滤模式不匹配的条目。
 
+    # 将之前的提示给清理掉
+    global_completion_txt=""
 
     local original_cmd=${COMP_WORDS[0]}
 
@@ -67,14 +93,15 @@ _complete_func() {
     # 格式如下 : cmd_list=("$cmd_item $cmd_item  '{option:value}'  ...")
     # 1. cmd_list中的每个元素为提示的完整命令行
     # 4. 如果cmd_item带空格可以用''(单引号)包裹
-    # 3. cmd_item支持{option:value}形式 : 该形式,并且不比较与原始的shell命令, option支持如下情况
+    # 3. 选项模式: cmd_item支持{option:value}形式, 该形式,并且不比较与原始的shell命令, option支持如下情况
     #   3.1 {value} : 原样输出{value}目的是为了提示后面输入
     #   3.2 {cmd:value} : 输出value执行结果即 eval $value
     #   3.3 {-filenames} : 非提示, 但是将 complete 改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
+    #   3.4 {multiple_cmd_or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
+    #   即 cmd_item1 后可以提示cmd_item2, 反之亦然
     # 通用的命令提示如下
     # 1. {cmd:_comp_file_direct_} : 提示的文件列表
 
-    local cmd_list=()
     if [[ "$original_cmd" == "python.sh" ]]; then
         cmd_list=("python.sh --help" # 查看帮助文档 
             "python.sh setuptools env" # 安装构建/打包的相关依赖
@@ -156,121 +183,92 @@ _complete_func() {
     COMPREPLY=()
     local command_name="${COMP_WORDS[COMP_CWORD]}"
 
-    # 提示值数组
-    local completion_cmd_list=""
-
     local i
     for(( i=0; i<${#cmd_list[@]}; i++)) do
-        local cmd=${cmd_list[i]}
+        eval cmd_item_list=(${cmd_list[i]})
+        cmd_item_list_length=${#cmd_item_list[@]}
         
         # 匹配的次数/要提示的位置
-        local match_index=0
-        local index=0
-        
-        for(( index=0; index<$COMP_CWORD; index++)) do
-            local cmd_item=${cmd_item_list[index]}
+        item_index=0
+        comp_index=0
+        while (( comp_index<$COMP_CWORD && item_index<cmd_item_list_length )); do
             
-
-            eval local is_match_result_arr=($(_is_match_cmd "$cmd" "$match_index" "$index"))
-
-            if (( ${is_match_result_arr[0]}<0 )); then
+            cmd_item=${cmd_item_list[item_index]}
+            eval cmd_item_data=($(_parse_cmd_item_data_ "$cmd_item"))
+            comp_cmd_item=${COMP_WORDS[comp_index]}
+            # 匹配单个命令
+            _is_match_cmd 
+            if [ ! $? -eq 0 ]; then
+                # 如果执行不匹配则退出
                 break
-            else
-                # 下移匹配下标
-                (( match_index=match_index+${is_match_result_arr[0]} ))
-
-                # 将匹配到的命令行追加到提示中, 从下标为1的地方开始(0是其他标志)
-                local j
-                for(( j=1; j<${#is_match_result_arr[@]}; j++)) do
-                    completion_cmd_list="$completion_cmd_list '${is_match_result_arr[j]}'"
-                done
             fi
         done
     done
-
-    local completion_txt=""
-    eval completion_cmd_list=($completion_cmd_list)
-
-    local completion_cmd_stack=()
-
-    for completion_cmd in "${completion_cmd_list[@]}"; do
-
-        # 将命令推到completion_cmd_stack中
-        completion_cmd_stack[${#completion_cmd_stack[@]}]="$completion_cmd"
-
-        # 遍历completion_cmd_stack直到数组为空
-        while (( ${#completion_cmd_stack[@]} > 0 )); do
-
-            local completion_stack_cmd=${completion_cmd_stack[${#completion_cmd_stack[@]}-1]}
-            unset completion_cmd_stack[${#completion_cmd_stack[@]}-1]
-
-            if ! `grep -E '^\{.*\}$' <<< "$completion_stack_cmd" > /dev/null`; then
-                # 如果不是 {} 包裹的命令直接追加到提示中
-                completion_txt="$completion_txt $completion_stack_cmd"
-            elif `grep -E '^\{cmd:' <<< "$completion_stack_cmd" > /dev/null`; then
-                # 如果 option 是cmd, 则需要执行cmd命令并将结果 push 到 completion_cmd_stack
-                local completion_normaliza_cmd=$(_cmd_normaliza_ "$completion_stack_cmd" "cmd")
-                local completion_normaliza_cmd_result=$(eval $completion_normaliza_cmd)
-                # 使用eval保证 '' 包裹起来的元素不被拆分
-                eval completion_normaliza_cmd_result=($completion_normaliza_cmd_result)
-                local completion_normaliza_cmd_item
-                for completion_normaliza_cmd_item in "${completion_normaliza_cmd_result[@]}"; do
-                    completion_cmd_stack[${#completion_cmd_stack[@]}]=$completion_normaliza_cmd_item
-                done
-
-            elif [[ "$completion_stack_cmd" == "{-filenames}" ]]; then
-                
-                # use a hack to enable file mode in bash < 4
-                # 将 compgen 提示模式改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
-                compopt -o filenames +o nospace 2>/dev/null ||
-                compgen -f /non-existing-dir/ >/dev/null ||
-                true
-            else
-                # 未知的情况为了不报错也追加到提示中
-                completion_txt="$completion_txt $completion_stack_cmd"
-            fi
-
-        done
-
-    done
-
 
     # 输出tab提示
-    COMPREPLY=($(compgen -W "${completion_txt}" -- ${command_name}))
+    COMPREPLY=($(compgen -W "${global_completion_txt}" -- ${command_name}))
     return 0
 }
 
+_parse_cmd_item_data_(){
+    local cmd_str="$1"
+
+    if `grep -E '^\{cmd:.*\}$' <<< "$cmd_str" > /dev/null`; then
+        # 执行命令模式
+        echo '"cmd" "1"'
+    elif `grep -E '^\{multiple_cmd_or:*\}$' <<< "$cmd_str" > /dev/null`; then
+        # 多参数模式
+        echo '"multiple_cmd_or" "0 1"'
+    elif `grep -E '^\{.*\}$' <<< "$cmd_str" > /dev/null`; then
+        # 注释
+        echo '"note" "1"'
+    else
+        # 默认的匹配模式
+        echo '"general" "1"'
+    fi
+}
+
 # 是否命令行匹配
-# result_0: match下标下移数量, 如果小于0则说明不匹配了需要结束
-# result_1-: 要添加的命令
+# result: 0: 匹配成功, 非0匹配失败
 _is_match_cmd() {
     
-    # 提示命令(可以拆分成数组)
-    eval local cmd_item_list=("$1")
-    # 提示命令项下标
-    local item_index="$2"
-    # 匹配的位置
-    local comp_index="$3"
+    
+    _is_match_cmd_simple
+    if [ $? -eq 0 ]; then
+       
+        (( comp_index++ ))
+        if (( comp_index>=COMP_CWORD )); then
+            local add_item_index
+            local add_item_index_list=(${cmd_item_data[1]})
 
-    # 要比较的子命令项
-    local cmd_item=${cmd_item_list[item_index]}
+            for add_item_index in "${add_item_index_list[@]}"; do
+                _completion_cmd_add "${cmd_item_list[item_index+add_item_index]}"
+            done        
+        fi
 
-    local cmd_item_list_length=${#cmd_item_list[@]}
-
-    local completion_cmd=""
-    if (( item_index == COMP_CWORD-1 && item_index+1 <  cmd_item_list_length )); then
-        completion_cmd=${cmd_item_list[item_index+1]}
+        (( item_index++ ))
+ 
+        return 0
+    else
+        return -1
     fi
 
-    local original_cmd_item=${COMP_WORDS[comp_index]}
-    if [[ $cmd_item == "$original_cmd_item" ]]; then
-        echo "1 $completion_cmd"
+}
+
+# 是否命令行匹配
+# result: true: 匹配成功, false: 匹配失败  
+_is_match_cmd_simple() {
+    # 提示的命令项
+
+    if [[ $cmd_item == "$comp_cmd_item" ]]; then
+        return 0
     # 支持{option:value}形式, 根据option对value进行处理
     elif `grep -E '^\{.*\}$' <<< "$cmd_item" > /dev/null`; then
-        echo "1 $completion_cmd"
+        return 0
     else
-        echo -1
+        return -1
     fi
+
 }
 
 
@@ -282,6 +280,71 @@ _cmd_normaliza_() {
     cmd=$(echo $cmd | sed 's/{'$option':\(.*\)}/\1/g')
 
     echo $cmd
+}
+
+
+# 添加到提示命令到提示中
+_completion_cmd_add() {
+    
+    _completion_cmd_normaliza_ "$1"
+    global_completion_txt=''$global_completion_txt' '$_completion_cmd_normaliza_result''
+}
+
+# 将提示出的命令格式化, 支持递归操作
+_completion_cmd_normaliza_() {
+
+    local completion_cmd="$1"
+
+
+    if [[ -z $completion_cmd ]]; then
+        _completion_cmd_normaliza_result=""
+        # 为空不格式化
+        return
+    fi
+
+    # completion_cmd栈用于支持递归操作
+    local completion_cmd_stack=()
+    # 最后归一化出的命令
+    local completion_txt=""
+    # 将命令推到completion_cmd_stack中
+    completion_cmd_stack[${#completion_cmd_stack[@]}]="$completion_cmd"
+
+    # 遍历completion_cmd_stack直到数组为空
+    while (( ${#completion_cmd_stack[@]} > 0 )); do
+
+        local completion_stack_cmd=${completion_cmd_stack[${#completion_cmd_stack[@]}-1]}
+        unset completion_cmd_stack[${#completion_cmd_stack[@]}-1]
+
+        if ! `grep -E '^\{.*\}$' <<< "$completion_stack_cmd" > /dev/null`; then
+            # 如果不是 {} 包裹的命令直接追加到提示中
+            completion_txt="$completion_txt $completion_stack_cmd"
+        elif `grep -E '^\{cmd:' <<< "$completion_stack_cmd" > /dev/null`; then
+            # 如果 option 是cmd, 则需要执行cmd命令并将结果 push 到 completion_cmd_stack
+            local completion_normaliza_cmd=$(_cmd_normaliza_ "$completion_stack_cmd" "cmd")
+            local completion_normaliza_cmd_result=$(eval $completion_normaliza_cmd)
+            # 使用eval保证 '' 包裹起来的元素不被拆分
+            eval local completion_normaliza_cmd_result=($completion_normaliza_cmd_result)
+            local completion_normaliza_cmd_item
+            for completion_normaliza_cmd_item in "${completion_normaliza_cmd_result[@]}"; do
+                completion_cmd_stack[${#completion_cmd_stack[@]}]=$completion_normaliza_cmd_item
+            done
+
+        elif [[ "$completion_stack_cmd" == "{-filenames}" ]]; then
+            
+            # use a hack to enable file mode in bash < 4
+            # 将 compgen 提示模式改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
+            compopt -o filenames +o nospace 2>/dev/null ||
+            compgen -f /non-existing-dir/ >/dev/null ||
+            true
+        else
+            # 未知的情况为了不报错也追加到提示中
+            completion_txt="$completion_txt $completion_stack_cmd"
+        fi
+
+    done
+
+    _completion_cmd_normaliza_result="$completion_txt"
+
 }
 
 

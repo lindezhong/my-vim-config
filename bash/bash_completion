@@ -188,14 +188,13 @@ _complete_func() {
         eval cmd_item_list=(${cmd_list[i]})
         cmd_item_list_length=${#cmd_item_list[@]}
         
-        # 匹配的次数/要提示的位置
+        # 匹配的次数/要提示的位置,重置, 并且重置相关数据
         item_index=0
+        _cmd_index_index_shift
         comp_index=0
+        _comp_cmd_index_index_shift
         while (( comp_index<$COMP_CWORD && item_index<cmd_item_list_length )); do
-            
-            cmd_item=${cmd_item_list[item_index]}
-            eval cmd_item_data=($(_parse_cmd_item_data_ "$cmd_item"))
-            comp_cmd_item=${COMP_WORDS[comp_index]}
+
             # 匹配单个命令
             _is_match_cmd 
             if [ ! $? -eq 0 ]; then
@@ -210,21 +209,44 @@ _complete_func() {
     return 0
 }
 
+# 变动item_index, 并且将相关数据也跟在变动
+_cmd_index_index_shift() {
+    local index_shift="$1"
+    test -z "$index_shift" && index_shift="0"
+    # 先变item_index
+    (( item_index=item_index+index_shift ))
+    cmd_item=${cmd_item_list[item_index]}
+    eval cmd_item_data=($(_parse_cmd_item_data_ "$cmd_item"))
+}
+
+# 变动comp_item_index, 并且将相关数据也跟在变动
+_comp_cmd_index_index_shift() {
+    local comp_index_shift="$1"
+    test -z "$comp_index_shift" && comp_index_shift="0"
+    # 先变item_index
+    (( comp_index=comp_index+comp_index_shift ))
+    comp_cmd_item=${COMP_WORDS[comp_index]}
+}
+
+
 _parse_cmd_item_data_(){
     local cmd_str="$1"
 
-    if `grep -E '^\{cmd:.*\}$' <<< "$cmd_str" > /dev/null`; then
+    if [[ "$cmd_str" == "{-filenames}" ]]; then
+        # 提示文件名模式
+        echo '"filenames" "0"'
+    elif `grep -E '^\{cmd:.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 执行命令模式
-        echo '"cmd" "1"'
-    elif `grep -E '^\{multiple_cmd_or:*\}$' <<< "$cmd_str" > /dev/null`; then
+        echo '"cmd" "0"'
+    elif `grep -E '^\{multiple_cmd_or:.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 多参数模式
         echo '"multiple_cmd_or" "0 1"'
     elif `grep -E '^\{.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 注释
-        echo '"note" "1"'
+        echo '"note" "0"'
     else
         # 默认的匹配模式
-        echo '"general" "1"'
+        echo '"general" "0"'
     fi
 }
 
@@ -236,7 +258,6 @@ _is_match_cmd() {
     _is_match_cmd_simple
     if [ $? -eq 0 ]; then
        
-        (( comp_index++ ))
         if (( comp_index>=COMP_CWORD )); then
             local add_item_index
             local add_item_index_list=(${cmd_item_data[1]})
@@ -246,8 +267,6 @@ _is_match_cmd() {
             done        
         fi
 
-        (( item_index++ ))
- 
         return 0
     else
         return -1
@@ -258,17 +277,73 @@ _is_match_cmd() {
 # 是否命令行匹配
 # result: true: 匹配成功, false: 匹配失败  
 _is_match_cmd_simple() {
-    # 提示的命令项
 
-    if [[ $cmd_item == "$comp_cmd_item" ]]; then
+    local match_cmd_item="$1" 
+    test -z "$match_cmd_item" && match_cmd_item="$cmd_item"
+
+    # item下标是否向前加n, 只有在匹配成功的时候生效
+    local item_add_num="$2"
+    test -z "$item_add_num" && item_add_num="1"
+
+    # comp下标是否向前加n, 只有在匹配成功的时候生效
+    local comp_add_num="$2"
+    test -z "$comp_add_num" && comp_add_num="1"
+
+    eval local match_cmd_item_data=($(_parse_cmd_item_data_ "$match_cmd_item"))
+
+    if [[ "${match_cmd_item_data[0]}" == "general" ]]; then
+        # 如果为普通的提示需要完全相等
+        if [[ "$match_cmd_item" == "$comp_cmd_item" ]]; then
+            _cmd_index_index_shift "$item_add_num"
+            _comp_cmd_index_index_shift "$comp_add_num"
+            return 0
+        fi
+    elif [[ "${match_cmd_item_data[0]}" == "cmd" ]]; then
+        # 如果为命令模式暂时不考虑需要匹配防止cmd执行过久导致的性能问题
+        _cmd_index_index_shift "$item_add_num"
+        _comp_cmd_index_index_shift "$comp_add_num"
         return 0
-    # 支持{option:value}形式, 根据option对value进行处理
-    elif `grep -E '^\{.*\}$' <<< "$cmd_item" > /dev/null`; then
+    elif [[ "${match_cmd_item_data[0]}" == "note" ]]; then
+        # 如果只是提示则直接匹配
+        _cmd_index_index_shift "$item_add_num"
+        _comp_cmd_index_index_shift "$comp_add_num"
         return 0
-    else
-        return -1
+    elif [[ "${match_cmd_item_data[0]}" == "multiple_cmd_or" ]]; then
+        _is_match_cmd_multiple_cmd_or "$match_cmd_item" "$item_add_num" "$comp_add_num"
+        return $?
     fi
 
+
+    # 不匹配
+    return -1
+}
+
+# multiple_cmd_or 模式匹配
+_is_match_cmd_multiple_cmd_or() {
+    local match_cmd_item="$1"
+    eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "multiple_cmd_or")
+    
+    # item下标是否向前加n, 只有在匹配成功的时候生效
+    local item_add_num="$2"
+    test -z "$item_add_num" && item_add_num="1"
+
+    # comp下标是否向前加n, 只有在匹配成功的时候生效
+    local comp_add_num="$2"
+    test -z "$comp_add_num" && comp_add_num="1"
+    
+    local multiple_cmd_item
+    for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
+        _is_match_cmd_simple "$multiple_cmd_item" "0" "0"
+        if [ $? -eq 0 ]; then
+            # 如果有一个可以匹配则直接返回成功
+            _comp_cmd_index_index_shift "$comp_add_num"
+            return 0
+        fi
+    done
+
+    # 所有都不匹配,则需要下移自己的提示,是or的关系, 就算没有一个匹配也可以
+    _cmd_index_index_shift "$item_add_num"
+    return 0
 }
 
 
@@ -302,6 +377,7 @@ _completion_cmd_normaliza_() {
         return
     fi
 
+
     # completion_cmd栈用于支持递归操作
     local completion_cmd_stack=()
     # 最后归一化出的命令
@@ -315,10 +391,16 @@ _completion_cmd_normaliza_() {
         local completion_stack_cmd=${completion_cmd_stack[${#completion_cmd_stack[@]}-1]}
         unset completion_cmd_stack[${#completion_cmd_stack[@]}-1]
 
-        if ! `grep -E '^\{.*\}$' <<< "$completion_stack_cmd" > /dev/null`; then
-            # 如果不是 {} 包裹的命令直接追加到提示中
+
+        eval local completion_stack_cmd_data=($(_parse_cmd_item_data_ "$completion_stack_cmd"))
+
+        if [[ "${completion_stack_cmd_data[0]}" == "general" ]]; then
+            # 如果为普通提示
             completion_txt="$completion_txt $completion_stack_cmd"
-        elif `grep -E '^\{cmd:' <<< "$completion_stack_cmd" > /dev/null`; then
+        elif [[ "${completion_stack_cmd_data[0]}" == "note" ]]; then
+            # 如果为注释模式
+            completion_txt="$completion_txt $completion_stack_cmd"
+        elif [[ "${completion_stack_cmd_data[0]}" == "cmd" ]]; then
             # 如果 option 是cmd, 则需要执行cmd命令并将结果 push 到 completion_cmd_stack
             local completion_normaliza_cmd=$(_cmd_normaliza_ "$completion_stack_cmd" "cmd")
             local completion_normaliza_cmd_result=$(eval $completion_normaliza_cmd)
@@ -329,13 +411,22 @@ _completion_cmd_normaliza_() {
                 completion_cmd_stack[${#completion_cmd_stack[@]}]=$completion_normaliza_cmd_item
             done
 
-        elif [[ "$completion_stack_cmd" == "{-filenames}" ]]; then
-            
+        elif [[ "${completion_stack_cmd_data[0]}" == "filenames" ]]; then
             # use a hack to enable file mode in bash < 4
             # 将 compgen 提示模式改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
             compopt -o filenames +o nospace 2>/dev/null ||
             compgen -f /non-existing-dir/ >/dev/null ||
             true
+
+        elif [[ "${completion_stack_cmd_data[0]}" == "multiple_cmd_or" ]]; then
+           # 多参数模式
+           eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "multiple_cmd_or")
+           local multiple_cmd_item
+           for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
+               # 将多个提示追加到提示中
+               completion_cmd_stack[${#completion_cmd_stack[@]}]=$multiple_cmd_item
+           done
+
         else
             # 未知的情况为了不报错也追加到提示中
             completion_txt="$completion_txt $completion_stack_cmd"

@@ -97,7 +97,7 @@ _complete_func() {
     #   3.1 {value} : 原样输出{value}目的是为了提示后面输入
     #   3.2 {cmd:value} : 输出value执行结果即 eval $value
     #   3.3 {-filenames} : 非提示, 但是将 complete 改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
-    #   3.4 {multiple_cmd_or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
+    #   3.4 {or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
     #   即 cmd_item1 后可以提示cmd_item2, 反之亦然
     # 通用的命令提示如下
     # 1. {cmd:_comp_file_direct_} : 提示的文件列表
@@ -238,9 +238,9 @@ _parse_cmd_item_data_(){
     elif `grep -E '^\{cmd:.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 执行命令模式
         echo '"cmd" "0"'
-    elif `grep -E '^\{multiple_cmd_or:.*\}$' <<< "$cmd_str" > /dev/null`; then
+    elif `grep -E '^\{or:.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 多参数模式
-        echo '"multiple_cmd_or" "0 1"'
+        echo '"or" "0 1"'
     elif `grep -E '^\{.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 注释
         echo '"note" "0"'
@@ -308,8 +308,8 @@ _is_match_cmd_simple() {
         _cmd_index_index_shift "$item_add_num"
         _comp_cmd_index_index_shift "$comp_add_num"
         return 0
-    elif [[ "${match_cmd_item_data[0]}" == "multiple_cmd_or" ]]; then
-        _is_match_cmd_multiple_cmd_or "$match_cmd_item" "$item_add_num" "$comp_add_num"
+    elif [[ "${match_cmd_item_data[0]}" == "or" ]]; then
+        _is_match_cmd_or "$match_cmd_item" "$item_add_num" "$comp_add_num"
         return $?
     fi
 
@@ -318,10 +318,10 @@ _is_match_cmd_simple() {
     return -1
 }
 
-# multiple_cmd_or 模式匹配
-_is_match_cmd_multiple_cmd_or() {
+# or 模式匹配
+_is_match_cmd_or() {
     local match_cmd_item="$1"
-    eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "multiple_cmd_or")
+    eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "or")
     
     # item下标是否向前加n, 只有在匹配成功的时候生效
     local item_add_num="$2"
@@ -418,9 +418,9 @@ _completion_cmd_normaliza_() {
             compgen -f /non-existing-dir/ >/dev/null ||
             true
 
-        elif [[ "${completion_stack_cmd_data[0]}" == "multiple_cmd_or" ]]; then
+        elif [[ "${completion_stack_cmd_data[0]}" == "or" ]]; then
            # 多参数模式
-           eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "multiple_cmd_or")
+           eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "or")
            local multiple_cmd_item
            for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
                # 将多个提示追加到提示中

@@ -119,7 +119,7 @@ _complete_func() {
     elif [[ "$original_cmd" == "test_complete" ]]; then
         cmd_list=("test_complete or '{or:(-d -l)}' -t -f"
             "test_complete and '{and:(-v \"{dir}\")}' -t -f"
-            "test_complete and_or '{or:(\"{and:(-v {dir})}\" \"{and:(-d {dir})}\")}'")
+            "test_complete and_or '{or:(\"{and:(-v {dir})}\" \"{and:(-d {dir})}\")}' -t -f")
 
     elif [[ "$original_cmd" == "git" ]]; then
         cmd_list=("git --help" # 查看帮助文档
@@ -208,7 +208,7 @@ _complete_func() {
 
             # 匹配单个命令
             _is_match_cmd 
-            if [ ! $? -eq 0 ]; then
+            if (( $?>200 )); then
                 # 如果执行不匹配则退出
                 break
             fi
@@ -230,13 +230,32 @@ _cmd_index_index_shift() {
     eval cmd_item_data=($(_parse_cmd_item_data_ "$cmd_item"))
 }
 
-# 变动comp_item_index, 并且将相关数据也跟在变动
+# 变动comp_item_index, 并且将相关数据也跟在变动, 可能会触发提示
+# 需要保证_comp_cmd_index_index_shift在_cmd_index_index_shift前执行
 _comp_cmd_index_index_shift() {
     local comp_index_shift="$1"
     test -z "$comp_index_shift" && comp_index_shift="0"
+
+    # 是否关闭comp_item_index的提示, 0:关闭, 非0打开
+    local close_comp="$2"
+    test -z "$close_comp" && close_comp="1"
+
     # 先变item_index
     (( comp_index=comp_index+comp_index_shift ))
     comp_cmd_item=${COMP_WORDS[comp_index]}
+
+    if (( comp_index_shift!=0 && close_comp!=0 )); then
+        # 如果变化后已经匹配完全则直接直接触发提示
+        if (( comp_index>=COMP_CWORD )); then
+            local add_item_index
+            local add_item_index_list=(${cmd_item_data[1]})
+    
+            for add_item_index in "${add_item_index_list[@]}"; do
+                _completion_cmd_add "${cmd_item_list[item_index+add_item_index]}"
+            done        
+        fi
+    fi
+
 }
 
 
@@ -245,47 +264,30 @@ _parse_cmd_item_data_(){
 
     if [[ "$cmd_str" == "{-filenames}" ]]; then
         # 提示文件名模式
-        echo '"filenames" "0"'
+        echo '"filenames" "1"'
     elif `grep -E '^\{cmd:.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 执行命令模式
-        echo '"cmd" "0"'
+        echo '"cmd" "1"'
     elif `grep -E '^\{or:.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 多参数or模式, or模式需要提示下一个cmd_item(or模式支持完全不匹配)
         echo '"or" "0 1"'
     elif `grep -E '^\{and:.*\}$' <<< "$cmd_str" > /dev/null`; then
         # and模式 , and模式由匹配方法 _is_match_cmd_and 追加所以其实会导致一个提示重复添加的情况, 后续优化
-        echo '"and" "0"'
+        echo '"and" "1"'
     elif `grep -E '^\{.*\}$' <<< "$cmd_str" > /dev/null`; then
         # 注释
-        echo '"note" "0"'
+        echo '"note" "1"'
     else
         # 默认的匹配模式
-        echo '"general" "0"'
+        echo '"general" "1"'
     fi
 }
 
 # 是否命令行匹配
-# result: 0: 匹配成功, 非0匹配失败
+# result: [0-200]: 匹配成功, (200,]匹配失败
 _is_match_cmd() {
-    
-    
     _is_match_cmd_simple
-    if [ $? -eq 0 ]; then
-       
-        if (( comp_index>=COMP_CWORD )); then
-            local add_item_index
-            local add_item_index_list=(${cmd_item_data[1]})
-
-            for add_item_index in "${add_item_index_list[@]}"; do
-                _completion_cmd_add "${cmd_item_list[item_index+add_item_index]}"
-            done        
-        fi
-
-        return 0
-    else
-        return -1
-    fi
-
+    return $?
 }
 
 # 是否命令行匹配
@@ -311,19 +313,19 @@ _is_match_cmd_simple() {
     if [[ "${match_cmd_item_data[0]}" == "general" ]]; then
         # 如果为普通的提示需要完全相等
         if [[ "$match_cmd_item" == "$match_comp_cmd_item" ]]; then
-            _cmd_index_index_shift "$item_add_num"
             _comp_cmd_index_index_shift "$comp_add_num"
+            _cmd_index_index_shift "$item_add_num"
             return 0
         fi
     elif [[ "${match_cmd_item_data[0]}" == "cmd" ]]; then
         # 如果为命令模式暂时不考虑需要匹配防止cmd执行过久导致的性能问题
-        _cmd_index_index_shift "$item_add_num"
         _comp_cmd_index_index_shift "$comp_add_num"
+        _cmd_index_index_shift "$item_add_num"
         return 0
     elif [[ "${match_cmd_item_data[0]}" == "note" ]]; then
         # 如果只是提示则直接匹配
-        _cmd_index_index_shift "$item_add_num"
         _comp_cmd_index_index_shift "$comp_add_num"
+        _cmd_index_index_shift "$item_add_num"
         return 0
     elif [[ "${match_cmd_item_data[0]}" == "or" ]]; then
         _is_match_cmd_or "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num"
@@ -355,18 +357,46 @@ _is_match_cmd_or() {
     local comp_add_num="$4"
     test -z "$comp_add_num" && comp_add_num="1"
    
+
+    local close_comp="1"
+    # 是否下移comp_index,默认不下移坐标
+    local is_comp_index_shift="false"
     local multiple_cmd_item
     for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
         _is_match_cmd_simple "$multiple_cmd_item" "$match_comp_cmd_item" "0" "0"
-        if [ $? -eq 0 ]; then
-            # 如果有一个可以匹配则直接返回成功
-            _comp_cmd_index_index_shift "$comp_add_num"
-            return 0
+        local match_result="$?"
+        if (( $match_result<=200 )); then
+            # 如果有一个可以匹配则需要下移
+            is_comp_index_shift="true"
         fi
+
+        if (( $match_result==200 )); then
+            # 全匹配也不下移提示
+            close_comp="0"
+        fi
+
+        if (( $match_result>100 && $match_result<=200 )); then
+            # 如果为 and 模式的不完全匹配则不下移,而且需要手动添加下匹配到的and的下一个
+            if (( comp_index>=COMP_CWORD )); then
+                eval local and_multiple_cmd_item_list=$(_cmd_normaliza_ "$multiple_cmd_item" "and") 
+                _completion_cmd_add "${and_multiple_cmd_item_list[match_result-100]}"
+            fi
+
+            
+            close_comp="0"
+        fi
+
     done
 
-    # 所有都不匹配,则需要下移自己的提示,是or的关系, 就算没有一个匹配也可以
-    _cmd_index_index_shift "$item_add_num"
+    if $is_comp_index_shift; then
+        _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+    else
+        # 所有都不匹配,则需要下移自己的提示,是or的关系, 就算没有一个匹配也可以
+        _cmd_index_index_shift "$item_add_num"
+    fi
+
+
+
     return 0
 }
 
@@ -392,7 +422,7 @@ _is_match_cmd_and() {
     local match_comp_index
     for (( match_comp_index = comp_index; match_comp_index >= 0; match_comp_index-- )); do
          _is_match_cmd_simple "${multiple_cmd_item_list[0]}" "${COMP_WORDS[match_comp_index]}" "0" "0"
-        if [ $? -eq 0 ]; then
+        if (( $?<=200 )); then
             # 有找到匹配第一个下标的数据
             break
         fi
@@ -406,24 +436,51 @@ _is_match_cmd_and() {
     local i
     for(( i=0; match_comp_index<COMP_CWORD && match_comp_index<=comp_index && i<${#multiple_cmd_item_list[@]}; i++)) do
         _is_match_cmd_simple "${multiple_cmd_item_list[i]}" "${COMP_WORDS[match_comp_index]}" "0" "0"
-        if [ ! $? -eq 0 ]; then
+        if (( $?>200 )); then
             # 如果有一个不匹配则直接结束
             return -1
         fi
         (( match_comp_index++ ))
     done
 
+    if (( match_comp_index<=comp_index )); then
+        # 为匹配成功
+        return -1
+    fi
+
     # 匹配成功往下走一个
-    _comp_cmd_index_index_shift "$comp_add_num"
     if (( i>=${#multiple_cmd_item_list[@]} )); then
         # 如果and完全匹配则跳过了
+        _comp_cmd_index_index_shift "$comp_add_num"
         _cmd_index_index_shift "$item_add_num"
+
+        if (( match_comp_index>=COMP_CWORD )); then 
+            # 如果匹配到则往提示里加一个
+            _completion_cmd_add "${multiple_cmd_item_list[i]}"
+        fi
+
+        # 完全匹配则返回100
+        return 100
+    else
+        _comp_cmd_index_index_shift "$comp_add_num" "0"
     fi
-    if (( match_comp_index>=COMP_CWORD )); then
+    if (( match_comp_index>=COMP_CWORD )); then 
         # 如果匹配到则往提示里加一个
         _completion_cmd_add "${multiple_cmd_item_list[i]}"
+        if (( i<${#multiple_cmd_item_list[@]} )); then
+            # 如果有添加则返回200
+            return 200
+        else
+            # 如果完全匹配而且到最后了, 则返回0让提示走辖区
+            return 0
+        fi
     fi
-    return 0
+
+    # 如果是不完全匹配则返回 100 + n (匹配到地n个, 从1开始)
+    local result=100
+    (( result=result+i ))
+    return $result
+
 }
 
 
@@ -505,18 +562,29 @@ _completion_cmd_normaliza_() {
             true
 
         elif [[ "${completion_stack_cmd_data[0]}" == "or" ]]; then
-           # 多参数模式
-           eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "or")
-           local multiple_cmd_item
-           for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
+            # 多参数模式
+            eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "or")
+            local multiple_cmd_item
+            for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
+                eval local multiple_cmd_item_data=($(_parse_cmd_item_data_ "$multiple_cmd_item"))
+                if [[ "${multiple_cmd_item_data[0]}" == "and" ]]; then
+                     _is_match_cmd_and "$multiple_cmd_item" "" "0" "0"
+                     if (( $?<=200 && $?>100 )); then
+                        # 特殊逻辑兼容,在or模式中有个cmd_item是and模式,如果这个and模式不完全匹配则只提示这个and模式的命令
+                        multiple_cmd_item_list=()
+                    fi
+                fi
+            done
+
+            for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
                # 将多个提示追加到提示中
                completion_cmd_stack[${#completion_cmd_stack[@]}]=$multiple_cmd_item
-           done
+            done
 
         elif [[ "${completion_stack_cmd_data[0]}" == "and" ]]; then
             # and 模式由匹配添加所以可能死循环
-            _is_match_cmd_and "$completion_stack_cmd" "0" "0"
-            if [ ! $? -eq 0 ]; then
+            _is_match_cmd_and "$completion_stack_cmd" "" "0" "0"
+            if (( $?>200 )); then
                 # 如果是完全不匹配说明可能是要最新的提示
                 eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "and")
                 completion_cmd_stack[${#completion_cmd_stack[@]}]=${multiple_cmd_item_list[0]}

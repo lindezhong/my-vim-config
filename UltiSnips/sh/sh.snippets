@@ -386,6 +386,12 @@ if [ -d ${1:目录地址} ]; then
 fi
 endsnippet
 
+snippet ifFileExist "判断文件(文件不能用''包裹)是否存在，要判断不存在加 !"
+if [ -f ${1:文件地址} ]; then
+    $0
+fi
+endsnippet
+
 snippet ifNum "判断是否为数字,进入if是数字"
 if grep -E '^[0-9][0-9]*$' <<< "\$${1:var}" >> /dev/null; then
     $0
@@ -423,7 +429,7 @@ done
 endsnippet
 
 snippet forin "遍历数组不带下标"
-for ${1:子变量名} in "\$\{${2:父变量名}[@]\}"; do
+for ${2:子变量名} in "\$\{${1:父变量名}[@]\}"; do
     $0
 done
 endsnippet
@@ -582,6 +588,16 @@ while [ -z \$$2 ]; do
 done
 $0
 endsnippet
+
+snippet readFile "读取文件内容, 每次读取一行"
+while read ${2:line}
+do
+    $0
+done  < ${1:file_path}
+endsnippet
+
+
+
 
 # #awk
 snippet awk "awk 指定分割符,并且打印某个分割后的值"

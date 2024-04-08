@@ -12,7 +12,14 @@ complete -F _complete_func you-get # 爬取视频工具,使用 `pip3 install you
 # complete -F _complete_func pandoc # 文件格式转换工具, 比如epub转pdf 
 # complete -F _complete_func pandoc # 文件格式转换工具, 比如epub转pdf, 使用 `apt install calibre` 安装
 
-
+# 如果存在本地目录存在则读取文件提示
+if [ -d ~/.bash_completion ]; then
+    complete_file_list=($(ls ~/.bash_completion))
+    for complete_file in "${complete_file_list[@]}"; do
+        # 如果有提示文件则也追加到提示中
+        eval complete -F _complete_func $complete_file
+    done
+fi
 
 # 提示列表
 cmd_list=()
@@ -87,6 +94,7 @@ _complete_func() {
 
     # 将之前的提示给清理掉
     global_completion_txt=""
+    cmd_list=()
 
     local original_cmd=${COMP_WORDS[0]}
 
@@ -106,6 +114,7 @@ _complete_func() {
     #       and 匹配模式一般用于kv的匹配比如 docker -v docker目录:宿主机目录 , 其中-v docker目录:宿主机目录就是 kv
     # 通用的命令提示如下
     # 1. {cmd:_comp_file_direct_} : 提示的文件列表
+
 
     if [[ "$original_cmd" == "python.sh" ]]; then
         cmd_list=("python.sh --help" # 查看帮助文档 
@@ -189,6 +198,14 @@ _complete_func() {
         cmd_list=("ebook-convert {input_file} {out_file} --base-font-size=12 --line-height=18 --embed-all-fonts --embed-font-family='AR PL SungtiL GB'"
             )
 
+    fi
+
+    if [ -e ~/.bash_completion/$original_cmd ]; then
+        local completion_cmd_context
+        while read completion_cmd_context
+        do
+            cmd_list[${#cmd_list[@]}]="$completion_cmd_context"
+        done  < ~/.bash_completion/$original_cmd
     fi
 
     COMPREPLY=()

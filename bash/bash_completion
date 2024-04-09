@@ -282,16 +282,16 @@ _parse_cmd_item_data_(){
     if [[ "$cmd_str" == "{-filenames}" ]]; then
         # 提示文件名模式
         echo '"filenames" "1"'
-    elif `grep -E '^\{cmd:.*\}$' <<< "$cmd_str" > /dev/null`; then
+    elif [[ "$cmd_str" == {cmd:* ]]; then
         # 执行命令模式
         echo '"cmd" "1"'
-    elif `grep -E '^\{or:.*\}$' <<< "$cmd_str" > /dev/null`; then
+    elif [[ "$cmd_str" == {or:* ]]; then
         # 多参数or模式, or模式需要提示下一个cmd_item(or模式支持完全不匹配)
         echo '"or" "0 1"'
-    elif `grep -E '^\{and:.*\}$' <<< "$cmd_str" > /dev/null`; then
+    elif [[ "$cmd_str" == {and:* ]]; then
         # and模式 , and模式由匹配方法 _is_match_cmd_and 追加所以其实会导致一个提示重复添加的情况, 后续优化
         echo '"and" "1"'
-    elif `grep -E '^\{.*\}$' <<< "$cmd_str" > /dev/null`; then
+    elif [[ "$cmd_str" == {* ]]; then
         # 注释
         echo '"note" "1"'
     else

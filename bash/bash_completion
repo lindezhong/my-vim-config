@@ -1,16 +1,5 @@
 # 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/bash_completion 或 /etc/bash_completion.d/bash_completion下，这样在下次登录终端时即可自动source自动补全脚本。
 # git 补全脚本: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
-# complete -F _complete_func git
-complete -F _complete_func test_complete
-complete -F _complete_func git.sh
-complete -F _complete_func python.sh
-complete -F _complete_func mvn.sh
-complete -F _complete_func download.sh
-complete -F _complete_func mvn
-complete -F _complete_func vimspector.sh
-complete -F _complete_func you-get # 爬取视频工具,使用 `pip3 install you-get` 安装
-# complete -F _complete_func pandoc # 文件格式转换工具, 比如epub转pdf 
-# complete -F _complete_func pandoc # 文件格式转换工具, 比如epub转pdf, 使用 `apt install calibre` 安装
 
 # 如果存在本地目录存在则读取文件提示
 if [ -d ~/.bash_completion ]; then
@@ -116,94 +105,15 @@ _complete_func() {
     # 1. {cmd:_comp_file_direct_} : 提示的文件列表
 
 
-    if [[ "$original_cmd" == "python.sh" ]]; then
-        cmd_list=("python.sh --help" # 查看帮助文档 
-            "python.sh setuptools env" # 安装构建/打包的相关依赖
-            "python.sh setuptools init {项目名}" # 初始化一个可打包python项目
-            "python.sh setuptools install" # 将本地python项目安装到site-packages
-            "python.sh setuptools build" # 打包本地python项目,在./dist 生成文件夹
-            "python.sh test {cmd:_comp_file_direct_}" # 运行单元测试用例, 等价于 python setup.py test
-        )
-
-    elif [[ "$original_cmd" == "test_complete" ]]; then
-        cmd_list=("test_complete or '{or:(-d -l)}' -t -f"
-            "test_complete and '{and:(-v \"{dir}\")}' -t -f"
-            "test_complete and_or '{or:(\"{and:(-v {dir})}\" \"{and:(-d {dir})}\")}' -t -f")
-
-    elif [[ "$original_cmd" == "git" ]]; then
-        cmd_list=("git --help" # 查看帮助文档
-
-            # git stash : 将目前还不想提交的但是已经修改的内容进行暂存至堆栈
-            "git stash push -m {提交消息用双引号包裹}" # 将修改内容暂存至stash暂存区(为一个栈), 并且使用消息
-            "git stash list" # 查看当前stash暂存区中的内容
-            "git stash pop" # 将当前stash中的内容弹出，并应用到当前分支对应的工作目录上, 命令将堆栈中最近保存的内容删除（栈是先进后出）
-            "git stash pop {stash暂存栈下标}" # 将指定stash栈的内容弹出，并应用到当前分支对应的工作目录上, 比如git stash pop stash@{1}
-            "git stash apply" # 将堆栈中的内容应用到当前目录，不同于git stash pop，该命令不会将内容从堆栈中删除
-            "git stash drop {stash暂存栈下标}" # 从stash堆栈中移除某个指定的stash, 比如 git stash drop stash@{0}
-            "git stash clear" # 清除stash堆栈中的所有内容
-            "git stash show" # 查看堆栈中最新保存的stash和当前目录的差异。
-            "git stash show {stash暂存栈下标} -p" # 查看堆栈中指定保存的stash和当前目录的差异。比如  git stash show stash@{1} -p 
-            "git stash create" # 它创建了一个暂存条目，并返回它的对象名，而不将其推送到暂存参考日志中返回值配合 git stash store -m "消息" ${git stash create}
-            "git stash store -m {消息} {gitStashCreate执行结果}" # 创建的暂存条目推送到暂存参考日志
-            "git stash branch {分支名} {stash暂存栈下标}" # 此命令使用指定的stash创建一个新分支，然后删除指定的存储, git stash branch new_branch stash@{1}
-            )
-        
-    elif [[ "$original_cmd" == "git.sh" ]]; then
-        cmd_list=("git.sh --help" # 查看帮助文档
-            "git.sh upstream {上游git地址}" # Git进行fork后跟原仓库同步,会添加一个上游的主干分支 upstream/master
-            "git.sh github repos {github组织} {pageSize:30}" # git clone github上一个组织(organizations)下的所有存储库
-            "git.sh github upstreamUrl" # 解析github项目上游url
-            "git.sh reset version {git_commit_id}" # git回滚到某个版本
-            "git.sh reset add {cmd:_comp_file_direct_}" # git撤销add 文件列表
-            "git.sh init_server {项目名}" # 初始化git服务端项目,供git clone user@ip:/项目路径
-            "git.sh pull" # 将当前目录下的所有git项目pull
-        )
-    elif [[ "$original_cmd" == "mvn.sh" ]]; then
-        cmd_list=("mvn.sh --help" # 查看mvn.sh脚本帮助文档
-            "mvn.sh find_main {过滤字符1} {过滤字符2}" # 扫描本目录下所有的main java
-            "mvn.sh deploy '{cmd:mvn.sh find_main src/main}'" # 部署maven项目,运行前强制打包编译
-            "mvn.sh run '{cmd:mvn.sh find_main src/main}'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,不阻塞启动
-            "mvn.sh debug '{cmd:mvn.sh find_main src/main}'" # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
-            "mvn.sh init jar" # 初始化普通maven项目, 打包为jar
-        )
-    elif [[ "$original_cmd" == "download.sh" ]]; then
-        cmd_list=("download.sh --help" # 脚本帮助文档
-            "download.sh {url文件存储路径} {下载目录}" # 下载多个文件到某个目录
-        )
-    elif [[ "$original_cmd" == "mvn" ]]; then
-        cmd_list=("mvn clean install -Dmaven.test.skip=true" # 编译打包maven项目,跳过测试类(不执行测试用例，也不编译测试用例类),不执行测试用例，也不编译测试用例类
-            "mvn dependency:sources -DdownloadJavadocs=true" # 下载maven依赖pom的源码和doc
-            "mvn dependency:tree" # 查看pom依赖树
-            "mvn compile" # 编译maven项目
-            "mvn compiler:compile" # 编译maven项目
-        )
-    elif [[ "$original_cmd" == "vimspector.sh" ]]; then
-        cmd_list=("vimspector.sh --help" # 查看帮助文档
-            "vimspector.sh language" # 查看支持的语言
-            "vimspector.sh config '{cmd:vimspector.sh language}'" # 复制对应语言的配置到本目录下,在本地生成 .vimspector.json 文件
-        )
-    elif [[ "$original_cmd" == "you-get" ]]; then
-        cmd_list=("you-get -l {视频网址}" # 下载视频列表(下载多个)
-            "you-get {视频网址}" # 下载单个视频
-        )
-    elif [[ "$original_cmd" == "pandoc" ]]; then
-        cmd_list=("pandoc {cmd:_comp_file_direct_} -o {输出文件名} --pdf-engine=xelatex" # pandoc 文件格式转换如果需要转pdf需要安装latex 
-        )
-    elif [[ "$original_cmd" = "ebook-convert" ]]; then
-        # ebook-convert 转换电纸书格式, 支持pdf, epub等
-        # --base-font-size: 基准字体大小（以PT为单位）。在生成的书籍中所有的字体尺寸将基于这个大小重新缩放。通过选择更大的尺寸，可以使输出中的字体更大，反之亦然。默认情况下，当值为0时，根据你选择的'输出配置'确定基准字体大小
-        # --line-height: 行高（以PT为单位）。控制连续文本行之间的行高。仅适用于未定义自身行高的内容元素。大多数情况下，最小行高值更加有用。默认不做行高调整
-        # --embed-all-fonts: 嵌入输入文档中引用到但未嵌入的字体。软件会在你的系统中查找这些字体，找到了就嵌入。字体嵌入只有当你的目标格式支持时才有用，例如 EPUB、AZW3、DOCX 和 PDF。请保证你拥有在文档中嵌入字体的合适授权。 
-        # --embed-font-family: 在书籍中嵌入指定的字体。这里指定了书籍中使用的“基础”字体。如果输入文件指定了字体，就有可能覆盖此处的基础字体。你可以使用“过滤样式信息”的选项来删除输入文档中指定的字体。注意，字体内嵌只在一些输出格式中有用，主要是 EPUB、AZW3 和 DOCX。
-        cmd_list=("ebook-convert {input_file} {out_file} --base-font-size=12 --line-height=18 --embed-all-fonts --embed-font-family='AR PL SungtiL GB'"
-            )
-
-    fi
 
     if [ -e ~/.bash_completion/$original_cmd ]; then
         local completion_cmd_context
         while read completion_cmd_context
         do
+
+            if [[ "$completion_cmd_context" == \#* || -z $completion_cmd_context ]]; then
+                continue
+            fi
             cmd_list[${#cmd_list[@]}]="$completion_cmd_context"
         done  < ~/.bash_completion/$original_cmd
     fi

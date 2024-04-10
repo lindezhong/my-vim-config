@@ -1,0 +1,4 @@
+test_complete or "{or:(-d -l)}" -t -f
+test_complete and '{and:(-v "{dir}")}' -t -f
+test_complete and_or '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}' -t -f
+

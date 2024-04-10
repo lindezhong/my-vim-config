@@ -1,0 +1,10 @@
+# 编译打包maven项目,跳过测试类(不执行测试用例，也不编译测试用例类),不执行测试用例，也不编译测试用例类
+mvn clean install -Dmaven.test.skip=true
+# 下载maven依赖pom的源码和doc
+mvn dependency:sources -DdownloadJavadocs=true
+# 查看pom依赖树
+mvn dependency:tree
+# 编译maven项目
+mvn compile
+# 编译maven项目
+mvn compiler:compile

@@ -1,0 +1,30 @@
+# 查看帮助文档
+git --help
+
+################################################################
+# git stash : 将目前还不想提交的但是已经修改的内容进行暂存至堆栈
+################################################################
+# 将修改内容暂存至stash暂存区(为一个栈), 并且使用消息
+git stash push -m {提交消息用双引号包裹}
+# 查看当前stash暂存区中的内容
+git stash list
+# 将当前stash中的内容弹出，并应用到当前分支对应的工作目录上, 命令将堆栈中最近保存的内容删除（栈是先进后出）
+git stash pop
+# 将指定stash栈的内容弹出，并应用到当前分支对应的工作目录上, 比如git stash pop stash@{1}
+git stash pop {stash暂存栈下标}
+# 将堆栈中的内容应用到当前目录，不同于git stash pop，该命令不会将内容从堆栈中删除
+git stash apply
+# 从stash堆栈中移除某个指定的stash, 比如 git stash drop stash@{0}
+git stash drop {stash暂存栈下标}
+# 清除stash堆栈中的所有内容
+git stash clear
+# 查看堆栈中最新保存的stash和当前目录的差异。
+git stash show
+# 查看堆栈中指定保存的stash和当前目录的差异。比如  git stash show stash@{1} -p
+git stash show {stash暂存栈下标} -p
+# 它创建了一个暂存条目，并返回它的对象名，而不将其推送到暂存参考日志中返回值配合 git stash store -m "消息" ${git stash create}
+git stash create
+# 创建的暂存条目推送到暂存参考日志
+git stash store -m {消息} {gitStashCreate执行结果}
+# 此命令使用指定的stash创建一个新分支，然后删除指定的存储, git stash branch new_branch stash@{1}
+git stash branch {分支名} {stash暂存栈下标}

@@ -39,6 +39,7 @@ done
 
 # 配置,shell tab 提示
 sudo ln -s ${home_path}/bash/bash_completion /etc/bash_completion.d
+ln -s ${home_path}/bash/bash_completion_tips ~/.bash_completion
 
 
 # python软连接:coc-jedi使用

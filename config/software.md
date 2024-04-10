@@ -51,8 +51,8 @@ server {
 sudo systemctl restart nginx
 
 # 6. 如果出现上传webdav文件失败情况检查是否是因为权限问题
-比如nginx日志(/var/log/nginx/error.log)中出现Permission denied
-解决方案给nginx worker 进程对应的用户www-data(使用 ps -ef | grep nginx 查询)授予权限
+# 比如nginx日志(/var/log/nginx/error.log)中出现Permission denied
+# 解决方案给nginx worker 进程对应的用户www-data(使用 ps -ef | grep nginx 查询)授予权限
 chown -R www-data /webdav
 ```
 

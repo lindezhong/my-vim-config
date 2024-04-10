@@ -3,8 +3,17 @@
 
 # 如果存在本地目录存在则读取文件提示
 if [ -d ~/.bash_completion ]; then
+    ignore_complete_file_list=()
+    if [ -f ~/.bash_completion/bash_completion_ignore ]; then
+        ignore_complete_file_list=($(cat ~/.bash_completion/bash_completion_ignore))
+    fi
     complete_file_list=($(ls ~/.bash_completion))
     for complete_file in "${complete_file_list[@]}"; do
+        # 如果在忽略文件中则跳过
+        if [[ "${ignore_complete_file_list[@]}" =~ "${complete_file}" ]]; then
+            continue
+        fi
+
         # 如果有提示文件则也追加到提示中
         eval complete -F _complete_func $complete_file
     done

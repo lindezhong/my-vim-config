@@ -1,4 +1,23 @@
+call plug#begin('~/.vim/plugged')
+Plug 'Yggdroot/LeaderF'
+Plug 'jiangmiao/auto-pairs'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'preservim/nerdcommenter'
+Plug 'preservim/nerdtree'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'ap/vim-buftabline'
+Plug 'iamcco/mathjax-support-for-mkdp'
+Plug 'iamcco/markdown-preview.vim'
+Plug 'puremourning/vimspector'
+Plug 'gillescastel/latex-snippets'
+Plug 'lervag/vimtex'
+Plug 'KeitaNakamura/tex-conceal.vim'
+Plug 'dhruvasagar/vim-table-mode'
+call plug#end()
+
 syntax on
+filetype plugin indent on
 set tabstop=4
 set shiftwidth=4
 set expandtab
@@ -8,6 +27,59 @@ set cindent
 set nowrap
 set hidden
 set nu
+" 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
+set maxmempattern=2000
+
+
+" 字典补全,使用Ctrl-X Ctrl-K快捷键，将在'dictionary'选项定义的文件中查找匹配的关键词。
+" set dictionary=/usr/dict/words,/usr/share/dict/words
+" set complete+=k "set complete option
+" 词典补全 使用Ctrl-X Ctrl-T快捷键，将在'thesaurus'选项定义的文件中查找匹配的关键词。
+" 因为在词典文件中，每行会包含多个单词，所以将显示匹配行中的所有单词
+" set thesaurus=/usr/dict/words,/usr/share/dict/words
+" 如果觉得<Ctrl-X><Ctrl-K>组合键太麻烦 ，那么也可以直接将字典补全添加到默认补全列表中，在vimrc中添加下面的代码
+" set complete-=k complete+=k
+
+" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
+colorscheme default
+" 要选择其他背景颜色，您可以使用 
+" :highlight CocFloating ctermbg=color
+" 并更改错误消息的前景（文本）颜色，请使用
+" :highlight CocErrorFloat ctermfg=color
+" 在哪里 color是颜色名称或颜色编号（通常从 0 到 15）。 阅读有关颜色值的更多信息 
+" :h cterm-colors
+" 如果你想为 vim 使用 GUI，你应该考虑使用 guibg和 guifg
+" :h gui-colors
+" 修改coc 选择框颜色 CocMenuSel 为分组
+" coc浮动窗口选中行颜色
+autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
+" coc浮动窗口颜色
+autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""  在终端背景是暗色但的时候启用以下配置""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" coc 调用链颜色: 去除 for highlight ranges of outgoing calls.
+" coc 范围选择颜色, 兼容代码片段提示
+autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black
+" coc 镶嵌提示颜色, 兼容提示函数的参数列表
+autocmd VimEnter * silent highlight CocInlayHint ctermbg=DarkGray ctermfg=Blue
+autocmd VimEnter * silent highlight CocInlayHintType ctermbg=DarkGray ctermfg=Blue
+autocmd VimEnter * silent highlight CocInlayHintParameter ctermbg=DarkGray ctermfg=Blue
+" 设置背景色兼容 coc location
+autocmd VimEnter * silent highlight Normal ctermbg=Black
+" 设置选中行颜色
+autocmd VimEnter * silent highlight Visual ctermfg=Black
+" 设置vim diff 颜色
+autocmd VimEnter * silent highlight DiffChange ctermfg=White ctermbg=Black
+autocmd VimEnter * silent highlight DiffText ctermfg=Black ctermbg=Red
+autocmd VimEnter * silent highlight DiffAdd ctermfg=Black ctermbg=Blue
+autocmd VimEnter * silent highlight DiffDelete ctermfg=Black ctermbg=Blue
+
+" 树莓派兼容
+set backspace=2
+set nocompatible
+
 
 " ==================================================
 " =================== 快捷键配置 ===================
@@ -324,62 +396,6 @@ nmap <Leader>v :CocCommand markdown-preview-enhanced.openPreview<CR>
 " ==================================================
 " =================== 快捷键配置 ===================
 " ==================================================
-
-" 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
-set maxmempattern=2000
-
-" 字典补全,使用Ctrl-X Ctrl-K快捷键，将在'dictionary'选项定义的文件中查找匹配的关键词。
-" set dictionary=/usr/dict/words,/usr/share/dict/words
-" set complete+=k "set complete option
-" 词典补全 使用Ctrl-X Ctrl-T快捷键，将在'thesaurus'选项定义的文件中查找匹配的关键词。
-" 因为在词典文件中，每行会包含多个单词，所以将显示匹配行中的所有单词
-" set thesaurus=/usr/dict/words,/usr/share/dict/words
-" 如果觉得<Ctrl-X><Ctrl-K>组合键太麻烦 ，那么也可以直接将字典补全添加到默认补全列表中，在vimrc中添加下面的代码
-" set complete-=k complete+=k
-
-" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
-colorscheme default
-" 要选择其他背景颜色，您可以使用 
-" :highlight CocFloating ctermbg=color
-" 并更改错误消息的前景（文本）颜色，请使用
-" :highlight CocErrorFloat ctermfg=color
-" 在哪里 color是颜色名称或颜色编号（通常从 0 到 15）。 阅读有关颜色值的更多信息 
-" :h cterm-colors
-" 如果你想为 vim 使用 GUI，你应该考虑使用 guibg和 guifg
-" :h gui-colors
-" 修改coc 选择框颜色 CocMenuSel 为分组
-" coc浮动窗口选中行颜色
-autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
-" coc浮动窗口颜色
-autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""""""""""""""""""""  在终端背景是暗色但的时候启用以下配置""""""""""""""""""
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" coc 调用链颜色: 去除 for highlight ranges of outgoing calls.
-" coc 范围选择颜色, 兼容代码片段提示
-autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black
-" coc 镶嵌提示颜色, 兼容提示函数的参数列表
-autocmd VimEnter * silent highlight CocInlayHint ctermbg=DarkGray ctermfg=Blue
-autocmd VimEnter * silent highlight CocInlayHintType ctermbg=DarkGray ctermfg=Blue
-autocmd VimEnter * silent highlight CocInlayHintParameter ctermbg=DarkGray ctermfg=Blue
-" 设置背景色兼容 coc location
-autocmd VimEnter * silent highlight Normal ctermbg=Black
-" 设置选中行颜色
-autocmd VimEnter * silent highlight Visual ctermfg=Black
-" 设置vim diff 颜色
-autocmd VimEnter * silent highlight DiffChange ctermfg=White ctermbg=Black
-autocmd VimEnter * silent highlight DiffText ctermfg=Black ctermbg=Red
-autocmd VimEnter * silent highlight DiffAdd ctermfg=Black ctermbg=Blue
-autocmd VimEnter * silent highlight DiffDelete ctermfg=Black ctermbg=Blue
-
-" 树莓派兼容
-set backspace=2
-set nocompatible
-
-execute pathogen#infect()
-syntax on
-filetype plugin indent on
 
 " NERDTree配置(目录树) preservim/nerdtree
 " 目录树的使用主要通过在vim的command模式下键入如下命令，即可达到相应的效果。

@@ -1,2 +1,4 @@
 bundle/
 dconf/tmp
+autoload/
+plugged/

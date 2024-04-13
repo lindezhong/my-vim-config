@@ -108,13 +108,13 @@ sudo apt install -y ripgrep
 #####################################################
 
 
-# 下载vim插件
-for (( i=0; i<10; i++ )); do
-bash ./vim.git
-done
-
-# 安装debug支持
-for (( i = 0; i < 10; i++ )); do
-    ./bundle/vimspector/install_gadget.py --all
-    ./bundle/vimspector/install_gadget.py --force-enable-java
-done
+# # 下载vim插件
+# for (( i=0; i<10; i++ )); do
+# bash ./vim.git
+# done
+# 
+# # 安装debug支持
+# for (( i = 0; i < 10; i++ )); do
+#     ./bundle/vimspector/install_gadget.py --all
+#     ./bundle/vimspector/install_gadget.py --force-enable-java
+# done

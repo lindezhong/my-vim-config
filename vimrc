@@ -1,3 +1,4 @@
+" 使用 :PlugInstall 安装插件, :PlugUpdate 更新插件 
 call plug#begin('~/.vim/plugged')
 Plug 'Yggdroot/LeaderF'
 Plug 'jiangmiao/auto-pairs'

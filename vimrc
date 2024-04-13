@@ -10,9 +10,11 @@ Plug 'ap/vim-buftabline'
 Plug 'iamcco/mathjax-support-for-mkdp'
 Plug 'iamcco/markdown-preview.vim'
 Plug 'puremourning/vimspector'
+" vim latex snippets
 Plug 'gillescastel/latex-snippets'
 Plug 'lervag/vimtex'
 Plug 'KeitaNakamura/tex-conceal.vim'
+" vim 表格
 Plug 'dhruvasagar/vim-table-mode'
 call plug#end()
 
@@ -29,6 +31,12 @@ set hidden
 set nu
 " 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
 set maxmempattern=2000
+
+if has('nvim')
+    " 设置光标样式, 让nvim和vim保持一样都是闪烁的方块
+    set guicursor=n-v-c-i:block
+else
+endif
 
 
 " 字典补全,使用Ctrl-X Ctrl-K快捷键，将在'dictionary'选项定义的文件中查找匹配的关键词。

@@ -18,6 +18,18 @@ home_path=$(readlink -f $(dirname "$0"))
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 
+# 顺带兼容 nvim
+# nvim vim-plug
+mkdir -p ~/.local/share/nvim/site/autoload
+ln -s ~/.vim/autoload/plug.vim ~/.local/share/nvim/site/autoload/
+# vim 配置链接
+mkdir -p ~/.config/nvim/
+ln -s ~/.vim/vimrc ~/.config/nvim/init.vim
+
+# nvim配色方案链接
+sudo mv /usr/share/nvim/runtime/colors/default.vim /usr/share/nvim/runtime/colors/nvim-default.vim
+sudo ln -s ~/.vim/colors/vimdefault.vim /usr/share/nvim/runtime/colors/default.vim
+
 # 配置ubuntu终端颜色方案
 bash dconf/load_dconf.sh terminal "/org/gnome/terminal/legacy/" "$home_path/dconf/one-half-dark-terminal.dconf"
 

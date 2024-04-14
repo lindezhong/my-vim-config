@@ -1,8 +1,15 @@
 # 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/bash_completion 或 /etc/bash_completion.d/bash_completion下，这样在下次登录终端时即可自动source自动补全脚本。
 # git 补全脚本: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
 
+# 
+# COMP_WORDBREAKS="
+# \"'><=;|&(:"
+# 去除分割 = : ,让一些提示可以继续
+COMP_WORDBREAKS="
+\"'><;|&( "
+
 # 本地测试的时候的脚本如果TEST_COMP_WORDS不为空则是测试场景
-# TEST_COMP_WORDS="test_complete merge a ="
+# TEST_COMP_WORDS=""
 if [[ ! -z $TEST_COMP_WORDS ]]; then
     eval COMP_WORDS=($TEST_COMP_WORDS)
     COMP_CWORD=${#COMP_WORDS[@]}
@@ -118,8 +125,6 @@ _complete_func() {
     #       即 cmd_item1 会提示出 cmd_item2 cmd_item3 , 但cmd_item1 cmd_item2 会提示出 cmd_item3
     #       但 直接输入 cmd_item2 不匹配, 因为 cmd_item2 前无 cmd_item1 (需要完全按照匹配)
     #       and 匹配模式一般用于kv的匹配比如 docker -v docker目录:宿主机目录 , 其中-v docker目录:宿主机目录就是 kv
-    #   3.6 {merge:("cmd_item1" "cmd_item2" ...)}, 该模式是为了兼容 a=b 或 a:b 传递到 bash_completion 时候被拆分成数组
-    #       请注意 = : 没法提示因为 COMPREPLY 中会有问题,所以说现在 merge 模式处于不可用的状态
     # 通用的命令提示如下
     # 1. {cmd:_comp_file_direct_} : 提示的文件列表
 
@@ -225,9 +230,6 @@ _parse_cmd_item_data_(){
     elif [[ "$cmd_str" == {and:* ]]; then
         # and模式 , and模式由匹配方法 _is_match_cmd_and 追加所以其实会导致一个提示重复添加的情况, 后续优化
         echo '"and" ""'
-    elif [[ "$cmd_str" == {merge:* ]]; then
-        # merge模式, 匹配跟and模式一致但提示是将数组合并成一个提示
-        echo '"merge" ""'
     elif [[ "$cmd_str" == {* ]]; then
         # 注释
         echo '"note" "1"'
@@ -290,9 +292,6 @@ _is_match_cmd_simple() {
         return $?
     elif [[ "${match_cmd_item_data[0]}" == "and" ]]; then
         _is_match_cmd_and "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
-        return $?
-    elif [[ "${match_cmd_item_data[0]}" == "merge" ]]; then
-        _is_match_cmd_merge "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
         return $?
     fi
 
@@ -357,7 +356,7 @@ _is_match_cmd_or() {
 _is_match_cmd_and() {
     local match_cmd_item="$1" 
     test -z "$match_cmd_item" && match_cmd_item="$cmd_item"
-    eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "and" "merge")
+    eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "and")
 
     local match_comp_cmd_item="$2"
     test -z "$match_comp_cmd_item" && match_comp_cmd_item="$comp_cmd_item"
@@ -434,54 +433,6 @@ _is_match_cmd_and() {
     (( result=result+i ))
     return $result
 
-}
-
-_is_match_cmd_merge() {
-    
-    local match_cmd_item="$1" 
-    test -z "$match_cmd_item" && match_cmd_item="$cmd_item"
-
-    local match_comp_cmd_item="$2"
-    test -z "$match_comp_cmd_item" && match_comp_cmd_item="$comp_cmd_item"
-
-    # item下标是否向前加n, 只有在匹配成功的时候生效
-    local item_add_num="$3"
-    test -z "$item_add_num" && item_add_num="1"
-
-    # comp下标是否向前加n, 只有在匹配成功的时候生效
-    local comp_add_num="$4"
-    test -z "$comp_add_num" && comp_add_num="1"
-
-    # 是否关闭提示, 只有在匹配成功且comp_add_num>0情况下生效
-    local close_comp="$5"
-    test -z "$close_comp" && close_comp="1"
-
-
-    # 需要关闭and模式的提示
-    _is_match_cmd_and "$1" "$2" "0" "$4" "0"
-    local merge_result=$?
-    if (( $merge_result<=200 )); then
-        
-        if (( comp_index>=COMP_CWORD && close_comp!=0 )); then
-            if (( $merge_result>=100 && $merge_result<=200 )); then
-                # 如果为and模式就会提示的说明提示本身就好了 
-                _completion_cmd_add "${cmd_item_list[item_index]}"
-            else
-                # 提示下一个节点
-                _completion_cmd_add "${cmd_item_list[item_index+1]}"
-            fi
-        fi
-
-
-        if (( $merge_result==100 )); then
-            # 完全匹配则移动itme
-            _cmd_index_index_shift "$item_add_num"
-        fi
-
-        # and 模式有一些特殊的返回值在merge下不需要所以需要取消掉
-        return 0
-    fi
-    return -1
 }
 
 
@@ -590,16 +541,6 @@ _completion_cmd_normaliza_() {
                 eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "and")
                 completion_cmd_stack[${#completion_cmd_stack[@]}]=${multiple_cmd_item_list[0]}
             fi
-
-        elif [[ "${completion_stack_cmd_data[0]}" == "merge" ]]; then
-            # merge模式
-            local merge_cmd=""
-            eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "merge")
-            local multiple_cmd_item
-            for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
-                merge_cmd="${merge_cmd}${multiple_cmd_item}"
-            done
-            completion_cmd_stack[${#completion_cmd_stack[@]}]=${merge_cmd}
 
         else
             # 未知的情况为了不报错也追加到提示中

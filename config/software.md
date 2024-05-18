@@ -3,8 +3,6 @@
 ```shell
 # 可以使用url : http://ip:18081/目录 访问/webdav/目录 的webdav 服务
 
-:qa
-
 # 1. 先安装完整版本的nginx
 sudo apt install nginx-full
 

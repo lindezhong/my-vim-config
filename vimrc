@@ -149,6 +149,9 @@ imap <Esc> <Esc>`^
 nmap <silent><S-u> :redo<CR>
 nmap <S-j> <C-f>
 nmap <S-k> <C-b>
+vmap <S-j> <C-f>
+vmap <S-k> <C-b>
+
 
 " 窗口大小调整
 " nmap <silent><C-[> :vertical res-1<CR>

@@ -232,6 +232,7 @@ keymap :e LOAD
 
 # jump
 keymap ESC-C-j SUBMIT
+keymap ESC-j SUBMIT
 keymap C-] TAB_LINK
 keymap C-j GOTO_LINK
 

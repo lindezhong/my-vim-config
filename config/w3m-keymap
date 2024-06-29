@@ -1,3 +1,21 @@
+# Vimium C keymap
+# mapKey <a-e> <esc>
+# mapKey <c-e> <esc>
+# map d scrollFullPageDown
+# map u scrollFullPageUp
+# map J scrollFullPageDown
+# map K scrollFullPageUp
+# map <s-down> scrollFullPageDown
+# map <s-up> scrollFullPageUp
+# map <c-h> previousTab
+# map <c-l> nextTab
+# map <c-left> previousTab
+# map <c-right> nextTab
+# map <a-h> goBack
+# map <a-l> goForward
+# map <a-left> goBack
+# map <a-right> goForward
+
 # w3m vim-like keymap file
 #   by @sansna
 
@@ -158,8 +176,10 @@ keymap :O OPTIONS
 keymap :d DOWNLOAD_LIST
 
 ########## history navigation ##########
-keymap L NEXT
-keymap H PREV
+# keymap L NEXT
+# keymap H PREV
+keymap ESC-l NEXT
+keymap ESC-h PREV
 keymap :p SELECT_MENU
 keymap :h HISTORY
 
@@ -170,8 +190,10 @@ keymap gg BEGIN
 keymap G END
 keymap C-d NEXT_PAGE
 keymap d NEXT_PAGE
+keymap J NEXT_PAGE
 keymap C-u PREV_PAGE
 keymap u PREV_PAGE
+keymap K PREV_PAGE
 keymap zz CENTER_V
 ########## cursor ##########
 keymap l MOVE_RIGHT
@@ -236,8 +258,12 @@ keymap bH TAB_GOTO http://www.bing.com
 keymap gh GOTO http://www.google.com
 keymap gH TAB_GOTO http://www.google.com
 keymap C-t NEW_TAB
-keymap K NEXT_TAB
-keymap J PREV_TAB
+# keymap K NEXT_TAB
+# keymap J PREV_TAB
+keymap <C-l> NEXT_TAB
+keymap <C-h> PREV_TAB
+keymap  NEXT_TAB
+keymap  PREV_TAB
 keymap C-wL TAB_RIGHT
 keymap C-wH TAB_LEFT
 keymap t TAB_GOTO

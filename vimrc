@@ -143,6 +143,8 @@ imap <A-Left> <Esc>`^<C-o>
 imap <A-Right> <Esc>`^<C-i>
 nmap <A-h> <C-o>
 nmap <A-l> <C-i>
+nmap h <C-o>
+nmap l <C-i>
 imap <A-h> <Esc>`^<C-o>
 imap <A-l> <Esc>`^<C-i>
 imap <Esc> <Esc>`^

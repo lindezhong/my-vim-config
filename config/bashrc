@@ -6,14 +6,46 @@ alias mvnsource="mvn dependency:sources -DdownloadJavadocs=true"
 alias mvntree="mvn dependency:tree"
 alias mvndebug='export MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspen=n"'
 
-export JAVA_HOME=/opt/jdk11
-export CLASSPATH=.:${JAVA_HOME}/lib/dt.jar:${JAVA_HOME}/lib/tools.jar
-export MAVEN_HOME=/opt/apache-maven-3.8.5
-export BASH_HOME=~/.vim/bash
-# 指定c语言额外的include,lib路径
-export LD_LIBRARY_PATH="~/.local/lib:~/.local/include"
-export CPPFLAGS="-I~/.local/include"
-export LDFLAGS="-L~/.local/lib"
-alias gcc="gcc -I gcc -I ~/.local/include"
+# 需要pip3 install pyotp
+alias 2fa_git='python -c "import pyotp; print(pyotp.TOTP(\"3NQ2ZK7MF2GQP4LE\").now())"'
 
-PATH=.:${PATH}:${JAVA_HOME}/bin:${JAVA_HOME}/jre/bin:${MAVEN_HOME}/bin:${BASH_HOME}
+
+proxy () {
+    export http_proxy="http://localhost:20181"
+    export https_proxy=$http_proxy
+    export socks5_proxy="socks5://localhost:20180"
+    echo "HTTP Proxy on"
+}
+
+# noproxy
+noproxy () {
+    unset http_proxy
+    unset https_proxy
+    unset socks5_proxy
+    echo "HTTP Proxy off"
+}
+
+
+# 在 Bash shell 中，PS4 是一个环境变量，用来定义在开启 shell 脚本调试模式 (set -x) 时显示的提示符
+export PS4='\033[0;33m+ $(date +%T.%3N) $BASH_SOURCE:$LINENO:${FUNCNAME[0]}() :\033[0m '
+
+# 兼容部分应用在 ssh -X 情况下无法打开图形界面问题(比如firefox)
+export XAUTHORITY=$HOME/.Xauthority
+
+export JAVA_HOME=/opt/jdk8
+export CLASSPATH=.:${JAVA_HOME}/lib/dt.jar:${JAVA_HOME}/lib/tools.jar
+export MAVEN_HOME=/opt/apache-maven-3.9.6
+export BASH_HOME=~/.local/bin
+
+# 指定c语言额外的include,lib路径
+export LD_LIBRARY_PATH=/home/ldz/.local/lib:$LD_LIBRARY_PATH
+export CPPFLAGS="-I/home/ldz/.local/include"
+export LDFLAGS="-L/home/ldz/.local/lib"
+# alias gcc="gcc -I gcc -I ~/.local/include"
+
+PATH=.:${JAVA_HOME}/bin:${JAVA_HOME}/jre/bin:${MAVEN_HOME}/bin:${BASH_HOME}:${PATH}
+
+LANG=zh_CN.UTF-8
+# 光标不闪烁
+printf '\e[?12l'
+

@@ -53,7 +53,7 @@ fi
 if [ -f ${HOME}/.w3m/config ]; then
     rm ${HOME}/.w3m/config
 fi
-ln -s ${home_path}/config/w3m-keymap ${HOME}/.w3m/keymap
+ln -s ${home_path}/keymap/w3m-keymap ${HOME}/.w3m/keymap
 ln -s ${home_path}/config/w3m-config ${HOME}/.w3m/config
 
 # 将./bash 下的文件软连接到 ~/.local/bin
@@ -70,7 +70,9 @@ done
 
 # 配置,shell tab 提示
 sudo ln -s ${home_path}/bash/bash_completion /etc/bash_completion.d
-ln -s ${home_path}/bash/bash_completion_tips ~/.bash_completion
+if [ ! -d ~/.bash_completion ]; then
+    ln -s ${home_path}/bash/bash_completion_tips ~/.bash_completion
+fi
 
 
 # python软连接:coc-jedi使用

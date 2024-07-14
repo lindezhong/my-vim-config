@@ -1,21 +1,3 @@
-# Vimium C keymap
-# mapKey <a-e> <esc>
-# mapKey <c-e> <esc>
-# map d scrollFullPageDown
-# map u scrollFullPageUp
-# map J scrollFullPageDown
-# map K scrollFullPageUp
-# map <s-down> scrollFullPageDown
-# map <s-up> scrollFullPageUp
-# map <c-h> previousTab
-# map <c-l> nextTab
-# map <c-left> previousTab
-# map <c-right> nextTab
-# map <a-h> goBack
-# map <a-l> goForward
-# map <a-left> goBack
-# map <a-right> goForward
-
 # w3m vim-like keymap file
 #   by @sansna
 

@@ -153,6 +153,11 @@ nmap <S-j> <C-f>
 nmap <S-k> <C-b>
 vmap <S-j> <C-f>
 vmap <S-k> <C-b>
+nmap <S-h> <S-Left>
+nmap <S-l> <S-Right>
+vmap <S-h> <S-Left>
+vmap <S-l> <S-Right>
+
 
 
 " 窗口大小调整

@@ -2478,25 +2478,25 @@ class NYPizzaStore {
 }
 
 package 比萨原料 as PizzaIngredient_package #DDDDDD {
-    together Dough_together {
+    together {
         interface Dough {}
         class ThickCrustDough implements Dough {}
         class ThinCrustDough implements Dough {}
     }
     
-    together Sauce_together {
+    together {
         interface Sauce {}
         class PlumTomatoSauce implements Sauce {}
         class MarinaraSauce implements Sauce {}
     }
     
-    together Cheese_together {
+    together {
         interface Cheese {}
         class MozzarellaCheese implements Cheese {}
         class ReggianoCheese implements Cheese {}
     }
     
-    together Clams_together {
+    together {
         interface Clams {}
         class FrozenClams implements Clams {}
         class FreshClams implements Clams {}
@@ -2520,15 +2520,15 @@ ChicagoPizzaIngredientFactory -left-> FrozenClams
 ' 控制布局无意义
 
 
-NYPizzaStore -down[hidden]--> Dough_together
-Dough_together -down[hidden]---> Sauce_together
-Sauce_together -down[hidden]---> Cheese_together
-Cheese_together -down[hidden]---> Clams_together
+' NYPizzaStore -down[hidden]--> Dough_together
+' Dough_together -down[hidden]---> Sauce_together
+' Sauce_together -down[hidden]---> Cheese_together
+' Cheese_together -down[hidden]---> Clams_together
 
-PizzaIngredientFactory_together -right[hidden]-> Dough_together
-PizzaIngredientFactory_together -right[hidden]-> Sauce_together
-PizzaIngredientFactory_together -right[hidden]-> Cheese_together
-PizzaIngredientFactory_together -right[hidden]-> Clams_together
+' PizzaIngredientFactory_together -right[hidden]-> Dough_together
+' PizzaIngredientFactory_together -right[hidden]-> Sauce_together
+' PizzaIngredientFactory_together -right[hidden]-> Cheese_together
+' PizzaIngredientFactory_together -right[hidden]-> Clams_together
 
 @enduml
 ```
@@ -2846,7 +2846,7 @@ note top of TV : 电视
 
 package 遥控器 as remote_control {
     
-    together together1 {
+    together {
         () ON1
         () OFF1
 
@@ -2854,7 +2854,7 @@ package 遥控器 as remote_control {
         note left of OFF1 : 电灯关
     }
     
-    together together2 {
+    together {
         () ON2
         () OFF2
 
@@ -2862,7 +2862,7 @@ package 遥控器 as remote_control {
         note left of OFF2 : 吊扇关
     }
     
-    together together3 {
+    together {
         () ON3
         () OFF3
 
@@ -2870,7 +2870,7 @@ package 遥控器 as remote_control {
         note left of OFF3 : 电视关
     }
   
-    together together4 {
+    together {
         () ON4
         () OFF4
 
@@ -2878,17 +2878,17 @@ package 遥控器 as remote_control {
         note left of OFF4 : 电灯,吊扇,电视关
     }
     
-    together together_undo {
+    together {
         () undo
         note right of undo : 对象重建到最后一次执行execute()前状态,\n但电视使用 lambda 无法撤销
     }
 
 ' 控制布局无意义
 
-together1 -down[hidden]-> together2
-together2 -down[hidden]-> together3
-together3 -down[hidden]-> together4
-together4 -down[hidden]-> together_undo
+' together1 -down[hidden]-> together2
+' together2 -down[hidden]-> together3
+' together3 -down[hidden]-> together4
+' together4 -down[hidden]-> together_undo
 }
 
 note top of remote_control

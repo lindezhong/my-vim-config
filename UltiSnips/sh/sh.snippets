@@ -596,6 +596,12 @@ do
 done  < ${1:file_path}
 endsnippet
 
+snippet readCommand "读取命令执行结果, 每次读取一行"
+while read ${2:line}
+do
+    $0
+done  < <(${1:command})
+endsnippet
 
 
 

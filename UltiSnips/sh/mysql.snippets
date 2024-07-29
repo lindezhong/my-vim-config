@@ -1,0 +1,39 @@
+# mysql
+
+snippet mysqlInitParameter "mysql 初始化查询参数, 比如host密码等"
+MYSQL_USER="${1:root}"
+MYSQL_PASSWORD="${2:password}"
+MYSQL_HOST="${3:localhost}"
+MYSQL_DATABASE="${4:database}"
+MYSQL_PORT="${5:3306}"
+$0
+endsnippet
+
+snippet mysqlQueryOne "mysql 查询一条数据, 数据中不允许有换行否则会出问题"
+declare -A ${1:map}=()
+while read $1_line
+do
+    $1_key=${$1_line%%: *}
+    $1_value=${$1_line#*: }
+    $1["\$$1_key"]="\$$1_value"
+done  < <(mysql -e "${2:sql}\G;" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -D "$MYSQL_DATABASE" | tail -n +2)
+$0
+endsnippet
+
+snippet mysqlQueryList "mysql 查询多条数据, 数据中不允许有换行否则会出问题"
+$1_length=0
+while read $1_line
+do
+    if \`grep -E '\** ([0-9]*)\. row \**' <<< "\$$1_line" > /dev/null\`; then
+        $1_length=$(echo "\$$1_line" | sed -E 's/\** ([0-9]*)\. row \**/\1/g')
+        (( $1_length-- ))
+        eval declare -A $1_\${$1_length}=\(\)
+    else
+        $1_key=${$1_line%%: *}
+        $1_value=${$1_line#*: }
+        eval ${1:map}_${$1_length}[\"\$$1_key\"]=\"\$$1_value\"
+    fi
+done  < <(mysql -e "${2:sql}\G;"  -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -D "$MYSQL_DATABASE")
+$0
+endsnippet
+

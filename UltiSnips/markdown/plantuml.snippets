@@ -301,3 +301,12 @@ endsnippet
 # @enduml
 # ```
 
+
+snippet plantUmlSeqActivate "时序图, 生命线, 即带返回值的时序图"
+${1:object1} -> ${2:object2}: ${3:调用}
+activate $2
+$0
+$2 --> $1: ${4:return}
+deactivate $2
+endsnippet
+

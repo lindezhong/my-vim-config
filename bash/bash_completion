@@ -215,6 +215,7 @@ _comp_cmd_index_index_shift() {
 }
 
 
+# result ("匹配模式", "要添加提示cmd_item_data下标, 是相对当前")
 _parse_cmd_item_data_(){
     local cmd_str="$1"
 

@@ -6,21 +6,24 @@ MYSQL_PASSWORD="${2:password}"
 MYSQL_HOST="${3:localhost}"
 MYSQL_DATABASE="${4:database}"
 MYSQL_PORT="${5:3306}"
+set -o pipefail
 $0
 endsnippet
 
-snippet mysqlQueryOne "mysql 查询一条数据, 数据中不允许有换行否则会出问题"
+snippet mysqlQueryOne "mysql 查询一条数据, 数据中不允许有换行否则会出问题, set -o pipefail(使得整个管道命令只要有一个命令失败，整个管道就会返回失败状态) 可以使用$?检测命令执行错误, 但返回值(count)不能是local"
 declare -A ${1:map}=()
+__mysql_result=$(mysql -e "${2:sql}\G;" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -D "$MYSQL_DATABASE" | tail -n +2)
 while read $1_line
 do
     $1_key=${$1_line%%: *}
     $1_value=${$1_line#*: }
-    $1["\$$1_key"]="\$$1_value"
-done  < <(mysql -e "${2:sql}\G;" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -D "$MYSQL_DATABASE" | tail -n +2)
+	$1["\$$1_key"]="\$$1_value"
+done  < <(echo "$__mysql_result")
 $0
 endsnippet
 
-snippet mysqlQueryList "mysql 查询多条数据, 数据中不允许有换行否则会出问题"
+snippet mysqlQueryList "mysql 查询多条数据, 数据中不允许有换行否则会出问题, set -o pipefail(使得整个管道命令只要有一个命令失败，整个管道就会返回失败状态) 可以使用$?检测命令执行错误, 但返回值(count)不能是local"
+__mysql_result=$(mysql -e "${2:sql}\G;"  -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -D "$MYSQL_DATABASE")
 $1_length=0
 while read $1_line
 do
@@ -33,7 +36,12 @@ do
         $1_value=${$1_line#*: }
         eval ${1:map}_${$1_length}[\"\$$1_key\"]=\"\$$1_value\"
     fi
-done  < <(mysql -e "${2:sql}\G;"  -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -D "$MYSQL_DATABASE")
+done  < <(echo "$__mysql_result")
 $0
 endsnippet
 
+snippet mysqlRowCount "mysql 执行有影响的sql(比如, insert delete update),返回影响函数, SELECT ROW_COUNT(),用于返回上一个数据更改语句所影响的行数, set -o pipefail(使得整个管道命令只要有一个命令失败，整个管道就会返回失败状态) 可以使用$?检测命令执行错误, 但返回值(count)不能是local"
+${1:count}=$(mysql -e "${2:sql};SELECT ROW_COUNT()\G;"  -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -D "$MYSQL_DATABASE" \
+    | tail -n +2 | awk '{print \$2}')
+$0
+endsnippet

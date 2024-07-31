@@ -1,0 +1,88 @@
+# # shopt
+# shopt 是 Bash 中的一个内置命令，用于设置和取消 Bash 的各种可选行为。
+# 有两类选项：带 -s 选项设置的（开）或带 -u 取消的（关）
+# 以及使用 -o 操作的选项。-o 选项主要是用于设置和展示以下少数几种特定的、兼容性相关的 Bash 行为。
+# ## 常用操作
+# autocd：启用后，可以通过仅输入目录名来 cd 到该目录。
+# cdable_vars：启用后，可以通过变量名称来 cd 到变量值指定的目录。
+# cdspell：启用后，当你输入的目录名有拼写错误时，Bash 会尝试纠正并 cd 到正确的目录。
+# checkhash：启用后，Bash 每次运行命令前检查 hash 表中的命令路径是否仍然有效。
+# cmdhist：启用后，Bash 会将多行命令放到同一条历史记录条目中。
+# compat31：使某些行为与 Bash 3.1 保持兼容。
+# compat32：使某些行为与 Bash 3.2 保持兼容。
+# compat40：使某些行为与 Bash 4.0 保持兼容。
+# direxpand：启用后，命令行上包含波浪线 (~) 后，自动补全会扩展为完整的路径名。
+# dotglob：启用后，通配符模式会匹配以 . 开头的文件。
+# execfail：启用后，命令查找时如果 exec 系统调用失败，shell 将继续而不是退出。
+# expand_aliases：启用后，在执行命令前替换别名。
+# extdebug：启用调试模式的扩展功能。这些额外的功能允许在函数和其他块级结构中进行调试。
+# extglob：启用或禁用扩展的通配符匹配。
+# histappend：启用后，当 shell 退出时，命令历史记录会附加到历史文件而不是覆盖它。
+# histreedit：在启用 readline 时允许重新编辑部分历史记录中执行的命令。
+# histverify：在执行命令前，让用户可以查看和编辑历史记录中拉出的命令。
+# hostcomplete：启用后，在 Tab 自动补全时尝试完成主机名。
+# huponexit：启用后，shell 退出时发送 HUP 信号给所有已打开的工作。
+# interactive_comments：启用后，shell 会将 # 作为注释的开始。
+# lithist：启用后，shell 将保存命令中保留的换行符到历史记录内。
+# login_shell：标识当前 shell 是否为登录 shell（只读）。
+# mailwarn：当邮件文件在上次检查后被指定用户访问过时发出警告。
+# nocaseglob：启用时，通配符匹配时会忽略大小写。
+# nocasematch：启用时，case 语句匹配时忽略大小写。
+# nocd：启用时，禁用 cd 命令。
+# nullglob：启用时，通配符模式没有匹配文件时会消失，而不是作为未被扩展的通配符模式。
+# progcomp：启用或禁用可编程的自动补齐功能。
+# promptvars：启用时，shell 会扩展 PS1 中的变量。
+# restricted_shell：标识当前 shell 是否为受限 shell（只读）。
+# shift_verbose：当 shift 命令超出位置参数个数时显示错误信息。
+# sourcepath：启用时，shell 在执行 . filename 或 source filename 时会查找 PATH 变量。
+# xpg_echo：启用后，echo 将支持如 \ 转义字符序列。
+# ### 常用操作样例(autocd)
+# 在命令输入 `shopt -s autocd` 并回车
+# 这会开启 autocd 功能。现在你可以直接输入目录名称并按下回车键来切换目录。例如：
+# ```
+# ~/projects $ documents
+# ~/documents $
+# ```
+# 如果你希望每次打开终端时都自动开启 autocd 功能，可以将该命令添加到你的 ~/.bashrc 文件中。编辑 ~/.bashrc 文件并在文件末尾添加以下行：
+# `shopt -s autocd`
+# ## -o 操作
+# 使用`shopt -o -p`可以查看 shopt 命令支持哪些 -o 选项
+# shopt 是 Bash shell 中的一个内置命令，用于显示和设置 shell 选项。
+# 不同的选项控制 Bash 的各种功能和行为。以下是 shopt 可以控制的一些常见选项：
+# allexport：相当于 set -a，使所有已定义的变量自动导出为环境变量。
+# braceexpand：相当于 set -B，启用大括号扩展。
+# emacs：相当于 set -o emacs，使用 Emacs 样式的命令行编辑模式。
+# errexit：相当于 set -e，当命令失败时退出脚本。
+# hashall：相当于 set -h，使 Bash 记住命令的位置，以减少文件系统查找时间。
+# histexpand：相当于 set -H，启用历史记录替换。
+# history：相当于 set -o history，启用命令历史功能。
+# ignoreeof：相当于 set -o ignoreeof，防止使用 Ctrl-D（EOF）关闭交互式 shell。
+# monitor：相当于 set -o monitor，启用作业控制。
+# noclobber：相当于 set -o noclobber，防止重定向覆盖文件。
+# noexec：相当于 set -n，读取命令但不执行，用于检查脚本语法。
+# noglob：相当于 set -f，禁用文件名通配符扩展。
+# nolog：相当于 set -o nolog，防止函数定义保存到历史记录中。
+# notify：相当于 set -b，立即通知作业状态改变。
+# nounset：相当于 set -u，尝试使用未定义变量时退出脚本。
+# pipefail：相当于 set -o pipefail，使得整个管道命令只要有一个命令失败，整个管道就会返回失败状态。
+
+snippet setErrExit "当命令失败时退出脚本"
+set -e
+$0
+endsnippet
+
+snippet setNounSet "尝试使用未定义变量时退出脚本"
+set -u
+$0
+endsnippet
+
+snippet setPipefail "使得整个管道命令只要有一个命令失败，整个管道就会返回失败状态"
+set -o pipefail
+$0
+endsnippet
+
+snippet setExacting "严格模式：命令失败、使用未定义变量、管道命令失败(整个管道命令只要有一个命令失败)都会退出"
+set -euo pipefail
+$0
+endsnippet
+

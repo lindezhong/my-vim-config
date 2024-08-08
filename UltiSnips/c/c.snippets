@@ -386,11 +386,11 @@ strncpy(${1:dest}, ${2:src},${3:n});
 endsnippet
 # - strcat(char *, const char *) : 它接受两个字符串作为参数，把第二个字符串的副本添加到第一个字符串的末尾。
 snippet strCat "连接字符串,第一个参数只能是数组不能为指针，把第二个字符串的副本添加到第一个字符串的末尾,注意不要超过第一个字符串长度"
-strcat(${1:追加字符串}, ${2:var});
+strcat(${1:var}, ${2:追加字符串});
 endsnippet
 # - strncat(char *, const char *, unsigned long) : strncat() 用于连接两个字符串，用法与strcat() 完全一致，只是增加了第三个参数，指定最大添加的字符数一旦达到指定的字符数，或者在源字符串中遇到空字符\0 ，就不再添加了。
-snippet strCatN "连接字符串,第一个参数只能是数组不能为指针,把第二个字符串的副本添加到第一个字符串的末尾,并指定长度n, strncat('world', 'ldz', 3) -> 'world ldz'"
-strncat(${1:追加字符串}, ${2:var},${3:n});
+snippet strCatN "连接字符串,第一个参数只能是数组不能为指针,把第二个字符串的副本添加到第一个字符串的末尾,并指定长度n, strncat('world', 'ldz-delete', 3) -> 'worldldz'"
+strncat(${1:var}, ${2:追加字符串},${3:n});
 endsnippet
 # - int strcmp(const char* s1, const char* s2) : 函数用于比较两个字符串的内容。如果s1 小于s2 ，strcmp() 返回值小于0；如果s1 大于s2 ，返回值大于0。
 # - strncmp() : 由于strcmp() 比较的是整个字符串，C 语言又提供了strncmp() 函数，只比较到指定的位置。
@@ -496,7 +496,7 @@ endsnippet
 #   char* b;
 #   char c;
 # };
-# printf("%d\n", sizeof(struct foo)); // 24
+# printf("%lu\n", sizeof(struct foo)); // 24
 # // 上面示例中，struct foo 有三个属性，在64位计算机上占用的存储空间分别是：int a 占4个字节，指针char* b 占8个字节，char c 占1个字节。它们加起来，一共是13个字节（4 + 8 + 1）。但是实际上，struct foo 会占用24个字节，原因是它最大的内存占用属性是char* b 的8个字节，导致其他属性的存储空间也是8个字节，这样才可以对齐，导致整个struct foo 就是24个字节（8 * 3）。
 # // 多出来的存储空间，都采用空位填充，所以上面的struct foo 真实的结构其实是下面这样
 # struct foo {
@@ -552,10 +552,10 @@ endsnippet
 # };
 # struct book* b1;
 # ```
-snippet structDefinition "定义一个struct结构,1.结构名:如果为空为匿名结构,匿名结构一定需要变量名 2.变量名:如果不为空则表示定义了一个struce变量,可以在变量名后直接赋值 = {} 3. 可以使用指针变量 * 变量名"
-struct ${1:[结构名]} \{
+snippet structDefinition "定义一个struct结构,1.结构名:如果为空为匿名结构,匿名结构一定需要变量名 2.变量名:如果不为空则表示定义了一个struce变量,可以在变量名后直接赋值 = {} 3. 可以使用指针变量 * 变量名, 4. 例子 struct Book {char* name;}; 或 struct Book {char* name;} b1 = {'book name'};"
+struct ${1:结构名} \{
 $0
-\} ${2:[变量名]};
+\} ${2:变量名};
 endsnippet
 snippet structInit "初始化一个struct类型的变量(给struct类型赋初始值) 如 : struct Book b1 = {'name'}"
 struct ${1:结构名} ${2:变量名} = \{${3:按顺序的变量值}\};

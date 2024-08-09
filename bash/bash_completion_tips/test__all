@@ -1,0 +1,7 @@
+# 用作测试聚合脚本的提示
+
+# cmd: test_cmd
+# end
+
+test_cmd add ls xxx
+

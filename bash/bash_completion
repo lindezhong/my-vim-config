@@ -1,6 +1,34 @@
 # 可将编写好的脚本在用户根目录.bash_profile中进行调用，亦可放于/etc/bash_completion 或 /etc/bash_completion.d/bash_completion下，这样在下次登录终端时即可自动source自动补全脚本。
 # git 补全脚本: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
 
+
+# cmd 提示文件命名规范:
+# 1. 某个文件名存储某个命令的提示, 比如文件 `git.sh` 中存储的是对 `git.sh` 的提示  
+# 2. 如果文件是以 `__all` 结尾则为聚合文件, 可能提示多个命令
+#   2.1 在聚合文件中需要添加 `# cmd: 需要提示的命令` 告诉脚本这个文件支持提示那些文件
+#   2.2 可以通过 `# end` 结束查找需要哪些提示的命令以提高性能, 如何遇到 `# end` 之后的 `# cmd: 需要提示的命令` 会失效
+# 3. 如果提示文件写了但不想加入提示中, 可以加入 `~/.bash_completion/bash_completion_ignore` 文件中忽略它
+
+# cmd_list 编写规则:
+# 格式如下 : cmd_list=("$cmd_item $cmd_item  '{option:value}'  ...")
+# 1. cmd_list中的每个元素为提示的完整命令行
+# 4. 如果cmd_item带空格可以用''(单引号)包裹
+# 3. 选项模式: cmd_item支持{option:value}形式, 该形式,并且不比较与原始的shell命令, option支持如下情况
+#   3.1 {value} : 原样输出{value}目的是为了提示后面输入
+#   3.2 {cmd:value} : 输出value执行结果即 eval $value
+#   3.3 {-filenames} : 非提示, 但是将 complete 改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
+#   3.4 {or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
+#       即 cmd_item1 后可以提示cmd_item2, 反之亦然
+#   3.5 {and:("cmd_item1" "cmd_item2" "cmd_item3" ...)}, 该形式需要按照顺序匹配cmd_item1 cmd_item2 cmd_item3,
+#       即 cmd_item1 会提示出 cmd_item2 cmd_item3 , 但cmd_item1 cmd_item2 会提示出 cmd_item3
+#       但 直接输入 cmd_item2 不匹配, 因为 cmd_item2 前无 cmd_item1 (需要完全按照匹配)
+#       and 匹配模式一般用于kv的匹配比如 docker -v docker目录:宿主机目录 , 其中-v docker目录:宿主机目录就是 kv
+#   3.6 可以嵌套and和or实现一些操作比如 '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}'
+# 通用的命令提示如下
+# 1. {cmd:_comp_file_direct_} : 提示的文件列表
+
+
+
 # 
 # COMP_WORDBREAKS="
 # \"'><=;|&(:"
@@ -29,8 +57,22 @@ if [ -d ~/.bash_completion ]; then
             continue
         fi
 
-        # 如果有提示文件则也追加到提示中
-        eval complete -F _complete_func $complete_file
+        if [[ "$complete_file" == *__all ]]; then
+            # 如果是 __all 结尾的文件认为是汇聚文件, 需要特殊处理
+            while read line
+            do
+                if [[ "$line" == \#\ cmd:\ * ]]; then
+                    cmd=${line#*\#\ cmd:\ }
+                    eval complete -F _complete_func $cmd
+                elif [[ "$line" == "# end" ]]; then
+                    break
+                fi
+            done  < ~/.bash_completion/$complete_file
+        else
+            # 如果有提示文件则也追加到提示中
+            eval complete -F _complete_func $complete_file
+        fi
+
     done
 fi
 
@@ -54,6 +96,44 @@ comp_index=0
 comp_cmd_item=""
 # 最后提示的命令文本
 global_completion_txt=""
+
+# 初始化cmd_list
+_init_cmd_list() {
+    local original_cmd="$1"
+    
+    cmd_list=()
+
+
+    # 如果存在本地目录存在则读取文件提示
+    if [ -d ~/.bash_completion ]; then
+        ignore_complete_file_list=()
+        if [ -f ~/.bash_completion/bash_completion_ignore ]; then
+            ignore_complete_file_list=($(cat ~/.bash_completion/bash_completion_ignore))
+        fi
+        complete_file_list=($(ls ~/.bash_completion))
+        for complete_file in "${complete_file_list[@]}"; do
+            # 如果在忽略文件中则跳过
+            if [[ "${ignore_complete_file_list[@]}" =~ "${complete_file}" ]]; then
+                continue
+            fi
+
+            
+            if [[ "${complete_file}" != *__all && "${complete_file}" != "$original_cmd" ]]; then
+                continue
+            fi
+
+            while read completion_cmd_context
+            do
+                if [[ "$completion_cmd_context" != ${original_cmd}* ]]; then
+                    continue
+                fi
+                cmd_list[${#cmd_list[@]}]="$completion_cmd_context"
+            done  < ~/.bash_completion/$complete_file
+    
+        done
+    fi
+
+}
 
 _complete_func() {
 
@@ -107,40 +187,11 @@ _complete_func() {
 
     # 将之前的提示给清理掉
     global_completion_txt=""
-    cmd_list=()
 
     local original_cmd=${COMP_WORDS[0]}
-
-    # cmd_list 编写规则:
-    # 格式如下 : cmd_list=("$cmd_item $cmd_item  '{option:value}'  ...")
-    # 1. cmd_list中的每个元素为提示的完整命令行
-    # 4. 如果cmd_item带空格可以用''(单引号)包裹
-    # 3. 选项模式: cmd_item支持{option:value}形式, 该形式,并且不比较与原始的shell命令, option支持如下情况
-    #   3.1 {value} : 原样输出{value}目的是为了提示后面输入
-    #   3.2 {cmd:value} : 输出value执行结果即 eval $value
-    #   3.3 {-filenames} : 非提示, 但是将 complete 改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
-    #   3.4 {or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
-    #       即 cmd_item1 后可以提示cmd_item2, 反之亦然
-    #   3.5 {and:("cmd_item1" "cmd_item2" "cmd_item3" ...)}, 该形式需要按照顺序匹配cmd_item1 cmd_item2 cmd_item3,
-    #       即 cmd_item1 会提示出 cmd_item2 cmd_item3 , 但cmd_item1 cmd_item2 会提示出 cmd_item3
-    #       但 直接输入 cmd_item2 不匹配, 因为 cmd_item2 前无 cmd_item1 (需要完全按照匹配)
-    #       and 匹配模式一般用于kv的匹配比如 docker -v docker目录:宿主机目录 , 其中-v docker目录:宿主机目录就是 kv
-    # 通用的命令提示如下
-    # 1. {cmd:_comp_file_direct_} : 提示的文件列表
+    _init_cmd_list "$original_cmd"
 
 
-
-    if [ -e ~/.bash_completion/$original_cmd ]; then
-        local completion_cmd_context
-        while read completion_cmd_context
-        do
-
-            if [[ "$completion_cmd_context" == \#* || -z $completion_cmd_context ]]; then
-                continue
-            fi
-            cmd_list[${#cmd_list[@]}]="$completion_cmd_context"
-        done  < ~/.bash_completion/$original_cmd
-    fi
 
     COMPREPLY=()
     local command_name="${COMP_WORDS[COMP_CWORD]}"
@@ -248,7 +299,15 @@ _is_match_cmd() {
 }
 
 # 是否命令行匹配
-# result: true: 匹配成功, false: 匹配失败  
+# result:   
+#      [0,200]: 匹配成功
+#       (200,): 匹配失败
+#         (,0): 匹配失败
+#   [100, 200]: and模式返回
+#          100: and模式完全匹配,
+#   (100, 200): and模式不完全匹配则返回 100 + n (匹配到地n个(and模式), 从1开始)
+#          200: and模式完全匹配, 而且匹配完成(整个命令匹配完)
+#   (100, 200]: and模式匹配, 已经有提示,也由and模式自己提供提示
 _is_match_cmd_simple() {
 
     local match_cmd_item="$1" 

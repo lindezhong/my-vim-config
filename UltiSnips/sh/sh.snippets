@@ -596,7 +596,7 @@ do
 done  < ${1:file_path}
 endsnippet
 
-snippet readCommand "读取命令执行结果, 每次读取一行"
+snippet readCommand "读取命令执行结果, 每次读取一行, >() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
 while read ${2:line}
 do
     $0
@@ -623,3 +623,27 @@ snippet template_engine "使用eval命令实现模板引擎,模板文件中出�
 eval "echo \"$(cat ${1:模板引擎文件路径})\" > ${2:生成文件路径}"
 $0
 endsnippet
+
+# #tee
+snippet teeDisable "禁用, 正常输出标准输出和标准异常同时重定向到文件, 区分标准输出和标准异常, 这个操作只能在执行命令中使用, 不能在shell脚本中执行, 否则会导致shell没法终止，>() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
+${1:command} > >(tee ${2:stdout}) 2> >(tee ${3:stderr} >&2)
+禁用该提示, 这个提示会导致shell无法正常终止因为该操作是tee读取文件所以会一直等待, 只能在调用脚本的时候使用
+endsnippet
+
+snippet teeOutput "正常输出标准输出和标准异常同时重定向到文件"
+${1:command} | tee ${2:output}
+$0
+endsnippet
+
+snippet teeOutErr "正常输出标准输出和标准异常同时重定向到文件, 区分标准输出和标准异常文件, 1. 先将标准输出和标准异常输出到一个临时文件 2. 使用tee读取临时的标准输出和标准异常到期望的文件上 3. tee最后要使用 & 异步执行是因为tee在读取文件的时候会一直等待 4. 最后要调用sync命令确保所有缓冲区中的数据都被写入到磁盘"
+tee '$2' < "$2.tmp" &
+tee '$3' < "$3.tmp" >&2 &
+${1:command} > ${2:stdout}.tmp 2> ${3:stderr}.tmp 
+sync
+$0
+endsnippet
+
+# #mkfifo
+snippet mkfifo "mkfifo 是一个用于创建命名管道（FIFO，First In First Out）的命令. 可以通过-m指定管道权限, 比如 `mkfifo -m 644 my_pipe` 在 Unix/Linux 系统中，命名管道是一种特殊的文件，允许两个或多个进程之间进行通信。通过使用命名管道，一个进程可以将数据写入管道，而另一个进程可以从该管道中读取数据，从而实现进程间通信。1. 创建命名管道 `mkfifo my_pipe` 2. 写入数据: `echo 'Hello, World!' > my_pipe` 3. 读取数据: 在另一个终端中，可以使用 cat 或其他命令从命名管道读取数据：`cat < my_pipe` "
+endsnippet
+

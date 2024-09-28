@@ -208,8 +208,6 @@ imap <C-r> <Esc>:%s///g
 " :help 'sessionoptions'
 " 去除blank(恢复编辑无名缓冲区的窗口)保证不会因为目录导致问题
 set sessionoptions-=blank
-set sessionoptions-=buffers
-set sessionoptions-=options
 
 let g:MkSessionDirectory = expand('~') .  "/.vim-session"
 

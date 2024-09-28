@@ -64,6 +64,9 @@ colorscheme default
 autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
 " coc浮动窗口颜色
 autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
+" vim退出的时候自动保持 session , 在启动vim的时候可以使用 `LoadDirectoryMkSession` 加载
+autocmd VimEnter * call InitDirectoryMkSession()
+autocmd VimLeave * call SaveDirectoryMkSession()
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """"""""""""""""""""  在终端背景是暗色但的时候启用以下配置""""""""""""""""""
@@ -99,21 +102,20 @@ set nocompatible
 " :ls 查看缓冲文件
 nmap <silent><C-Right> :bn <CR>
 nmap <silent><C-Left> :bp <CR>
-nmap <silent><Esc><w> :bd <CR>
 imap <silent><C-Right> <Esc>`^:bn <CR>i
 imap <silent><C-Left> <Esc>`^:bp <CR>i
-imap <silent><Esc><w> <Esc>`^:bd <CR>i
 nmap <silent><C-l> :bn <CR>
 nmap <silent><C-h> :bp <CR>
 imap <silent><C-l> <Esc>`^:bn <CR>i
 imap <silent><C-h> <Esc>`^:bp <CR>i
-" 缓冲文件兼容ubuntu
-nmap <silent><A-Right> :bn <CR>
-nmap <silent><A-Left> :bp <CR>
-nmap <silent><A-w> :bd <CR>
-imap <silent><A-Right> <Esc>`^:bn <CR>i
-imap <silent><A-Left> <Esc>`^:bp <CR>i
-imap <silent><A-w> <Esc>`^:bd <CR>i
+" 关闭缓冲文件
+nmap <silent><C-n> :bd <CR>
+imap <silent><C-n> <Esc>`^:bd <CR>i
+" 关闭所有的缓冲文件
+" nmap <silent><C-A-q> :bufdo bd <CR>
+" imap <silent><C-A-q> <Esc>`^:bufdo bd <CR>i
+
+
 
 " 窗口跳转
 nmap <silent><Esc><C-h> <C-w><C-h>
@@ -194,6 +196,69 @@ nnoremap <C-y> "*p
 " | printf()    | 格式化字符串打印   |
 nmap <C-r> :%s///g
 imap <C-r> <Esc>:%s///g
+
+
+" ================= 自定义函数 =======================
+
+" 如果vim打开的是一个文件夹则不会保存 mksession
+" mksession 保存路径, 如果该目录不存在则会导致 SaveDirectoryMkSession LoadDirectoryMkSession 失效
+" sessionoptions，用于指定保存会话的内容，默认值如下, 
+" set sessionoptions=blank,buffers,curdir,folds,help,options,tabpages,winsize,terminal
+" 使用以下命令，可以查看关于会话选项的帮助信息：
+" :help 'sessionoptions'
+" 去除blank(恢复编辑无名缓冲区的窗口)保证不会因为目录导致问题
+set sessionoptions-=blank
+
+let g:MkSessionDirectory = expand('~') .  "/.vim-session"
+
+" 初始化g:MkSessionFile(当前需要保存的mksession路径)
+function! InitDirectoryMkSession()
+
+    if  expand('%:p') != "" || !isdirectory(g:MkSessionDirectory)
+        " expand('%:p')为当前文件的完整路径
+        " 如果为 '' 则说明是一个目录, 不为空是一个文件
+        " 如果vim打开的是一个文件直接结束, 这个方法只是保存文件夹得 mksession
+        " 如果数据存储目录不存在则也不做任何事情
+        return
+    endif
+
+    " 获取当前文件夹路径并且替换 / -> _
+    let current_directory = substitute(expand('%:p:h'), '/', '_', 'g')
+    let g:MkSessionFile = g:MkSessionDirectory . "/" . current_directory
+
+    call LoadDirectoryMkSession()
+
+endfunction
+
+
+" 保存mksession
+function! SaveDirectoryMkSession()
+
+    if !exists("g:MkSessionFile")
+        " 如果mksession文件路径没定义则不保存mksession
+        " 该变量由InitDirectoryMkSession定义,所以执行SaveDirectoryMkSession前需要先执行LoadDirectoryMkSession
+        return
+    endif
+
+    execute 'silent! mksession! ' . g:MkSessionFile
+
+endfunction
+
+" 加载mksession
+function! LoadDirectoryMkSession()
+
+    if !exists("g:MkSessionFile") || !filereadable(g:MkSessionFile)
+        " 如果mksession文件路径没定义则不保存mksession
+        " 该变量由InitDirectoryMkSession定义,所以执行LoadDirectoryMkSession前需要先执行LoadDirectoryMkSession
+        return
+    endif
+
+    execute 'silent! source ' . g:MkSessionFile
+
+endfunction
+
+command! LoadSession call LoadDirectoryMkSession()
+
 
 
 " =================== Vimspector =====================

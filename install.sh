@@ -17,6 +17,8 @@ home_path=$(readlink -f $(dirname "$0"))
 # 安装Vim-plug
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
+# 创建mksession目录用于自动保存mksession
+mkdir -p ~/.vim-session
 
 # 顺带兼容 nvim
 # nvim vim-plug

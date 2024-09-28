@@ -552,6 +552,7 @@ let g:coc_global_extensions = [
             \ 'coc-css',
             \ 'coc-tsserver',
             \ 'coc-clangd',
+            \ 'coc-go',
             \ 'coc-sh'
             \ ]
 " # 插件安装需要做的事

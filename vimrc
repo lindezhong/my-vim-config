@@ -234,7 +234,7 @@ endfunction
 " 保存mksession
 function! SaveDirectoryMkSession()
 
-    if !exists("g:MkSessionFile")
+    if !exists("g:MkSessionFile") || g:MkSessionFile == ''
         " 如果mksession文件路径没定义则不保存mksession
         " 该变量由InitDirectoryMkSession定义,所以执行SaveDirectoryMkSession前需要先执行LoadDirectoryMkSession
         return
@@ -258,6 +258,43 @@ function! LoadDirectoryMkSession()
 endfunction
 
 command! LoadSession call LoadDirectoryMkSession()
+command! SaveSession call SaveDirectoryMkSession()
+
+" 静默退出不触发 `SaveDirectoryMkSession` 逻辑
+function! Exit()
+    if exists("g:MkSessionFile")
+        if filereadable(g:MkSessionFile)
+            " 如果老的session文件存在需要清理掉
+            call delete(g:MkSessionFile)
+        endif
+         " 将原始变量置为空
+         let g:MkSessionFile = ''
+    endif
+
+    quit
+endfunction
+" 静默退出不触发 `SaveDirectoryMkSession` 逻辑
+" 使用 `:Exit` 触发
+command! Exit call Exit()
+
+
+" 连续执行退出 `:quit` n次
+function! Quit(num)
+    " 将输入转换为整数
+    let n = a:num
+
+    " 检查输入是否为有效整数
+    if !empty(n) && n =~ '^\d\+$'
+        for i in range(1, n)
+            quit
+        endfor
+    else
+        echo "请输入一个有效的整数！"
+    endif
+endfunction
+" 连续执行退出 `:quit` n次
+" 使用 `:Q n` 触发
+command! -nargs=1 Q call Quit(<f-args>)
 
 
 

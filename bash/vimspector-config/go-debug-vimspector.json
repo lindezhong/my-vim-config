@@ -1,0 +1,22 @@
+{
+  "note_dlv": "可以使用 `dlv exec --headless --listen=:2345 --api-version=2 --accept-multiclient ./go应用path` 启动 go",
+  "note_build": "需要使用 `go build -gcflags 'all=-N -l' -o your-executable ./path/to/your/package` 编译添加调试信息, -N 选项禁用优化。 , -l 选项禁用内联，使调试更容易",
+  "configurations": {
+    "run": {
+      "adapter": "vscode-go",
+      "filetypes": [ "go" ],
+      "configuration": {
+        "request": "attach",
+        "mode": "remote",
+        "host": "${host:localhost}",
+        "port": "${port:2345}",
+        "pathMappings": {
+          "remote": "local"
+        }
+
+      }
+    }
+  }
+}
+
+

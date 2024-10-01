@@ -1,0 +1,25 @@
+# 初始化go项目, package 例子 : example/hello
+# 会在当前目录生成一个 go.mod 文件用于定义模块的依赖管理
+go mod init {package}
+# go mod tidy 是 Go 语言中用于管理依赖项的命令，它的主要作用是清理和整理 Go 模块的依赖项
+go mod tidy
+# 运行单元测试
+go test
+# 编译
+go build
+# 显示go install 的路径
+# 需要在 PATH 中配置过 go path 而且存在 GOPATH 环境变量比如在 `~/.bashrc` 中配置:
+# export GOPATH='/opt/go'
+# export PATH=$PATH:${GOPATH}/bin
+go list -f '{{.Target}}'
+# install 会把程序安装到  go list -f '{{.Target}}'
+go install
+# 添加依赖包会修改 go.mod , go.sum 内容
+go get {package}
+# 添加某个目录到工作空间(第一次运行), 添加文件 go.work
+go work init {cmd:_comp_file_direct_}
+# 添加某个目录到工作空间, 会修改 go.work 内容 (需要先执行 go work init)
+go work use {cmd:_comp_file_direct_}
+# go 运行
+go run {cmd:_comp_file_direct_}
+

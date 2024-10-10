@@ -1,3 +1,24 @@
 # 安装方式 `sudo apt install sox`
 # 合并音频 flac 文件 part1.flac part2.flac 合并到 output.flac 例子如下
-# `sox part1.flac part2.flac output.flac`
+# sox part1.flac part2.flac output.flac
+# 剪辑音频: 这条命令将音量提高两倍，并从头开始剪辑前 30 秒的音频。
+# sox input.flac output.flac vol 2.0 trim 0 30
+# 剪辑音频: 这条命令将音量提高两倍，并从头开始剪辑倒数 10 秒的音频。
+# sox input.flac output.flac vol 2.0 trim 0 -10
+# 剪辑音频: 保留最后10秒音频
+# sox input.flac output.flac trim -10
+# 转换格式
+# sox input.mp3 output.flac
+# 去除空白音
+# silence：表示使用静音检测功能。
+# -l：长静音检测。
+# 1：指要检测的静音段数。
+# 0.1：静音持续时间（单位：秒），表示最短的静音时间。
+# 0.5%：静音阈值，低于该音量的音频被视为静音。
+# -1：表示删除最后的静音段。
+# 0.1 和 0.5% 是用于最后一段静音的检测参数。
+# sox input.mp3 output.mp3 silence -l 1 0.1 0.5% -1 0.1 0.5%
+
+
+
+

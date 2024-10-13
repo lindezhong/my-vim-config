@@ -10,6 +10,17 @@ alias mvndebug='export MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunj
 alias 2fa_git='python -c "import pyotp; print(pyotp.TOTP(\"3NQ2ZK7MF2GQP4LE\").now())"'
 
 
+# 对于环境变量只能影响到当前用户, 所以使用 sudo 的时候代理失效所以需要
+# 编辑 sudoers 文件：可以配置 sudo 允许某些环境变量被传递。这需要使用 visudo 命令进行编辑。
+# 具体步骤如下
+# ```shell
+# # 1. 打开sudoers
+# $ sudo visudo
+# # 2. 添加如下行告诉 sudo 保留 proxy 相关的环境变量
+# Defaults    env_keep += "http_proxy"
+# Defaults    env_keep += "https_proxy"
+# Defaults    env_keep += "socks5_proxy"
+# ```
 proxy () {
     export http_proxy="http://localhost:20181"
     export https_proxy=$http_proxy

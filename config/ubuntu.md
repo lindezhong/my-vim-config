@@ -42,3 +42,28 @@ gsettings set "org.gnome.desktop.wm.keybindings" switch-to-workspace-left "['']"
 gsettings set "org.gnome.desktop.wm.keybindings" switch-to-workspace-right "['']"
 gsettings set "org.gnome.desktop.wm.keybindings" move-to-workspace-right "['']"
 gsettings set "org.gnome.desktop.wm.keybindings" move-to-workspace-left "['']"
+
+# 使用命令行连接wifi
+
+1. 安装wpasupplicant
+sudo apt install wpasupplicant
+2. 将wifi的账号(essid) 和 密码输入文件
+wpa_passphrase essid password | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf
+3. 重启wifi 
+wpa_cli -i wlan0 reconfigure
+4. 完整配置如下, 支持多个wifi秘密 priority为优先级，值越大，优先级越高。
+```config
+country=CN
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+network={
+    ssid="Honor 10"
+    psk="zyj123#.."
+    priority=5
+} 
+network={
+    ssid="company"
+    psk="companyPwd"
+    priority=4
+}
+```

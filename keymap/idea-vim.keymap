@@ -1,0 +1,41 @@
+" 通过 ID 或键盘映射模式查找 IDE 操作（例如:actionlist extract）:actionlist C-D
+map <C-Down> <Action>(GotoDeclaration)
+map <C-Up> <Action>(GotoDeclaration)
+map <C-Left> <Action>(PreviousTab)
+map <C-Right> <Action>(NextTab)
+map <C-j> <Action>(GotoDeclaration)
+map <C-k> <Action>(GotoDeclaration)
+map <C-h> <Action>(PreviousTab)
+map <C-l> <Action>(NextTab)
+
+map <A-Down> <Action>(GotoImplementation)
+map <A-Up> <Action>(GotoDeclaration)
+map <A-Left> <Action>(Back)
+map <A-Right> <Action>(Forward)
+map <A-j> <Action>(GotoImplementation)
+map <A-k> <Action>(GotoDeclaration)
+map <A-h> <Action>(Back)
+map <A-l> <Action>(Forward)
+
+map <S-j> <S-Down>
+map <S-k> <S-Up>
+map <S-h> <S-Left>
+map <S-l> <S-Right>
+
+map <C-p> <Action>(SearchEverywhere)
+map <C-A-p> <Action>(FindInPath)
+map <C-y> <Action>(EditorCopy)<ESC>
+map <C-S-c> <Action>(EditorCopy)<ESC>
+map <C-S-v> <Action>(EditorPaste)
+imap <C-S-v> <Action>(EditorPaste)
+map <C-d> <Action>(QuickJavadoc)
+map <C-A-i> <Action>(CallHierarchy)
+map <C-Enter> <Action>(QuickFixes)
+map <C-w> <Action>(CloseContent)
+
+map <S-u> :redo<CR>
+" debug
+map <F9> <Action>(Resume)
+map <PageUp> <Action>(StepOver)
+map <PageDown> <Action>(StepInto)
+

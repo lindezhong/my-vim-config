@@ -1,6 +1,7 @@
 # w3m vim-like keymap file
 #   by @sansna
 
+# 可以通过 `:H` 显示帮助(这里有可以设置的快捷键,该快捷键被修改了,原始是`H`)
 ########## invalidate defaults ##########
 keymap K NULL
 keymap J NULL

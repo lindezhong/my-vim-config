@@ -48,6 +48,11 @@ export PS4='\033[0;33m+ $(date +"%F %T.%3N") $BASH_SOURCE:$LINENO: \033[0m '
 # 兼容部分应用在 ssh -X 情况下无法打开图形界面问题(比如firefox)
 export XAUTHORITY=$HOME/.Xauthority
 
+# coc
+# coc-java 指定lombok jar的的路径该路径需要自己创建,jar需要需要lombok-${version}.jar格式
+# lombok官网:https://projectlombok.org/
+export LOMBOK_PATH="~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar"
+
 export JAVA_HOME=/opt/jdk8
 export CLASSPATH=.:${JAVA_HOME}/lib/dt.jar:${JAVA_HOME}/lib/tools.jar
 export MAVEN_HOME=/opt/apache-maven-3.9.6

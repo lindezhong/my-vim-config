@@ -36,6 +36,8 @@ set maxmempattern=2000
 if has('nvim')
     " 设置光标样式, 让nvim和vim保持一样都是闪烁的方块
     set guicursor=n-v-c-i:block
+    " 设置底部状态栏样式, 0: 不显示状态栏 , 1: 仅在打开多个窗口时显示 , 2: 始终显示（即使只有一个窗口）
+    set laststatus=1
 else
 endif
 
@@ -583,7 +585,6 @@ let g:coc_global_extensions = [
             \ 'coc-ultisnips',
             \ 'coc-java',
             \ 'coc-java-debug',
-            \ 'coc-java-lombok',
             \ 'coc-pyright',
             \ 'coc-html',
             \ 'coc-css',
@@ -606,6 +607,10 @@ let g:coc_global_extensions = [
 " 如果想要有英文翻译将 coc/coc-word 下的所有文件复制到 ~/.config/coc/extensions/node_modules/coc-word
 " ## coc-ultisnips-select
 " 如果想要选择snippets后自动展开snippets将 coc/coc-ultisnips-select 下的所有文件复制到 ~/.config/coc/extensions/node_modules/coc-ultisnips-select
+" ## coc-java
+" 需要自己手动下载lombok jar, 并且配置环境变量LOMBOK_PATH
+" 并且下载后的lombok的jar包需要保持 lombok-${version}.jar 格式
+" 比如 export LOMBOK_PATH="~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar"
 
 " coc-markdown-preview-enhanced coc markdown 预览插件
 " 如果需要隐藏头部title(由插件 coc-webview 提供) 修改文件 ~/.config/coc/extensions/node_modules/coc-webview/lib/index.js

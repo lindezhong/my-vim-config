@@ -38,7 +38,12 @@ noproxy () {
 
 
 # 在 Bash shell 中，PS4 是一个环境变量，用来定义在开启 shell 脚本调试模式 (set -x) 时显示的提示符
-export PS4='\033[0;33m+ $(date +%T.%3N) $BASH_SOURCE:$LINENO:${FUNCNAME[0]}() :\033[0m '
+# ${FUNCNAME[0]} : 打印当前正在执行的方法, 但有些linux系统不存在该参数需要特殊处理
+# 打印方法名, 如果方法名存在的话
+# export PS4='\033[0;33m+ $(date +"%F %T.%3N") $BASH_SOURCE:$LINENO:$( [ -z ${FUNCNAME} ] || echo "${FUNCNAME}():" ) \033[0m '
+# export PS4='\033[0;33m+ $(date +"%F %T.%3N") $BASH_SOURCE:$LINENO:${FUNCNAME} \033[0m '
+# 不打印方法名
+export PS4='\033[0;33m+ $(date +"%F %T.%3N") $BASH_SOURCE:$LINENO: \033[0m '
 
 # 兼容部分应用在 ssh -X 情况下无法打开图形界面问题(比如firefox)
 export XAUTHORITY=$HOME/.Xauthority

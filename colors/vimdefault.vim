@@ -1,5 +1,16 @@
+" 这个配置由 `:hi` 获取并转换而来
+" 请获取干净的配置, 即在没有配置过任何 imrc和安装过vim插件的情况下执行
+" 1. 打开vim, 执行 `:hi` 获取当前vim的样式并且复制出来
+" 2. 去除 `xxx` (这个原来是用在展示颜色的无用) , 正则表达式: `:%s/xxx//g`
+" 3. 在开头添加`hi`正则表达式: `:%s/\n/\rhi /g` , 但需要手动补偿第一行的hi
+" 4. 转换 cleared 模式的配色比如, `hi Table           cleared` 
+"   4.1 如果想要去除cleared 模式正则表达式: `:%s/hi\s\(\S\+\)\s\+cleared.*\n//g`
+"   4.2 如果想保留cleared正则表达式: `:%s/hi\s\(\S\+\)\s\+cleared.*\n/hi clear \1\r/g` , 执行后变为`hi clear Table`
+" 5. 转换 links 模式比如 `hi shHereDoc16     links to shRedir` , 执行后变成 `hi link shHereDoc16 shRedir`
+"   正则表达式: `:%s/hi\s\(\S\+\)\s\+links\s\+to\s\+\(\S\+\)\n/hi link \1 \2\r/g`
+
 hi SpecialKey      term=bold ctermfg=4 guifg=Blue
-hi EndOfBuffer term=bold ctermfg=12 gui=bold guifg=Blue 
+hi link EndOfBuffer NonText
 hi NonText         term=bold ctermfg=12 gui=bold guifg=Blue
 hi Directory       term=bold ctermfg=4 guifg=Blue
 hi ErrorMsg        term=standout ctermfg=15 ctermbg=1 guifg=White guibg=Red
@@ -11,8 +22,8 @@ hi LineNr          term=underline ctermfg=130 guifg=Brown
 hi clear LineNrAbove
 hi clear LineNrBelow
 hi CursorLineNr    term=bold cterm=underline ctermfg=130 gui=bold guifg=Brown
-hi CursorLineSign term=standout ctermfg=4 ctermbg=248 guifg=DarkBlue guibg=Grey 
-hi CursorLineFold term=standout ctermfg=4 ctermbg=248 guifg=DarkBlue guibg=Grey 
+hi link CursorLineSign SignColumn
+hi link CursorLineFold FoldColumn
 hi Question        term=standout ctermfg=2 gui=bold guifg=SeaGreen
 hi StatusLine      term=bold,reverse cterm=bold,reverse gui=bold,reverse
 hi StatusLineNC    term=reverse cterm=reverse gui=reverse
@@ -44,7 +55,7 @@ hi TabLineFill     term=reverse cterm=reverse gui=reverse
 hi CursorColumn    term=reverse ctermbg=7 guibg=Grey90
 hi CursorLine      term=underline cterm=underline guibg=Grey90
 hi ColorColumn     term=reverse ctermbg=224 guibg=LightRed
-hi QuickFixLine term=reverse ctermbg=11 guibg=Yellow 
+hi link QuickFixLine Search
 hi StatusLineTerm  term=bold,reverse cterm=bold ctermfg=15 ctermbg=2 gui=bold guifg=bg guibg=DarkGreen
 hi StatusLineTermNC  term=reverse ctermfg=15 ctermbg=2 guifg=bg guibg=DarkGreen
 hi Cursor          guifg=bg guibg=fg
@@ -64,27 +75,28 @@ hi Underlined      term=underline cterm=underline ctermfg=5 gui=underline guifg=
 hi Ignore          ctermfg=15 guifg=bg
 hi Error           term=reverse ctermfg=15 ctermbg=9 guifg=White guibg=Red
 hi Todo            term=standout ctermfg=0 ctermbg=11 guifg=Blue guibg=Yellow
-hi String term=underline ctermfg=1 guifg=Magenta 
-hi Character term=underline ctermfg=1 guifg=Magenta 
-hi Number term=underline ctermfg=1 guifg=Magenta 
-hi Boolean term=underline ctermfg=1 guifg=Magenta 
-hi Float        term=underline ctermfg=1 guifg=Magenta
-hi Function term=underline ctermfg=6 guifg=DarkCyan 
-hi Conditional term=bold ctermfg=130 gui=bold guifg=Brown 
-hi Repeat term=bold ctermfg=130 gui=bold guifg=Brown 
-hi Label term=bold ctermfg=130 gui=bold guifg=Brown 
-hi Operator term=bold ctermfg=130 gui=bold guifg=Brown 
-hi Keyword term=bold ctermfg=130 gui=bold guifg=Brown 
-hi Exception term=bold ctermfg=130 gui=bold guifg=Brown 
-hi Include term=underline ctermfg=5 guifg=#6a0dad 
-hi Define term=underline ctermfg=5 guifg=#6a0dad 
-hi Macro term=underline ctermfg=5 guifg=#6a0dad 
-hi PreCondit term=underline ctermfg=5 guifg=#6a0dad 
-hi StorageClass term=underline ctermfg=2 gui=bold guifg=SeaGreen 
-hi Structure term=underline ctermfg=2 gui=bold guifg=SeaGreen 
-hi Typedef term=underline ctermfg=2 gui=bold guifg=SeaGreen 
-hi Tag term=bold ctermfg=5 guifg=#6a5acd 
-hi SpecialChar term=bold ctermfg=5 guifg=#6a5acd 
-hi Delimiter term=bold ctermfg=5 guifg=#6a5acd 
-hi SpecialComment term=bold ctermfg=5 guifg=#6a5acd 
-hi Debug term=bold ctermfg=5 guifg=#6a5acd 
+hi link String Constant
+hi link Character Constant
+hi link Number Constant
+hi link Boolean Constant
+hi link Float Number
+hi link Function Identifier
+hi link Conditional Statement
+hi link Repeat Statement
+hi link Label Statement
+hi link Operator Statement
+hi link Keyword Statement
+hi link Exception Statement
+hi link Include PreProc
+hi link Define PreProc
+hi link Macro PreProc
+hi link PreCondit PreProc
+hi link StorageClass Type
+hi link Structure Type
+hi link Typedef Type
+hi link Tag Special
+hi link SpecialChar Special
+hi link Delimiter Special
+hi link SpecialComment Special
+hi link Debug Special
+

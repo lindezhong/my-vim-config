@@ -38,6 +38,8 @@ if has('nvim')
     set guicursor=n-v-c-i:block
     " 设置底部状态栏样式, 0: 不显示状态栏 , 1: 仅在打开多个窗口时显示 , 2: 始终显示（即使只有一个窗口）
     set laststatus=1
+    " 如果需要同步vim的默认颜色只要把 colors/vimdefault.vim 覆盖
+    " /usr/share/nvim/runtime/colors/default.vim 就好
 else
 endif
 

@@ -214,6 +214,10 @@ imap <C-r> <Esc>:%s///g
 " :help 'sessionoptions'
 " 去除blank(恢复编辑无名缓冲区的窗口)保证不会因为目录导致问题
 set sessionoptions-=blank
+if has('nvim')
+    " nvim vim-session 需要option否则打开第一个文件为普通文件
+    set sessionoptions+=options
+endif
 
 let g:MkSessionDirectory = expand('~') .  "/.vim-session"
 
@@ -230,7 +234,13 @@ function! InitDirectoryMkSession()
 
     " 获取当前文件夹路径并且替换 / -> _
     let current_directory = substitute(expand('%:p:h'), '/', '_', 'g')
-    let g:MkSessionFile = g:MkSessionDirectory . "/" . current_directory
+    " vim 和 nvim 加载不同的session文件, 因为会冲突
+    if has('nvim')
+        let g:MkSessionFile = g:MkSessionDirectory . "/" . current_directory . ".nvim"
+    else
+        let g:MkSessionFile = g:MkSessionDirectory . "/" . current_directory . ".vim"
+    endif
+
 
     call LoadDirectoryMkSession()
 

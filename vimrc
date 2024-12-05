@@ -40,6 +40,8 @@ if has('nvim')
     set laststatus=1
     " 如果需要同步vim的默认颜色只要把 colors/vimdefault.vim 覆盖
     " /usr/share/nvim/runtime/colors/default.vim 就好
+    " nvim 0.10 默认开启了真彩色, 但这个配色有点丑设置成关闭 
+    set notermguicolors
 else
 endif
 

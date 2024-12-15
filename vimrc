@@ -1,7 +1,8 @@
 " 使用 :PlugInstall 安装插件, :PlugUpdate 更新插件 
 call plug#begin('~/.vim/plugged')
 Plug 'Yggdroot/LeaderF'
-Plug 'jiangmiao/auto-pairs'
+" 自动各种括号补齐, 但在vim-session恢复的时候有bug, 去除掉
+" Plug 'jiangmiao/auto-pairs'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'preservim/nerdcommenter'
 Plug 'preservim/nerdtree'
@@ -214,10 +215,9 @@ imap <C-r> <Esc>:%s///g
 " :help 'sessionoptions'
 " 去除blank(恢复编辑无名缓冲区的窗口)保证不会因为目录导致问题
 set sessionoptions-=blank
-if has('nvim')
-    " nvim vim-session 需要option否则打开第一个文件为普通文件
-    set sessionoptions+=options
-endif
+" 关闭option, 这个回导致有时候回有一些bug, 但需要保留localoptions, 这个能保留filetype(文件格式)
+set sessionoptions+=localoptions
+set sessionoptions-=options
 
 let g:MkSessionDirectory = expand('~') .  "/.vim-session"
 

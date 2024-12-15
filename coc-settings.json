@@ -15,6 +15,7 @@
   ],
   "note.inlayHint.position": "禁止有些字符串显示灰底",
   "inlayHint.position": "eol",
+  "inlayHint.enable": false,
   "java.jdt.ls.lombokSupport.enabled": true,
   "note.java.jdt.ls.vmargs": "通过javaagent配置lombok, 该lombok的jar要为lombok-${version}.jar格式, lombok官网:https://projectlombok.org/",
   "note.LOMBOK_PATH": "LOMBOK_PATH为要为lombok的jar路径,配置在env中,lombok-${version}.jar格式",

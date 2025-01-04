@@ -43,6 +43,23 @@ if has('nvim')
     " /usr/share/nvim/runtime/colors/default.vim 就好
     " nvim 0.10 默认开启了真彩色, 但这个配色有点丑设置成关闭 
     set notermguicolors
+
+
+    " 设置垂直选项卡分隔符为竖线字符
+    set fillchars+=vert:\|
+    " 设置水平分隔符为等号字符
+    " set fillchars+=horiz:=
+    " 设置折叠线为点字符
+    set fillchars+=fold:-
+    " 设置垂直和水平分隔符为不同的字符
+    " set fillchars+=vert:│,horiz:─
+    " 设置当前窗口边界为星号字符
+    " set fillchars+=stl:*,stlnc:*
+    " 设置不同窗口之间的分隔符为加号字符
+    set fillchars+=eob:~
+    " 配置分割符颜色, vim为 VertSplit 颜色组, 但nvim为WinSeparator
+    highlight WinSeparator term=reverse cterm=reverse gui=reverse
+
 else
 endif
 

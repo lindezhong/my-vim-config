@@ -381,13 +381,13 @@ fi
 endsnippet
 
 snippet ifDirExist "判断目录(目录不能用''包裹)是否存在，要判断不存在加 !"
-if [ -d ${1:目录地址} ]; then
+if [ -d "${1:目录地址}" ]; then
     $0
 fi
 endsnippet
 
 snippet ifFileExist "判断文件(文件不能用''包裹)是否存在，要判断不存在加 !"
-if [ -f ${1:文件地址} ]; then
+if [ -f "${1:文件地址}" ]; then
     $0
 fi
 endsnippet

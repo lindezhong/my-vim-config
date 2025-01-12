@@ -45,5 +45,5 @@ rsync -azv --progress {source} {destination}
 rsync -azv -e {协议} --progress {source} {destination}
 # -n参数模拟命令执行的结果，并不真的执行命令。-v参数则是将结果输出到终端，这样就可以看到哪些内容会被同步。
 # 由于 rsync 默认使用文件大小和修改时间决定文件是否需要更新，所以-a比-r更有用。
-rsync -anv source/ destination
+rsync -anv {source} {destination}
 

@@ -13,6 +13,8 @@
           "path": "/opt/jdk17"
       }
   ],
+  "note.callHierarchy.enableTooltip": "关闭调用层次结构文件路径提示",
+  "callHierarchy.enableTooltip": false,
   "note.inlayHint.position": "禁止有些字符串显示灰底",
   "inlayHint.position": "eol",
   "inlayHint.enable": false,

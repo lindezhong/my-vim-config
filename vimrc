@@ -1,22 +1,54 @@
 " 使用 :PlugInstall 安装插件, :PlugUpdate 更新插件 
 call plug#begin('~/.vim/plugged')
+" 查找文件插件
 Plug 'Yggdroot/LeaderF'
+" auto-pairs配置(自动匹配括号) jiangmiao/auto-pairs
 " 自动各种括号补齐, 但在vim-session恢复的时候有bug, 去除掉
 " Plug 'jiangmiao/auto-pairs'
+" coc.nvim 提供vscode的vim移植
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" NerdCommenter配置(生成注释) preservim/nerdcommenter
+" count\cc 注释 count默认1
+" count\cu 取消注释 count默认1
+" count\ci 注释，取消注释 count默认1
 Plug 'preservim/nerdcommenter'
+" NERDTree配置(目录树) preservim/nerdtree
+" 目录树的使用主要通过在vim的command模式下键入如下命令，即可达到相应的效果。
+" ?: 快速帮助文档
+" o: 打开一个目录或者打开文件，创建的是 buffer，也可以用来打开书签
+" go: 打开一个文件，但是光标仍然留在 NERDTree，创建的是 buffer
+" t: 打开一个文件，创建的是Tab，对书签同样生效
+" T: 打开一个文件，但是光标仍然留在 NERDTree，创建的是 Tab，对书签同样生效
+" i: 水平分割创建文件的窗口，创建的是 buffer
+" gi: 水平分割创建文件的窗口，但是光标仍然留在 NERDTree
+" s: 垂直分割创建文件的窗口，创建的是 buffer
+" gs: 和 gi，go 类似
+" x: 收起当前打开的目录
+" X: 收起所有打开的目录
+" e: 以文件管理的方式打开选中的目录
+" D: 删除书签
+" m: 文件操作,新增文件/文件夹，删除文件/文件夹
 Plug 'preservim/nerdtree'
+" ultisnips 代码片段
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
+" 添加vim缓冲区标签(在vim最顶部出现打开的文件)
 Plug 'ap/vim-buftabline'
+" Markdown预览插件 iamcco/mathjax-support-for-mkdp(latex数学公式支持) iamcco/markdown-preview.vim
+" :MarkdownPreview 打开预览 :MarkdownPreviewStop 关闭预览
 Plug 'iamcco/mathjax-support-for-mkdp'
 Plug 'iamcco/markdown-preview.vim'
+" 用于vim debug
 Plug 'puremourning/vimspector'
 " vim latex snippets
 Plug 'gillescastel/latex-snippets'
 Plug 'lervag/vimtex'
 Plug 'KeitaNakamura/tex-conceal.vim'
 " vim 表格
+" dhruvasagar/vim-table-mode vim 表格创建
+" 1. 处理类似markdown 表格的数据格式 即 : | a | c | (|间需要空格)
+" 2. :TableModeEnable 打开表格模式才能自动处理表格
+" 3. :TableModeDisable 关闭表格模式
 Plug 'dhruvasagar/vim-table-mode'
 call plug#end()
 
@@ -85,9 +117,9 @@ colorscheme default
 " :h gui-colors
 " 修改coc 选择框颜色 CocMenuSel 为分组
 " coc浮动窗口选中行颜色
-autocmd VimEnter * silent highlight CocMenuSel ctermbg=LightGray
+highlight CocMenuSel ctermbg=LightGray
 " coc浮动窗口颜色
-autocmd VimEnter * silent highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
+highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
 " vim退出的时候自动保持 session , 在启动vim的时候可以使用 `LoadDirectoryMkSession` 加载
 autocmd VimEnter * call InitDirectoryMkSession()
 autocmd VimLeave * call SaveDirectoryMkSession()
@@ -97,20 +129,20 @@ autocmd VimLeave * call SaveDirectoryMkSession()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " coc 调用链颜色: 去除 for highlight ranges of outgoing calls.
 " coc 范围选择颜色, 兼容代码片段提示
-autocmd VimEnter * silent highlight CocSelectedRange ctermbg=Black
+highlight CocSelectedRange ctermbg=Black
 " coc 镶嵌提示颜色, 兼容提示函数的参数列表
-autocmd VimEnter * silent highlight CocInlayHint ctermbg=DarkGray ctermfg=Blue
-autocmd VimEnter * silent highlight CocInlayHintType ctermbg=DarkGray ctermfg=Blue
-autocmd VimEnter * silent highlight CocInlayHintParameter ctermbg=DarkGray ctermfg=Blue
+highlight CocInlayHint ctermbg=DarkGray ctermfg=Blue
+highlight CocInlayHintType ctermbg=DarkGray ctermfg=Blue
+highlight CocInlayHintParameter ctermbg=DarkGray ctermfg=Blue
 " 设置背景色兼容 coc location
-autocmd VimEnter * silent highlight Normal ctermbg=Black
+highlight Normal ctermbg=Black
 " 设置选中行颜色
-autocmd VimEnter * silent highlight Visual ctermfg=Black
+highlight Visual ctermfg=Black
 " 设置vim diff 颜色
-autocmd VimEnter * silent highlight DiffChange ctermfg=White ctermbg=Black
-autocmd VimEnter * silent highlight DiffText ctermfg=Black ctermbg=Red
-autocmd VimEnter * silent highlight DiffAdd ctermfg=Black ctermbg=Blue
-autocmd VimEnter * silent highlight DiffDelete ctermfg=Black ctermbg=Blue
+highlight DiffChange ctermfg=White ctermbg=Black
+highlight DiffText ctermfg=Black ctermbg=Red
+highlight DiffAdd ctermfg=Black ctermbg=Blue
+highlight DiffDelete ctermfg=Black ctermbg=Blue
 
 " 树莓派兼容
 set backspace=2
@@ -331,7 +363,7 @@ command! -nargs=1 Q call Quit(<f-args>)
 
 
 
-" =================== Vimspector =====================
+" =================== puremourning/vimspector =====================
 " 用于vim debug
 " F5启动通用debug
 nmap <silent> <F5> <Plug>VimspectorContinue
@@ -353,7 +385,8 @@ nmap <silent> <Leader><F9> <Plug>VimspectorToggleConditionalBreakpoint
 nmap <silent> <F6> <Plug>VimspectorRunToCursor
 
 
-" =================== NERDTree =====================
+" =================== preservim/nerdtree =====================
+" NERDTree配置(目录树) preservim/nerdtree
 " NERDTree配置 打开侧边目录
 nmap <silent><Esc><C-n> :NERDTreeToggle<CR>
 " 快速定位到当前文件
@@ -363,7 +396,7 @@ imap <silent><Esc><C-n> <Esc>`^:NERDTreeToggle<CR>
 " 快速定位到当前文件
 imap <silent><Esc><S-n> <Esc>`^:NERDTreeFind<CR>
 
-" =================== leaderF ======================
+" =================== Yggdroot/LeaderF ======================
 " leaderF配置(查找) Yggdroot/LeaderF
 " :LeaderfFile搜索当前目录下的文件
 " :LeaderfBuffer搜索当前的Buffer
@@ -377,7 +410,8 @@ imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
 nmap <silent><Esc><C-p> :Leaderf rg<CR>
 imap <silent><Esc><C-p> <Esc>`^:Leaderf rg<CR>
 
-" ==================== coc ====================
+" ==================== neoclide/coc.nvim ====================
+" coc.nvim 提供vscode的vim移植
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
 " other plugin before putting this into your config.
@@ -554,23 +588,8 @@ nmap <Leader>v :CocCommand markdown-preview-enhanced.openPreview<CR>
 " =================== 快捷键配置 ===================
 " ==================================================
 
+" ==================== preservim/nerdtree ====================
 " NERDTree配置(目录树) preservim/nerdtree
-" 目录树的使用主要通过在vim的command模式下键入如下命令，即可达到相应的效果。
-" ?: 快速帮助文档
-" o: 打开一个目录或者打开文件，创建的是 buffer，也可以用来打开书签
-" go: 打开一个文件，但是光标仍然留在 NERDTree，创建的是 buffer
-" t: 打开一个文件，创建的是Tab，对书签同样生效
-" T: 打开一个文件，但是光标仍然留在 NERDTree，创建的是 Tab，对书签同样生效
-" i: 水平分割创建文件的窗口，创建的是 buffer
-" gi: 水平分割创建文件的窗口，但是光标仍然留在 NERDTree
-" s: 垂直分割创建文件的窗口，创建的是 buffer
-" gs: 和 gi，go 类似
-" x: 收起当前打开的目录
-" X: 收起所有打开的目录
-" e: 以文件管理的方式打开选中的目录
-" D: 删除书签
-" m: 文件操作,新增文件/文件夹，删除文件/文件夹
-"
 " NERDTree防止在窗口打开
 " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
 autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
@@ -579,28 +598,18 @@ autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_
 autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 
 
-" auto-pairs配置(自动匹配括号) jiangmiao/auto-pairs
-
-
-" NerdCommenter配置(生成注释) preservim/nerdcommenter
-" count\cc 注释 count默认1
-" count\cu 取消注释 count默认1
-" count\ci 注释，取消注释 count默认1
-
-" 缓冲栏 fholgado/minibufexpl.vim
-" 设置minibufexplorer窗口最大高度为1行
-" let g:miniBufExplMaxSize = 1
-
-" Markdown预览插件 iamcco/mathjax-support-for-mkdp(latex数学公式支持) iamcco/markdown-preview.vim
-" :MarkdownPreview 打开预览 :MarkdownPreviewStop 关闭预览
 
 
 
+" ==================== SirVer/ultisnips ====================
+" ==================== honza/vim-snippets ====================
 " ultisnips 代码片段 SirVer/ultisnips honza/vim-snippets
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
+" ==================== neoclide/coc.nvim ====================
+" coc.nvim 提供vscode的vim移植
 let g:coc_snippet_next = '<tab>'
 
 
@@ -735,6 +744,8 @@ command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.org
 " provide custom statusline: lightline.vim, vim-airline.
 set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
+
+" ==================== puremourning/vimspector ====================
 " vimspector 远程debug插件,使用vscode的dap(Debug Adaptor Protocol)实现
 " 支持语言如下(包含开启方法)
 " | Language(s)          | Status      | Switch (for `install_gadget.py`)   | Adapter (for `:VimspectorInstall`)   | Dependencies             |
@@ -776,6 +787,10 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 " | `<Plug>VimspectorDownFrame`                   | Move down a frame in the current call stack                         | `vimspector#DownFrame()`                                          |
 " | `<Plug>VimspectorBalloonEval`                 | Evaluate expression under cursor (or visual) in popup               | *internal*                                                        |
 
+
+" ==================== gillescastel/latex-snippets ====================
+" ==================== lervag/vimtex ====================
+" ==================== KeitaNakamura/tex-conceal.vim ====================
 " vim latex 配置插件 gillescastel/latex-snippets lervag/vimtex KeitaNakamura/tex-conceal.vim 
 " 配置参考: https://github.com/gillescastel/latex-snippets
 " 快捷键 : \ll(<Leader>ll) 快速编译,打开文件 
@@ -793,6 +808,7 @@ let g:vimtex_syntax_nospell_comments=1
 " set spelllang=en_us
 " inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 
+" ==================== dhruvasagar/vim-table-mode ====================
 " dhruvasagar/vim-table-mode vim 表格创建
 " 1. 处理类似markdown 表格的数据格式 即 : | a | c | (|间需要空格)
 " 2. :TableModeEnable 打开表格模式才能自动处理表格

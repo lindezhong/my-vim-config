@@ -33,6 +33,8 @@ ln -s ~/.vim/vimrc ~/.config/nvim/init.vim
 mkdir -p ~/.config/nvim/colors
 ln -s ~/.vim/colors/vimdefault.vim ~/.config/nvim/colors/default.vim
 
+# nvim coc配置链接
+ln -s ~/.vim/coc-settings.json ~/.config/nvim/coc-settings.json
 
 # 配置ubuntu终端颜色方案
 bash dconf/load_dconf.sh terminal "/org/gnome/terminal/legacy/" "$home_path/dconf/one-half-dark-terminal.dconf"

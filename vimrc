@@ -648,11 +648,10 @@ let g:coc_global_extensions = [
 " ## coc-ultisnips-select
 " 如果想要选择snippets后自动展开snippets将 coc/coc-ultisnips-select 下的所有文件复制到 ~/.config/coc/extensions/node_modules/coc-ultisnips-select
 " ## coc-java
-" ### 老版本的coc-java需要自己下载lombox
-" 需要自己手动下载lombok jar, 并且配置环境变量LOMBOK_PATH
+" 需要自己手动下载lombok jar
 " 并且下载后的lombok的jar包需要保持 lombok-${version}.jar 格式
-" 比如 export LOMBOK_PATH="~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar"
-" 将./coc-settings.json 中的outdate.java.jdt.ls.vmargs -> java.jdt.ls.vmargs
+" 比如将lombok下载到: ~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar
+" 如果路径修改了需要修改java.jdt.ls.vmargs
 
 " coc-markdown-preview-enhanced coc markdown 预览插件
 " 如果需要隐藏头部title(由插件 coc-webview 提供) 修改文件 ~/.config/coc/extensions/node_modules/coc-webview/lib/index.js

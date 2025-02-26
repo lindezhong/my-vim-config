@@ -51,6 +51,13 @@ bypy upload {cmd:_comp_file_direct_} {remotepath} -v
 bypy ls {remotepath} 
 # 创建远程文件夹
 bypy mkdir {remotepath} 
+# 删除文件或文件夹
+bypy rm {remotepath}
+# 移动文件或文件夹
+# 会报错但实际移动成功
+bypy mv {from} {to}
+# 复制文件夹或文件夹
+bypy cp {from} {to}
 
 
 

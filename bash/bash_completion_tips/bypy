@@ -1,0 +1,56 @@
+# # bypy
+# bypy是一个命令行上传下载百度云盘上的文件的python客户端
+# **bypy只能操作/apps/bypy目录的文件**
+# **bypy操作的目录/(根目录)其实是/apps/bypy这个目录**
+# ## 安装方式
+# `pip install bypy`
+# ## 认证自己的网盘账号
+# `bypy info`
+# 输入`bypy info`后按照提示在控制台和浏览器中完成认证
+# ## 下载文件
+# 下载特定文件: `bypy downfile filename` 
+# 下载文件夹下所有文件或指定文件: `bypy downdir filename -v` 
+# ## 上传文件
+# `bypy upload [localpath] [remotepath]`
+# ## 更换绑定的百度云盘账户
+# 1. 在百度云的`个人头像->个人主页->授权管理`取消授权
+# 2. 需要删除当前用户目录下 ~/.bypy 隐藏文件夹中的json文件，再输入`bypy info`即可重新认证绑定新的百度云
+
+# 帮助文档
+bypy -h
+# 认证自己的网盘账号, 这个是操作百度云的先决条件
+bypy info
+# 下载特定文件到当前文件夹
+bypy downfile {remotepath}
+# 下载文件夹下所有文件或指定文件
+# -v : 递归下载这个文件夹下的所有文件, 如果没有 -v 只是下载一层
+# 如果没有localpath则和下载到当前文件夹这样会少一层
+# 比如下载 /dicts 下的文件
+# 原始文件路径如下
+# └── dicts
+#     ├── tmp
+#     │   └── xxx
+#     └── xxx
+# 下载后根目录dicts消失
+# 有localpath下载如下
+# └── {localpath}
+#     ├── tmp
+#     │   └── xxx
+#     └── xxx
+bypy downdir {remotepath} {localpath} -v
+# 上传文件
+# 如果要递归上传文件夹要加-v
+# 上传文件夹的时候跟downdir一样{remotepath}要填写完整
+# 比如 bypy upload ./dicts/ / -v 上传后的文件路径如下
+# ├── tmp
+# │   └── xxx
+# └── xxx
+# 正确填写为bypy upload ./dicts/ /dicts -v
+bypy upload {cmd:_comp_file_direct_} {remotepath} -v
+# 查看远程文件
+bypy ls {remotepath} 
+# 创建远程文件夹
+bypy mkdir {remotepath} 
+
+
+

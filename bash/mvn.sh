@@ -283,7 +283,17 @@ run() {
         class_path="${class_path_item}:${class_path}"
     done
 
-    mvn exec:exec -pl ${module_name_path} -Dexec.executable="java" -Dexec.args="-classpath ${class_path}%classpath ${default_map['remote_debug']} ${main_class_path}"
+
+    # 解析依赖的jar路径
+    local jar_path=""
+    local jar_path_list=($(mvn dependency:build-classpath | grep -v "Download" | grep -v "INFO" | grep -v "WARNING" | grep -v "ERROR" | grep "jar"))
+    for(( i=0; i<${#jar_path_list[@]}; i++)) do
+        local jar_path_item=${jar_path_list[i]}
+        jar_path="${jar_path_item}:${jar_path}"
+    done
+
+    mvn exec:exec -pl ${module_name_path} -Dexec.executable="java" -Dexec.args="-classpath ${class_path}${jar_path}%classpath ${default_map['remote_debug']} ${main_class_path}"
+ 
  
 }
 

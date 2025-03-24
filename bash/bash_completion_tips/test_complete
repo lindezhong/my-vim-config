@@ -1,4 +1,11 @@
 test_complete or "{or:(-d -l)}" -t -f
 test_complete and '{and:(-v "{dir}")}' -t -f
 test_complete and_or '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}' -t -f
+test_complete kv "{kv:('--mainClass=' '{cmd:mvn.sh find_main src/main}' '\\\"')}" -t -f
+# test_complete kv '{kv:("--mainClass=\\\"" "{cmd:mvn.sh find_main src/main}")}' -t -f
+# test_complete kv_or  '{or:("{kv:(-v {dir})}" "{kv:(-d {dir})}")}' -t -f
+# 需要嵌套 " 为 \\\\\\\" (例子在后缀部分, 但是因为是最后的后缀部分在complete没法显示, 只能在测试模式下显示)
+test_complete kv_or1  "{or:('{kv:(\\\"--mainClass=\\\" \\\"{cmd:mvn.sh find_main src/main}\\\" \\\"\\\\\\\"\\\")}' '{kv:(-d {dir})}')}" -t -f
+# 需要嵌套 ' 为 \'\\\\\'\' (例子在后缀部分, 但是因为是最后的后缀部分在complete没法显示, 只能在测试模式下显示)
+test_complete kv_or2  "{or:('{kv:(\\\"--mainClass=\\\" \\\"{cmd:mvn.sh find_main src/main}\\\" \\\"\'\\\\\'\'\\\")}' '{kv:(-d {dir})}')}" -t -f
 

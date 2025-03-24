@@ -24,6 +24,9 @@
 #       但 直接输入 cmd_item2 不匹配, 因为 cmd_item2 前无 cmd_item1 (需要完全按照匹配)
 #       and 匹配模式一般用于kv的匹配比如 docker -v docker目录:宿主机目录 , 其中-v docker目录:宿主机目录就是 kv
 #   3.6 可以嵌套and和or实现一些操作比如 '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}'
+#   3.7 {kv:("key(为固定字符串)" "cmd_item" "suffix(后缀为固定字符串可省略)")}, 该形式提示出的格式如下${key}${cmd_item}${suffix}
+#       如果cmd_item生成的是一个数组则提示多个比如${key}${cmd_item[0]}${suffix} ${key}${cmd_item[1]}${suffix} ...
+#       例子: 1. {kv: ("--mainClass=" "{cmd:mvn.sh find_main src/main}")} 2. {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
 # 通用的命令提示如下
 # 1. {cmd:_comp_file_direct_} : 提示的文件列表
 
@@ -282,6 +285,9 @@ _parse_cmd_item_data_(){
     elif [[ "$cmd_str" == {and:* ]]; then
         # and模式 , and模式由匹配方法 _is_match_cmd_and 追加所以其实会导致一个提示重复添加的情况, 后续优化
         echo '"and" ""'
+    elif [[ "$cmd_str" == {kv:* ]]; then
+        # kv模式 
+        echo '"kv" "1"'
     elif [[ "$cmd_str" == {* ]]; then
         # 注释
         echo '"note" "1"'
@@ -347,6 +353,18 @@ _is_match_cmd_simple() {
         _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
         _cmd_index_index_shift "$item_add_num"
         return 0
+    elif [[ "${match_cmd_item_data[0]}" == "kv" ]]; then
+        # kv模式的v往往是命令模式的所以只是提示是否为k前缀
+        # 例子: {kv: ("--mainClass=" "{cmd:mvn.sh find_main src/main}")}
+        # 例子: {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
+        eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "kv")
+        local key="${multiple_cmd_item_list[0]}"
+        
+        if [[ "$match_comp_cmd_item" == ${key}* ]]; then
+            _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+            _cmd_index_index_shift "$item_add_num"
+            return 0
+        fi
     elif [[ "${match_cmd_item_data[0]}" == "or" ]]; then
         _is_match_cmd_or "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
         return $?
@@ -572,6 +590,24 @@ _completion_cmd_normaliza_() {
             compopt -o filenames +o nospace 2>/dev/null ||
             compgen -f /non-existing-dir/ >/dev/null ||
             true
+        elif [[ "${completion_stack_cmd_data[0]}" == "kv" ]]; then
+            # 如果为kv模式
+            eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "kv")
+            local key="${multiple_cmd_item_list[0]}"
+            local value="${multiple_cmd_item_list[1]}"
+            local suffix=""
+            if  (( ${#multiple_cmd_item_list[@]} >= 3 )); then
+                suffix="${multiple_cmd_item_list[2]}"
+            fi
+
+            local old_completion_cmd_normaliza_result="$_completion_cmd_normaliza_result"
+            _completion_cmd_normaliza_ "$value"
+            local value_list=($_completion_cmd_normaliza_result)
+            local value_item
+            for value_item in "${value_list[@]}"; do
+                completion_txt="$completion_txt ${key}${value_item}${suffix}"
+            done
+            _completion_cmd_normaliza_result="$old_completion_cmd_normaliza_result"
 
         elif [[ "${completion_stack_cmd_data[0]}" == "or" ]]; then
             # 多参数模式

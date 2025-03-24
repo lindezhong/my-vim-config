@@ -1,7 +1,7 @@
 # 60,000 毫秒内的 Linux 性能分析
 # 这个命令提示是基于: https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55
 
-# cmd: vmstat 1
+# cmd: vmstat
 # cmd: mpstat
 # cmd: pidstat
 # cmd: iostat

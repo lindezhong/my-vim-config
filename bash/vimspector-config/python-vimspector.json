@@ -21,7 +21,7 @@
     }
   },
   "备注": "1. python -m venv .venv 创建环境 2. source .venv/bin/activate 切换环境 3. deactivate 切换回原始环境",
-  "vimspector unavailable: Requires Vim Compiled with +python3": "`pip3 install pynvim` 从 0.3.1 版本开始，python 包 neovim 已更名为 pynvim，将命令更新为 pip3 install pynvim"
+  "neovim 报错: vimspector unavailable: Requires Vim Compiled with +python3": "`pip3 install pynvim` 从 0.3.1 版本开始，python 包 neovim 已更名为 pynvim，将命令更新为 pip3 install pynvim"
 }
 
 

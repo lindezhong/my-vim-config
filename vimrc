@@ -598,6 +598,16 @@ autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_
 autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 " 目录显示隐藏文件即以 . 开头的文件活文件夹
 let g:NERDTreeShowHidden = 1
+" NERDTree 忽略文件规则
+let g:NERDTreeIgnore = [
+            \ '\~$',
+            \ '\.swp$',
+            \ '\.git$',
+            \ '\.github$',
+            \ '\.gitignore$',
+            \ '\.vimspector.json$',
+            \ ]
+
 
 
 

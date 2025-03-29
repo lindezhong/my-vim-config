@@ -600,12 +600,12 @@ autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTr
 let g:NERDTreeShowHidden = 1
 " NERDTree 忽略文件规则
 let g:NERDTreeIgnore = [
-            \ '\~$',
             \ '\.swp$',
-            \ '\.git$',
-            \ '\.github$',
-            \ '\.gitignore$',
-            \ '\.vimspector.json$',
+            \ '\~',
+            \ '\.git',
+            \ '\.github',
+            \ '\.gitignore',
+            \ '\.vimspector.json',
             \ ]
 
 

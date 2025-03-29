@@ -598,7 +598,7 @@ autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_
 autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 " 目录显示隐藏文件即以 . 开头的文件活文件夹
 let g:NERDTreeShowHidden = 1
-" NERDTree 忽略文件规则
+" NERDTree 忽略文件规则 (忽略规则支持正则表达式, 比如忽略vim的Swap file,使用'\.swp$'表示以swp结尾文件)
 let g:NERDTreeIgnore = [
             \ '\.swp$',
             \ '\~',

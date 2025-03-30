@@ -146,7 +146,7 @@ githubRepos() {
     # git_url(git://开头),的经过测试无法clone下来(一直卡住)不知道是为啥所以不使用
     # 但在git_model_list中保留着, 不做提示
     local git_model_list="clone_url git_url ssh_url"
-    read -p "请选择需要clone的url模式,clone_url(http://开头),ssh_url(git@开头) : " git_model
+    read -p "请选择需要clone的url模式,clone_url(http://开头),ssh_url(git@开头) : " -t 60 git_model
     if [[ ! "${git_model_list[@]}" =~ "${git_model}" ]] || [[ -z $git_model ]]; then
         git_model="clone_url"
         echo "git model未知的输入, 默认选择 $git_model 模式"

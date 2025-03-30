@@ -141,6 +141,17 @@ githubRepos() {
     local repos_url_list=[]
     local currentPageSize=$pageSize
     local pageNum=0
+
+    local git_model
+    # git_url(git://开头),的经过测试无法clone下来(一直卡住)不知道是为啥所以不使用
+    # 但在git_model_list中保留着, 不做提示
+    local git_model_list="clone_url git_url ssh_url"
+    read -p "请选择需要clone的url模式,clone_url(http://开头),ssh_url(git@开头) : " git_model
+    if [[ ! "${git_model_list[@]}" =~ "${git_model}" ]] || [[ -z $git_model ]]; then
+        git_model="clone_url"
+        echo "git model未知的输入, 默认选择 $git_model 模式"
+    fi
+    
     
     # 循环请求github获取组织下的所有存储
     while (( $currentPageSize >= $pageSize )); do
@@ -152,7 +163,7 @@ githubRepos() {
         currentPageSize=$(echo ${github_org_url_json} | jq ". | length")
         for (( i=0; i<currentPageSize; i++ )); do
             local repos_json=$(echo $github_org_url_json | jq -r ".[$i]")
-            local repos_url=$(echo $repos_json | jq -r ".html_url")
+            local repos_url=$(echo $repos_json | jq -r ".$git_model")
             repos_url_list[$repos_index]=$repos_url
             ((repos_index=$repos_index+1))
         done
@@ -172,6 +183,9 @@ githubRepos() {
         repos_url=${repos_url_list[i]}
         echo "$i) git clone $repos_url"
         local git_dir=${repos_url##*/}
+        # 去除最后的 .git
+        git_dir=$(echo $git_dir | sed 's/\.git$//g')
+        
         git clone $repos_url
         # 如果git clone 报错可能是因为项目已经存在此时进入到该目录中执行git pull
         if [ ! $? -eq 0 ] && [ -d $git_dir ]; then

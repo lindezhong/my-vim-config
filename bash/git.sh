@@ -171,7 +171,14 @@ githubRepos() {
     for(( i=0;i<${#repos_url_list[@]};i++)) do
         repos_url=${repos_url_list[i]}
         echo "$i) git clone $repos_url"
+        local git_dir=${repos_url##*/}
         git clone $repos_url
+        # 如果git clone 报错可能是因为项目已经存在此时进入到该目录中执行git pull
+        if [ ! $? -eq 0 ] && [ -d $git_dir ]; then
+            pushd $git_dir
+            git pull
+            popd
+        fi
     done;
 
     return 0

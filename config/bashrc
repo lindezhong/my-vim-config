@@ -54,9 +54,15 @@ export MAVEN_HOME=/opt/apache-maven-3.9.6
 export BASH_HOME=~/.local/bin
 
 # 指定c语言额外的include,lib路径
-export LD_LIBRARY_PATH=/home/ldz/.local/lib:$LD_LIBRARY_PATH
-export CPPFLAGS="-I/home/ldz/.local/include"
-export LDFLAGS="-L/home/ldz/.local/lib"
+# LD_LIBRARY_PATH 用于指定动态链接库的搜索路径。
+# 当您运行一个依赖于动态库的程序时，操作系统需要找到这些库以加载它们。这个环境变量可以临时改变库的搜索路径。
+export LD_LIBRARY_PATH="${HOME}/.local/lib:$LD_LIBRARY_PATH"
+# CPPFLAGS 用于指定 C 或 C++ 预处理器的标志。在编译源代码时，预处理器会在编译之前处理所有以 #include 开头的指令和宏定义。
+# 通过这个环境变量，您可以设置额外的编译器选项和包含路径。
+export CPPFLAGS="-I${HOME}/.local/include"
+# LDFLAGS 用于指定链接器的标志。在编译 C/C++ 程序时，编译器会使用链接器将目标文件和库结合起来生成可执行文件。
+# LDFLAGS 环境变量可以用于指定额外的链接器选项和库路径。
+export LDFLAGS="-L${HOME}/.local/lib"
 # alias gcc="gcc -I gcc -I ~/.local/include"
 
 PATH=.:${JAVA_HOME}/bin:${JAVA_HOME}/jre/bin:${MAVEN_HOME}/bin:${BASH_HOME}:${PATH}

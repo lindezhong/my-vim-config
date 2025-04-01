@@ -626,7 +626,11 @@ let g:coc_snippet_next = '<tab>'
 
 
 " coc.vim neoclide/coc.nvim
-" coc.vim 安装的
+" coc.vim 安装的插件
+" 可以指定版本格式如下 'coc-<extension>@<version>'
+" 可以通过 `:CocList extensions` 查看当前安装的coc插件版本
+" 可以通过 `npm search coc-*` 查询coc的插件有哪些,该命令会返回一个插件页面可以查看有哪些版本
+" 请注意coc-java版本升级后可能导致jdk版本过低,如果java代码无法编译或有其他问题需要设置`java.jdt.ls.java.home`指定jdk版本
 let g:coc_global_extensions = [
             \ 'coc-word',
             \ 'coc-markdown-preview-enhanced',

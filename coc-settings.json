@@ -1,7 +1,7 @@
 {
   "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/clangd/bin/clangd",
   "translator.engines": ["bing","google","youdao","haici"],
-  "java.jdt.ls.java.home": "/opt/jdk17",
+  "java.jdt.ls.java.home": "/opt/jdk23",
   "java.configuration.runtimes": [
       {
           "name": "JavaSE-1.8",
@@ -22,7 +22,7 @@
   "note.java.jdt.ls.vmargs": "通过javaagent配置lombok, 该lombok的jar要为lombok-${version}.jar格式, lombok官网:https://projectlombok.org/",
   "note.java.jdt.ls.vmargs": "配置lombok路径, lombok需要带版本如: lombok-${version}.jar格式, 路径例子如下",
   "example.LOMBOK_PATH": "~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar",
-  "java.jdt.ls.vmargs": "-javaagent:~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar",
+  "delete.java.jdt.ls.vmargs": "-javaagent:~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar",
   "note.tree.key.toggle": "coc-tree(coc树)的展开或关闭节点快捷键",
   "tree.key.toggle": "<tab>",
   "note.tree.key.actions": "coc-tree(coc树)触发coc树节点上的操作",

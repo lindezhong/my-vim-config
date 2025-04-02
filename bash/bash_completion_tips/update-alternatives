@@ -1,0 +1,71 @@
+# update-alternatives 是一个切换命令行版本的工具, 本质上是管理某个软链接指向那个那个文件
+# update-alternatives 的基本参数可以从 --install 操作查看出来, 下面这里例子可以说明 update-alternatives 需要的所有参数
+# link: 软链接文件地址, 如果同一个name先后指向的link不同会导致先设置的link被后设置的link覆盖
+# name: update-alternatives配置的名称相当于分类
+# path: 软链接指向的实际文件
+# priority: 优先级数字
+# <链接> 是指向 /etc/alternatives/<名称> 的符号链接。
+#     (如 /usr/bin/pager)
+# <名称> 是该链接替换组的主控名。
+#     (如 pager)
+# <路径> 是候选项目标文件的位置。
+#     (如 /usr/bin/less)
+# <优先级> 是一个整数，在自动模式下，这个数字越高的选项，其优先级也就越高。
+# update-alternatives --install <link> <name> <path> <priority>
+# 选项：
+#   --altdir <目录>          改变候选项目录。
+#                              （默认是 /etc/alternatives）。
+#   --admindir <目录>        设置 statoverride 文件的目录。
+#                              （默认是 /var/lib/dpkg/alternatives）。
+#   --instdir <目录>         改变安装目录。
+#   --root <目录>            改变文件系统根目录。
+#   --log <文件>             改变日志文件。
+#   --force                  允许使用候选项链接替换文件。
+#   --skip-auto              在自动模式中跳过设置正确候选项的提示
+#                            (只与 --config 有关)
+#   --quiet                  安静模式，输出尽可能少的信息。
+#   --verbose                启用详细输出。
+#   --debug                  调试输出，信息更多。
+#   --help                   显示本帮助信息。
+#   --version                显示版本信息。
+
+
+update-alternatives --help
+# 将某个地址安装到<name>软链接的待选项上
+# --slave(必须配合--install使用): 如java有很多个版本，1.6和1.7等等，但切换版本需要切换的命令很多，如java,javac,jar等等都需要切换，
+# 当然可以给这些命令都单独用update-alternatives进行设置，但切换的时候需要挨个进行切换。
+# --slave就可以在切换java时把其他命令也都跟着切换了。并且--slave是同--install同一条命令，而不是多条。
+# 比如如下例子
+# sudo update-alternatives --install /usr/bin/java java /opt/jdk-10/bin/java 10 \
+#     --slave /usr/bin/jar          jar           /opt/jdk-10/bin/jar \
+#     --slave /usr/bin/jarsigner    jarsigner     /opt/jdk-10/bin/jarsigner \
+#     --slave /usr/bin/javac        javac         /opt/jdk-10/bin/javac \
+#     --slave /usr/bin/javadoc      javadoc       /opt/jdk-10/bin/javadoc \
+#     --slave /usr/bin/javap        javap         /opt/jdk-10/bin/javap \
+#     --slave /usr/bin/javaws       javaws        /opt/jdk-10/bin/javaws
+update-alternatives --install "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}" {priority} --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  --slave "{cmd:get_link_path ${COMP_WORDS[COMP_CWORD]}}" "{cmd:get_all_name}" "{cmd:_comp_file_direct_}"  
+                           在系统中加入一组候选项。
+#  --remove <名称> <路径>   从 <名称> 替换组中去除 <路径> 项。
+update-alternatives --remove "{cmd:get_all_name}" "{cmd:get_link_by_name ${COMP_WORDS[COMP_CWORD-1]}}"
+#  --remove-all <名称>      从替换系统中删除 <名称> 替换组。
+update-alternatives --remove-all "{cmd:get_all_name}"
+#  --auto <名称>            将 <名称> 的主链接切换到自动模式(即执行`update-alternatives --config <name>`后Status为`auto mode`的)。
+update-alternatives --auto "{cmd:get_all_name}"
+#  --display <名称>         显示关于 <名称> 替换组的信息。
+update-alternatives --display "{cmd:get_all_name}"
+#  --query <名称>           机器可读版的 --display <名称>.
+update-alternatives --query "{cmd:get_all_name}"
+#  --list <名称>            列出 <名称> 替换组中所有的可用候选项。
+update-alternatives --list "{cmd:get_all_name}" 
+#  --get-selections         列出主要候选项名称以及它们的状态。
+update-alternatives --get-selections
+#  --set-selections         从标准输入中读入候选项的状态。
+update-alternatives --set-selections 
+#  --config <名称>          列出 <名称> 替换组中的可选项，并就使用其中
+update-alternatives --config "{cmd:get_all_name}"
+#                           哪一个，征询用户的意见。
+#  --set <名称> <路径>      将 <路径> 设置为 <名称> 的候选项。
+#  <路径> 必须事先在 --config 中配置过
+update-alternatives --set "{cmd:get_all_name}" "{cmd:get_link_by_name ${COMP_WORDS[COMP_CWORD-1]}}"
+#  --all                    对所有可选项一一调用 --config 命令。
+update-alternatives --all 

@@ -7,7 +7,19 @@
 # 2. 如果文件是以 `__all` 结尾则为聚合文件, 可能提示多个命令
 #   2.1 在聚合文件中需要添加 `# cmd: 需要提示的命令` 告诉脚本这个文件支持提示那些文件
 #   2.2 可以通过 `# end` 结束查找需要哪些提示的命令以提高性能, 如何遇到 `# end` 之后的 `# cmd: 需要提示的命令` 会失效
-# 3. 如果提示文件写了但不想加入提示中, 可以加入 `~/.bash_completion/bash_completion_ignore` 文件中忽略它
+#   2.3 如以下例子就是将命令`test_cmd`添加到了提示中可以提示`test_cmd add ls xxx`这个命令
+#   如果没有cmd: test_cmd 这行就没执行`complete -F _complete_func test_cmd`就没法调用到test_cmd的提示
+#   ```shell
+#   # 用作测试聚合脚本的提示
+#   # cmd: test_cmd
+#   # end
+#   test_cmd add ls xxx
+#
+#   ```
+# 3. 如果文件是以`__func.sh`结尾则为提示文件, 用于在对应命令的提示命令
+#   比如 update-alternatives__func.sh 中的函数`get_link_path`可以直接在update-alternatives中作为命令提示使用如{cmd:update-alternatives}
+#   请注意以`__func.sh`结尾的提示文件原则上只能定义函数作为提示
+# 4. 如果提示文件写了但不想加入提示中, 可以加入 `~/.bash_completion/bash_completion_ignore` 文件中忽略它
 
 # cmd_list 编写规则:
 # 格式如下 : cmd_list=("$cmd_item $cmd_item  '{option:value}'  ...")
@@ -57,6 +69,11 @@ if [ -d ~/.bash_completion ]; then
     for complete_file in "${complete_file_list[@]}"; do
         # 如果在忽略文件中则跳过
         if [[ "${ignore_complete_file_list[@]}" =~ "${complete_file}" ]]; then
+            continue
+        fi
+
+        # 如果是以 __func 结尾的是用于提示函数不添加进来
+        if [[ "$complete_file" == *__func.sh ]]; then
             continue
         fi
 
@@ -121,6 +138,12 @@ _init_cmd_list() {
             fi
 
             
+            # 如果为 __func 结尾的添加函数则执行 source 引入函数
+            if [[ "${complete_file}" == "${original_cmd}__func.sh" ]]; then
+                source ~/.bash_completion/${complete_file}
+                continue
+            fi
+
             if [[ "${complete_file}" != *__all && "${complete_file}" != "$original_cmd" ]]; then
                 continue
             fi

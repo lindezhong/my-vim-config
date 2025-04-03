@@ -228,6 +228,7 @@ vmap <S-l> <S-Right>
 " 需要vim支持clipboard
 " 执行 `vim --version | grep clipboard` 有 + 号
 " 如果不支持clipboard则安装vim-gtk(直接执行apt install vim-gtk不用卸载原始vim)
+" 对于已经支持clipboard的vim在ssh场景下需要开启X11转发(ssh -X)才能使用C-y复制到剪切板
 " 支持在在Visual模式下, 通过C-y复制到系统剪切板
 vnoremap <C-y> "+y
 " 支持在normal模式下, 通过C-y粘贴系统剪切板

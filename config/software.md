@@ -54,3 +54,71 @@ sudo systemctl restart nginx
 chown -R www-data /webdav
 ```
 
+# 源码安装vim
+
+```shell
+# 1. clone vim 源码
+git clone https://github.com/vim/vim
+
+# 2. 查询vim版本(tags)
+git tag
+
+# 3. 切换到某个版本(tags)
+git checkout {tag}
+
+# 4. 创建vim目录
+mkdir -p ${HOME}/.local/share/vim
+
+# 5. 配置编译参数
+#!/bin/bash
+# 配置 Vim 的编译选项（需在源码目录的 src 文件夹内执行）
+# ./configure \
+# --prefix=${HOME}/.local/share/vim \  # 将 Vim 安装到用户目录，避免需要 root 权限
+# --with-features=huge \              # 启用最大功能集（支持代码折叠/多缓冲等高级功能）
+# --enable-gui=gtk2 \                 # 编译 GTK2 图形界面（需安装 libgtk2.0-dev）
+# --enable-gui=gtk3 \                 # 使用 GTK3 图形界面（需安装 libgtk-3-dev）
+# --enable-fontset \                  # 支持多字体混合显示（如中英文不同字体）
+# --enable-cscope \                   # 集成 Cscope 代码分析工具
+# --enable-multibyte \                # 支持多字节字符（中文/日文等）
+# --enable-python3interp \            # 嵌入 Python3 解释器（需 python3-dev 库）
+# --with-python3-config-dir=$(python3-config --configdir) \  # 自动获取 Python3 库配置路径
+# --enable-rubyinterp \               # 嵌入 Ruby 解释器（需 ruby-dev 库）
+# --enable-luainterp \                # 嵌入 Lua 5.1 解释器（需 liblua5.1-dev）
+# --enable-perlinterp \               # 嵌入 Perl 解释器（需 libperl-dev 库）
+# --with-x                            # 启用 X11 图形系统支持(需 libxt-dev 库)
+
+./configure \
+    --prefix=${HOME}/.local/share/vim \
+    --with-features=huge \
+    --enable-gui=auto \
+    --enable-fontset \
+    --enable-cscope \
+    --enable-multibyte \
+    --enable-python3interp \
+    --with-python3-config-dir=$(python3-config --configdir) \
+    --enable-rubyinterp \
+    --enable-luainterp \
+    --enable-perlinterp \
+    --with-x 
+
+# 6 错误解决
+# ./configure 执行错误如果需要重试可以先执行 `make distclean` 清理旧的配置缓存
+
+# 6.1 如果报如下错误 
+#       checking for tgetent()... configure: error: NOT FOUND!
+#       You need to install a terminal library; for example ncurses.
+#       On Linux that would be the libncurses-dev package.
+#       Or specify the name of the library with --with-tlib.
+sudo apt install libncurses-dev
+
+# 6.2 configure: error: could not configure X
+sudo apt install libxt-dev
+
+# 7. 编译
+make && sudo make install
+
+# 8. 使用update-alternatives切换vim版本
+sudo update-alternatives --install ${HOME}/.local/bin/vim vim ${HOME}/.local/share/vim/bin/vim 100
+sudo update-alternatives --set vim ${HOME}/.local/share/vim/bin/vim
+
+```

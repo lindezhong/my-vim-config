@@ -50,7 +50,15 @@ export PS4='\033[0;33m+ $(date +"%F %T.%3N") $BASH_SOURCE:$LINENO: \033[0m '
 # 导致默认的XAUTHORITY变量路径被修改：
 export XAUTHORITY=$HOME/.Xauthority
 
-export JAVA_HOME=/opt/jdk8
+# 通过update-alternatives切换jdk版本 
+# sudo update-alternatives --install /opt/jdk java /opt/jdk8  1000
+# sudo update-alternatives --install /opt/jdk java /opt/jdk11 110
+# sudo update-alternatives --install /opt/jdk java /opt/jdk17 170
+# sudo update-alternatives --install /opt/jdk java /opt/jdk23 230
+# 可以通过sudo update-alternatives --set java <path> 更改jdk版本
+# 也可以通过 sudo update-alternatives --config java 更高jdk版本
+# 可以通过 sudo update-alternatives --auto java 更改会jdk8(<priority>最高的那个)
+export JAVA_HOME=/opt/jdk
 export CLASSPATH=.:${JAVA_HOME}/lib/dt.jar:${JAVA_HOME}/lib/tools.jar
 export MAVEN_HOME=/opt/apache-maven-3.9.6
 export BASH_HOME=~/.local/bin
@@ -67,7 +75,7 @@ export CPPFLAGS="-I${HOME}/.local/include"
 export LDFLAGS="-L${HOME}/.local/lib"
 # alias gcc="gcc -I gcc -I ~/.local/include"
 
-PATH=.:${JAVA_HOME}/bin:${JAVA_HOME}/jre/bin:${MAVEN_HOME}/bin:${BASH_HOME}:${PATH}
+PATH=.:${BASH_HOME}:${JAVA_HOME}/bin:${JAVA_HOME}/jre/bin:${MAVEN_HOME}/bin:${PATH}
 
 LANG=zh_CN.UTF-8
 # 光标不闪烁

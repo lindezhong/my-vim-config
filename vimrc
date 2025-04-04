@@ -106,7 +106,7 @@ endif
 " set complete-=k complete+=k
 
 " vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
-colorscheme default
+colorscheme vim8
 " 要选择其他背景颜色，您可以使用 
 " :highlight CocFloating ctermbg=color
 " 并更改错误消息的前景（文本）颜色，请使用

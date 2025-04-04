@@ -1,3 +1,4 @@
+" 对于配色方案来说需要设置colors_name(配色方案,且跟文件名一致)否则会导致在某些版本的vim中无法应用该方案
 " 这个配置由 `:hi` 获取并转换而来
 " 请获取干净的配置, 即在没有配置过任何 vimrc和安装过vim插件的情况下执行
 " 1. 打开vim, 执行 `:hi` 获取当前vim的样式并且复制出来
@@ -9,6 +10,8 @@
 " 5. 转换 links 模式比如 `hi shHereDoc16     links to shRedir` , 执行后变成 `hi link shHereDoc16 shRedir`
 "   正则表达式: `:%s/hi\s\(\S\+\)\s\+links\s\+to\s\+\(\S\+\)\n/hi link \1 \2\r/g`
 
+" 设置配色方案名称,如果不配置只是按照文件名确定配色方案名称在某些vim版本中无法找到
+let colors_name = "vim8"
 hi SpecialKey      term=bold ctermfg=4 guifg=Blue
 hi link EndOfBuffer NonText
 hi NonText         term=bold ctermfg=12 gui=bold guifg=Blue

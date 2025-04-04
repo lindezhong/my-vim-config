@@ -31,7 +31,7 @@ ln -s ~/.vim/vimrc ~/.config/nvim/init.vim
 # nvim配色方案链接
 # 由于~/.config/nvim/colors/目录的配色方案优先所以可以覆盖默认的配色方案
 mkdir -p ~/.config/nvim/colors
-ln -s ~/.vim/colors/vimdefault.vim ~/.config/nvim/colors/default.vim
+ln -s ~/.vim/colors/vim8.vim ~/.config/nvim/colors/vim8.vim
 
 # nvim coc配置链接
 ln -s ~/.vim/coc-settings.json ~/.config/nvim/coc-settings.json

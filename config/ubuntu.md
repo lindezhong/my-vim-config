@@ -45,6 +45,26 @@ gsettings set "org.gnome.desktop.wm.keybindings" move-to-workspace-left "['']"
 
 # 使用命令行连接wifi
 
+## 使用nmcli(更具体的可以看bash/bash_completion_tips/nmcli)
+1. 列出可用wifi网络，包括隐藏的网络
+nmcli dev wifi list
+2. 连接wifi, 如果是隐藏wifi需要添加参数`hidden yes`(非隐藏wif无需添加)
+nmcli dev wifi connect <SSID> password <password> hidden yes
+3. 查看连接名：
+nmcli connection show
+4. 激活连接
+nmcli connection up <connection-name>
+5. 删除配置, 系统将忘记该SSID相关联的网络
+nmcli connection delete <connection-name>
+请注意，删除连接配置不会立即中断当前的网络连接。你可能需要重新启动网络服务或断开并重新连接WiFi来应用更改：
+sudo service network-manager restart
+或者你可以通过以下命令断开并重新连接WiFi：
+nmcli connection down <connection-name>
+nmcli connection up <connection-name>
+
+
+## 使用 wpasupplicant
+
 1. 安装wpasupplicant
 sudo apt install wpasupplicant
 2. 将wifi的账号(essid) 和 密码输入文件

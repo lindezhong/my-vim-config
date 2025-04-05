@@ -85,4 +85,7 @@ WoeUSB 可以通过存命令行无需依赖图形化界面的烧录工具
 ## 烧录linux的iso文件
 
 1. 可以通过 [BalenaEtcher](https://github.com/balena-io/etcher/releases) 烧录,但高版本可能会报错选择低于v18.12的版本即可
-2. 可以通过ubuntu自带的烧录软件烧录
+2. 请注意如果下载的是AppImage版本的不能从命令行打开, 只能找到该文件后右击Run
+3. 由于AppImage依赖qt在某些版本上缺少依赖启动不了, 这个时候可以命令行运行查看缺少的依赖
+
+

@@ -228,7 +228,22 @@ vmap <S-l> <S-Right>
 " 需要vim支持clipboard
 " 执行 `vim --version | grep clipboard` 有 + 号
 " 如果不支持clipboard则安装vim-gtk(直接执行apt install vim-gtk不用卸载原始vim)
-" 对于已经支持clipboard的vim在ssh场景下需要开启X11转发(ssh -X)才能使用C-y复制到剪切板
+" 对于已经支持clipboard的vim在ssh场景下需要开启X11转发(ssh -X -C)才能使用C-y复制到剪切板
+" 对于X11转发开启有以下几个条件
+" 1. 如果报错`Invalid MIT-MAGIC-COOKIE-1 keyError: Can't open display: localhost:12.0`
+" 检查环境变量`XAUTHORITY`的配置情况 
+" 这个环境变量在服务端需要配置, 在客户端不能配置
+" 2. 服务端开启X11Forwarding即使服务端的`/etc/ssh/sshd_config`有如下配置
+" 修改后需要重启ssh服务端执行`sudo systemctl restart ssh`
+" X11Forwarding yes	    # 允许X11转发
+" X11DisplayOffset 10   #（可选）转发从localhost:10开始
+" X11UseLocalhost no	#（可选）禁止将X11转发请求绑定到本地回环地址上
+" AddressFamily inet	#（可选）强制使用IPv4通道。
+" 3. 客户端开启X11
+" Host *
+"     ForwardAgent yes      # 控制 SSH 代理转发功能。默认值为 no，表示禁止将本地的 SSH 认证代理（如私钥）转发到远程服务器
+"     ForwardX11 yes        # 控制是否自动重定向 X11 图形界面到本地。默认值 no 表示禁用 X11 转发功能
+"     ForwardX11Trusted yes # 此参数仅在 ForwardX11 yes 时生效，用于控制 X11 转发的安全级别。yes 表示启用“受信任的 X11 转发”，允许远程程序完全访问本地 X11 显示服务器；no 则限制远程程序的访问权限
 " 支持在在Visual模式下, 通过C-y复制到系统剪切板
 vnoremap <C-y> "+y
 " 支持在normal模式下, 通过C-y粘贴系统剪切板

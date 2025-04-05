@@ -45,7 +45,8 @@ export PS4='\033[0;33m+ $(date +"%F %T.%3N") $BASH_SOURCE:$LINENO: \033[0m '
 # 兼容部分应用在 ssh -X 情况下无法打开图形界面问题(比如firefox)
 # 若Firefox或Chromium通过Snap方式安装，其运行环境存在隔离机制，
 # 导致默认的XAUTHORITY变量路径被修改：
-export XAUTHORITY=$HOME/.Xauthority
+# 这个配置只能在服务端配置, 在客户端配置会导致无法转发
+# export XAUTHORITY=$HOME/.Xauthority
 
 # 通过update-alternatives切换jdk版本 
 # sudo update-alternatives --install /opt/jdk java /opt/jdk8  1000

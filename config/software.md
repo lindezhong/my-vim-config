@@ -67,13 +67,13 @@ git tag
 git checkout {tag}
 
 # 4. 创建vim目录
-mkdir -p ${HOME}/.local/share/vim
+sudo mkdir -p /opt/vim
 
 # 5. 配置编译参数
 #!/bin/bash
 # 配置 Vim 的编译选项（需在源码目录的 src 文件夹内执行）
 # ./configure \
-# --prefix=${HOME}/.local/share/vim \  # 将 Vim 安装到用户目录，避免需要 root 权限
+# --prefix=/opt/vim \  # 将 Vim 安装到用户目录，避免需要 root 权限
 # --with-features=huge \              # 启用最大功能集（支持代码折叠/多缓冲等高级功能）
 # --enable-gui=gtk2 \                 # 编译 GTK2 图形界面（需安装 libgtk2.0-dev）
 # --enable-gui=gtk3 \                 # 使用 GTK3 图形界面（需安装 libgtk-3-dev）
@@ -88,7 +88,7 @@ mkdir -p ${HOME}/.local/share/vim
 # --with-x                            # 启用 X11 图形系统支持(需 libxt-dev 库)
 
 ./configure \
-    --prefix=${HOME}/.local/share/vim \
+    --prefix=/opt/vim \
     --with-features=huge \
     --enable-gui=auto \
     --enable-fontset \
@@ -118,7 +118,7 @@ sudo apt install libxt-dev
 make && sudo make install
 
 # 8. 使用update-alternatives切换vim版本
-sudo update-alternatives --install ${HOME}/.local/bin/vim vim ${HOME}/.local/share/vim/bin/vim 100
-sudo update-alternatives --set vim ${HOME}/.local/share/vim/bin/vim
+sudo update-alternatives --install /usr/local/bin/vim vim /opt/vim/bin/vim 100
+sudo update-alternatives --set vim /opt/vim/bin/vim
 
 ```

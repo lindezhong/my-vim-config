@@ -1,0 +1,20 @@
+# 列出可用wifi网络，包括隐藏的网络
+nmcli dev wifi list
+# 连接wifi, 如果是隐藏wifi需要添加参数`hidden yes`(非隐藏wif无需添加)
+nmcli dev wifi connect <SSID> password <password> hidden yes
+# 查看连接名：
+nmcli connection show
+# 激活连接
+nmcli connection up <connection-name>
+# 断开连接
+nmcli connection down <connection-name>
+# 删除配置, 系统将忘记该SSID相关联的网络
+# 请注意，删除连接配置不会立即中断当前的网络连接。你可能需要重新启动网络服务或断开并重新连接WiFi来应用更改：
+# sudo service network-manager restart
+# 或者你可以通过以下命令断开并重新连接WiFi：
+# nmcli connection down <connection-name>
+# nmcli connection up <connection-name>
+nmcli connection delete <connection-name>
+
+
+

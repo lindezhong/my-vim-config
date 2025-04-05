@@ -1,3 +1,20 @@
+# 中文输入法
+
+先在设置中寻找输入法(keyboard)设置,寻找到中文智能输入法(Intelligent Pinyin),如果不存在则执行以下操作
+
+```shell
+# 1. 安装中文字库及中文语言包:
+sudo apt install fonts-noto-cjk
+sudo apt install language-pack-zh-hans language-pack-zh-hans-base
+# 2. 设置操作系统语言为UTF-8，该设置将在终端重启后生效
+echo "LANG=zh_CN.UTF-8" >> ~/.bashrc
+# 3. 重新设置语言为utf-8让其生成步骤1生成的语言
+sudo dpkg-reconfigure locales
+# 4. 再次查看输入法(keyboard)中是否存在中文智能输入法(Intelligent Pinyin), 如果不存在安装它
+# 安装后查看是否存在中文智能输入法, 如果不存在重启电脑
+sudo apt install ibus ibus-libpinyin
+```
+
 # 火狐全屏时黑一下晃眼睛问题解决办法
 地址栏输入 about:config，回车进入配置页面。分别搜索下面三项，功能看注释
 1. full-screen-api.warning.timeout 双击设置为 0 //关闭视频进入全屏时的提示

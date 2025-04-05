@@ -14,8 +14,13 @@ home_path=$(readlink -f $(dirname "$0"))
 # ~/.vim/compiler/和indent很像，它放的是相应文件类型应该如何编译的选项。
 # ~/.vim/after/这里面的文件也会在vim每次启动的时候加载，不过是等待~/.vim/plugin/加载完成之后才加载after里的内容，所以叫做after。
 # ~/.vim/spell/拼写检查脚本。
+
+# 安装curl防止curl未安装
+sudo apt install curl -y
 # 安装Vim-plug
-curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+if [ ! -f ~/.vim/autoload/plug.vim ]; then
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fi
 
 # 创建mksession目录用于自动保存mksession
 mkdir -p ~/.vim-session

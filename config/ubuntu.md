@@ -15,6 +15,11 @@ sudo dpkg-reconfigure locales
 sudo apt install ibus ibus-libpinyin
 ```
 
+# 隐藏活动按钮(左上角的按钮)
+1. 安装 `gnome-shell-extension-manager`
+sudo apt install gnome-shell-extension-manager
+2. 在软件中打开扩展管理器(ExtensionManager), 在浏览(Browse)中搜索`Hide Activities Button`安装它
+
 # 火狐全屏时黑一下晃眼睛问题解决办法
 地址栏输入 about:config，回车进入配置页面。分别搜索下面三项，功能看注释
 1. full-screen-api.warning.timeout 双击设置为 0 //关闭视频进入全屏时的提示

@@ -1,6 +1,6 @@
 # 中文输入法
 
-先在设置中寻找输入法(keyboard)设置,寻找到中文智能输入法(Intelligent Pinyin),如果不存在则执行以下操作
+先在设置中添加中文(System->Region&Language),键盘(keyboard)设置中文智能输入法(Intelligent Pinyin),如果不存在则执行以下操作
 
 ```shell
 # 1. 安装中文字库及中文语言包:

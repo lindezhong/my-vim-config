@@ -239,7 +239,7 @@ vmap <S-l> <S-Right>
 " X11DisplayOffset 10   #（可选）转发从localhost:10开始
 " X11UseLocalhost no	#（可选）禁止将X11转发请求绑定到本地回环地址上
 " AddressFamily inet	#（可选）强制使用IPv4通道。
-" 3. 客户端开启X11
+" 3. 客户端开启X11(客户端一般无需修改, 只有出问题后再修改)
 " Host *
 "     ForwardAgent yes      # 控制 SSH 代理转发功能。默认值为 no，表示禁止将本地的 SSH 认证代理（如私钥）转发到远程服务器
 "     ForwardX11 yes        # 控制是否自动重定向 X11 图形界面到本地。默认值 no 表示禁用 X11 转发功能

@@ -157,7 +157,6 @@ h1, h2, h3, h4, h5, h6 {
 /* 控制文本行间距为1.5, 和首行缩进2格 */
 p {
     line-height:1.5em;
-    padding:0 0 1.5em 0;
     text-indent:2em;
 }
 

@@ -122,3 +122,41 @@ sudo update-alternatives --install /usr/local/bin/vim vim /opt/vim/bin/vim 100
 sudo update-alternatives --set vim /opt/vim/bin/vim
 
 ```
+
+# calibre
+
+以下是calibre的样式配置, 配置步骤如下
+首选项->样式
+```css
+
+/* 
+这个是一个使用FBReader的暗色方案的css , 但由于Calibre使用了iframe嵌套章节正文所以, 这个css无法修改边框颜色(在书内容上下左右有间距)
+为了统一颜色需要创建一个颜色方案并使用它, 创建步骤如下
+首选项->颜色->新建方案, 配置颜色方案如下, 未显示出的配置默认就好
+名称: FBReader-Dark
+背景: #212121
+前景: #cccccc
+*/
+/* 背景色和前景色在配色, 因为这个配置是在iframe中无法影响到父节点的.book-side-margin */
+/*
+body, .book-side-margin {
+    background-color: #212121 !important;
+    color: #cccccc !important;
+}
+*/
+
+/* 去除目录名的阴影下效果 */
+h1, h2, h3, h4, h5, h6 {
+    text-shadow: none !important;
+}
+
+
+
+/* 控制选择文字颜色 */
+/*
+::selection {
+    background-color: #cccccc !important;
+}
+*/
+
+```

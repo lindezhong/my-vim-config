@@ -136,6 +136,10 @@ sudo update-alternatives --set vim /opt/vim/bin/vim
 名称: FBReader-Dark
 背景: #212121
 前景: #cccccc
+
+css说明
+1. css优先级如下: 内联样式 > ID 选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器 = 伪元素选择器
+2. !important 为强制覆盖, 由于有些css在calibre中自带内联样式为了覆盖需要使用!important
 */
 /* 背景色和前景色在配色, 因为这个配置是在iframe中无法影响到父节点的.book-side-margin */
 /*
@@ -147,15 +151,25 @@ body, .book-side-margin {
 
 /* 去除目录名的阴影下效果 */
 h1, h2, h3, h4, h5, h6 {
-    text-shadow: none !important;
+    text-shadow: none;
 }
 
+/* 控制文本行间距为1.5, 和首行缩进2格 */
+p {
+    line-height:1.5em;
+    padding:0 0 1.5em 0;
+    text-indent:2em;
+}
 
+/* 控制图片居中 */
+img {
+    text-align:center;
+}
 
 /* 控制选择文字颜色 */
 /*
 ::selection {
-    background-color: #cccccc !important;
+    background-color: #cccccc;
 }
 */
 

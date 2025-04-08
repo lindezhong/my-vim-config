@@ -173,7 +173,13 @@ img {
 /*
 ::selection {
     background-color: #cccccc;
+    color: #212121;
 }
+::selection:window-inactive {
+    background-color: #cccccc;
+    color: #212121;
+}
+
 */
 
 ```

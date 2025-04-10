@@ -118,7 +118,7 @@ sudo apt install libxt-dev
 make && sudo make install
 
 # 8. 使用update-alternatives切换vim版本
-sudo update-alternatives --install /usr/local/bin/vim vim /opt/vim/bin/vim 100
+sudo update-alternatives --install $(update-alternatives --query vim | grep Link | awk '{print $2}') vim /opt/vim/bin/vim 100
 sudo update-alternatives --set vim /opt/vim/bin/vim
 
 ```

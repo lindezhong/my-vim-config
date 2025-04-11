@@ -384,6 +384,11 @@ command! -nargs=1 Q call Quit(<f-args>)
 " =================== Yggdroot/LeaderF ======================
 " 设置打开搜索的窗口是左边
 let g:Lf_WindowPosition='left'
+" 忽略查询的文件列表
+let g:Lf_WildIgnore = {
+\ 'dir': ['.git', '.github', '.vim', '.hg', '.svn'],
+\ 'file': ['*.o', '*.a', '*.d', '*.i', '*.s', '*.bc', '*.so', '*.pyc', '*.swp', '*.class']
+\ }
 
 " =================== puremourning/vimspector =====================
 " 用于vim debug
@@ -655,6 +660,7 @@ let g:NERDTreeIgnore = [
             \ '\.swp$',
             \ '\~',
             \ '\.git',
+            \ '\.vim',
             \ '\.github',
             \ '\.gitignore',
             \ '\.vimspector.json',

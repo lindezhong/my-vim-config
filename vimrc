@@ -381,6 +381,9 @@ endfunction
 command! -nargs=1 Q call Quit(<f-args>)
 
 
+" =================== Yggdroot/LeaderF ======================
+" 设置打开搜索的窗口是左边
+let g:Lf_WindowPosition='left'
 
 " =================== puremourning/vimspector =====================
 " 用于vim debug
@@ -422,12 +425,42 @@ imap <silent><Esc><S-n> <Esc>`^:NERDTreeFind<CR>
 " :LeaderfMru 搜索最近使用过的文件( search most recently used files)就是Mru
 " :LeaderfLine 搜索当前文件中有的某个单词
 " :LeaderfFunction 搜索当前文件的函数(这个很有意思，如下图列出该文件中所有的函数和变量)
+" :Leaderf rg 实时调用rg搜索, 即 grep on the fly
+" :Leaderf git 查看git相关功能
+
+" 如果:Leaderf后面有感叹号，会直接进入 normal 模式；如果没有感叹号，则是输入模式，此时可以输入字符来进行模糊匹配过滤。可以用 tab 键在两个模式间来回切换。
+" Leaderf rg基本支持 rg 所有的必要选项，用户如果对 rg 命令比较熟悉，可以在 vim 命令行内输入:Leaderf, 然后手敲 rg 命令，命令选项还可以通过 tab 来补全。 当然，更聪明的做法是定义一些快捷键。
+" Leaderf rg的使用也比较简单，只要Leaderf[!] + rg 命令和选项（同命令行上一样）就可以了。 具体使用方法可以用:Leaderf rg -h来查看。
 nmap <silent><C-p> :LeaderfFile<CR>
 imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
 nmap <silent><C-f> :LeaderfLine<CR>
 imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
-nmap <silent><Esc><C-p> :Leaderf rg<CR>
-imap <silent><Esc><C-p> <Esc>`^:Leaderf rg<CR>
+" 搜索后不关闭LeaderF , -F 禁用正则表达式
+nmap <silent><Esc><C-p> :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s", leaderf#Rg#visual())<CR>
+imap <silent><Esc><C-p> <Esc>`^:<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s", leaderf#Rg#visual())<CR>
+
+" " https://www.v2ex.com/t/527045 使用例子
+" " 搜索光标下的单词，模式将被视为正则表达式，并直接进入正常模式
+" noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
+" " 搜索光标下的单词，模式将被视为正则表达式，
+" " 将结果附加到之前的搜索结果中。
+" noremap <C-G> :<C-U><C-R>=printf("Leaderf! rg --append -e %s ", expand("<cword>"))<CR>
+" " 仅在当前缓冲区中逐字搜索光标下的单词
+" noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg -F --current-buffer -e %s ", expand("<cword>"))<CR>
+" " 在所有列出的缓冲区中逐字搜索光标下的单词
+" noremap <C-D> :<C-U><C-R>=printf("Leaderf! rg -F --all-buffers -e %s ", expand("<cword>"))<CR>
+" " 按字面搜索可视化选定的文本，接受输入后不退出 LeaderF
+" xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+" " 调用上次搜索。如果结果窗口已关闭，请重新打开它。
+" noremap go :<C-U>Leaderf! rg --recall<CR>
+" " 在 *.h 和 *.cpp 文件中搜索光标所在的单词。
+" noremap <Leader>a :<C-U><C-R>=printf("Leaderf! rg -e %s -g *.h -g *.cpp", expand("<cword>"))<CR>
+" " 同上
+" noremap <Leader>a :<C-U><C-R>=printf("Leaderf! rg -e %s -g *.{h,cpp}", expand("<cword>"))<CR>
+" " 在 cpp 和 java 文件中搜索光标所在的单词。
+" noremap <Leader>b :<C-U><C-R>=printf("Leaderf! rg -e %s -t cpp -t java", expand("<cword>"))<CR>
+" " 在 cpp 文件中搜索光标所在的单词，排除 *.hpp 文件
+" noremap <Leader>c :<C-U><C-R>=printf("Leaderf! rg -e %s -t cpp -g !*.hpp", expand("<cword>"))<CR>
 
 " ==================== neoclide/coc.nvim ====================
 " coc.nvim 提供vscode的vim移植

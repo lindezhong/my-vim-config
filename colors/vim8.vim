@@ -10,8 +10,11 @@
 " 5. 转换 links 模式比如 `hi shHereDoc16     links to shRedir` , 执行后变成 `hi link shHereDoc16 shRedir`
 "   正则表达式: `:%s/hi\s\(\S\+\)\s\+links\s\+to\s\+\(\S\+\)\n/hi link \1 \2\r/g`
 
+" 这个是vim8的默认配置方案, 它是暗色配置方案
 " 设置配色方案名称,如果不配置只是按照文件名确定配色方案名称在某些vim版本中无法找到
 let colors_name = "vim8"
+set background=dark
+hi clear
 hi SpecialKey      term=bold ctermfg=4 guifg=Blue
 hi link EndOfBuffer NonText
 hi NonText         term=bold ctermfg=12 gui=bold guifg=Blue

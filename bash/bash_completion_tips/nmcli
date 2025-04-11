@@ -1,7 +1,7 @@
 # 列出可用wifi网络，包括隐藏的网络
-nmcli dev wifi list
+nmcli device wifi list
 # 连接wifi, 如果是隐藏wifi需要添加参数`hidden yes`(非隐藏wif无需添加)
-nmcli dev wifi connect <SSID> password <password> hidden yes
+nmcli device wifi connect <SSID> password <password> hidden yes
 # 查看连接名：
 nmcli connection show
 # 激活连接

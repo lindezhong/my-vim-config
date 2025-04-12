@@ -441,8 +441,14 @@ imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
 nmap <silent><C-f> :LeaderfLine<CR>
 imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
 " 搜索后不关闭LeaderF , -F 禁用正则表达式
-nmap <silent><Esc><C-p> :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s", leaderf#Rg#visual())<CR>
-imap <silent><Esc><C-p> <Esc>`^:<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s", leaderf#Rg#visual())<CR>
+nmap <Esc><C-p> :Leaderf! rg -F --stayOpen -e ""
+imap <Esc><C-p> <Esc>`^:Leaderf! rg -F --stayOpen -e ""
+
+
+"  -F 禁用正则表达式只搜索文本, --stayOpen 不退出 LeaderF 
+" leaderf#Rg#visual()会将上次光标选中的文本赋值给 LeaderF(即用v键后选中的文本)
+" expand("<cword>") 是一个非常实用的函数，用于获取光标下的单词,即光标当前行内容
+
 
 " " https://www.v2ex.com/t/527045 使用例子
 " " 搜索光标下的单词，模式将被视为正则表达式，并直接进入正常模式

@@ -52,6 +52,8 @@ Plug 'KeitaNakamura/tex-conceal.vim'
 Plug 'dhruvasagar/vim-table-mode'
 call plug#end()
 
+" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
+colorscheme vim8
 syntax on
 filetype plugin indent on
 set tabstop=4
@@ -105,8 +107,6 @@ endif
 " 如果觉得<Ctrl-X><Ctrl-K>组合键太麻烦 ，那么也可以直接将字典补全添加到默认补全列表中，在vimrc中添加下面的代码
 " set complete-=k complete+=k
 
-" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
-colorscheme vim8
 " 要选择其他背景颜色，您可以使用 
 " :highlight CocFloating ctermbg=color
 " 并更改错误消息的前景（文本）颜色，请使用

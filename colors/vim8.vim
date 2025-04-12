@@ -14,7 +14,7 @@
 " 设置配色方案名称,如果不配置只是按照文件名确定配色方案名称在某些vim版本中无法找到
 let colors_name = "vim8"
 set background=dark
-" 在vimrc中配置的配色方案需要在设置配色方案之后(即`colorscheme vim8`需要在最前面设置) 
+" 在vimrc中配置的配色方案需要在设置配色方案之后(即`colorscheme vim8`需要在vimr的其它配色前) 
 " 否则会导致vimrc配色方案会因为下面的`hi clear`而被清除掉
 hi clear
 hi SpecialKey      term=bold ctermfg=4 guifg=Blue

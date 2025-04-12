@@ -52,8 +52,6 @@ Plug 'KeitaNakamura/tex-conceal.vim'
 Plug 'dhruvasagar/vim-table-mode'
 call plug#end()
 
-" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
-colorscheme vim8
 syntax on
 filetype plugin indent on
 set tabstop=4
@@ -68,6 +66,8 @@ set nu
 " 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
 set maxmempattern=2000
 
+" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
+colorscheme vim8
 if has('nvim')
     " 设置光标样式, 让nvim和vim保持一样都是闪烁的方块
     set guicursor=n-v-c-i:block

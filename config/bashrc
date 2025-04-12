@@ -75,7 +75,10 @@ export LDFLAGS="-L${HOME}/.local/lib"
 
 PATH=.:${BASH_HOME}:${JAVA_HOME}/bin:${JAVA_HOME}/jre/bin:${MAVEN_HOME}/bin:${PATH}
 
-LANG=zh_CN.UTF-8
+# 设置终端语言为中文需要安装中文相关包, 比如
+# sudo apt install fonts-noto-cjk
+# sudo apt install language-pack-zh-hans language-pack-zh-hans-base
+# LANG=zh_CN.UTF-8
 # 光标不闪烁
 printf '\e[?12l'
 

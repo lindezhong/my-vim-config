@@ -69,6 +69,9 @@ set maxmempattern=2000
 " vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
 colorscheme vim8
 if has('nvim')
+    " neovim 报错: vimspector unavailable: Requires Vim Compiled with +python3:
+    " 解决方案: `pip3 install pynvim` 从 0.3.1 版本开始，python 包 neovim 已更名为 pynvim，将命令更新为 pip3 install pynvim
+
     " 设置光标样式, 让nvim和vim保持一样都是闪烁的方块
     set guicursor=n-v-c-i:block
     " 设置底部状态栏样式, 0: 不显示状态栏 , 1: 仅在打开多个窗口时显示 , 2: 始终显示（即使只有一个窗口）

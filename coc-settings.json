@@ -9,8 +9,8 @@
           "default": true
       },
       {
-          "name": "JavaSE-17",
-          "path": "/opt/jdk17"
+          "name": "JavaSE-23",
+          "path": "/opt/jdk23"
       }
   ],
   "note.callHierarchy.enableTooltip": "关闭调用层次结构文件路径提示",

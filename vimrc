@@ -665,11 +665,11 @@ let g:NERDTreeShowHidden = 1
 let g:NERDTreeIgnore = [
             \ '\.swp$',
             \ '\~',
-            \ '\.git',
-            \ '\.vim',
-            \ '\.github',
-            \ '\.gitignore',
-            \ '\.vimspector.json',
+            \ '^\.git$',
+            \ '^\.vim$',
+            \ '^\.github$',
+            \ '^\.gitignore$',
+            \ '^\.vimspector.json$',
             \ ]
 
 

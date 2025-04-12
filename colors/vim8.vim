@@ -14,7 +14,8 @@
 " 设置配色方案名称,如果不配置只是按照文件名确定配色方案名称在某些vim版本中无法找到
 let colors_name = "vim8"
 set background=dark
-hi clear
+" 配色方案无需清理防止配置在vimrc上的失效
+" hi clear
 hi SpecialKey      term=bold ctermfg=4 guifg=Blue
 hi link EndOfBuffer NonText
 hi NonText         term=bold ctermfg=12 gui=bold guifg=Blue

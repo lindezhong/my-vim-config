@@ -1,7 +1,7 @@
 mapKey <a-e> <esc>
 mapKey <c-e> <esc>
 mapKey <a-c-v> <c-v>
-map <c-y> autoCopy
+# map <c-y> autoCopy
 # scrollFullPageDown 和 scrollFullPageUp 可以配置dir(移动相对整个页面的比例)来控制移动的范围
 # dir 只支持Vimium C插件
 map d scrollFullPageDown dir=0.87

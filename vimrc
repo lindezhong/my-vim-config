@@ -446,6 +446,9 @@ imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
 " 搜索后不关闭LeaderF , -F 禁用正则表达式
 nmap <Esc><C-p> :Leaderf! rg -F --stayOpen -e ""
 imap <Esc><C-p> <Esc>`^:Leaderf! rg -F --stayOpen -e ""
+" git 相关快捷键
+nmap <C-g> :Leaderf! git 
+imap <C-g> <Esc>`^:Leaderf!  git 
 
 
 "  -F 禁用正则表达式只搜索文本, --stayOpen 不退出 LeaderF 

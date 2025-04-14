@@ -65,6 +65,16 @@ set hidden
 set nu
 " 设置vim做字符串匹配时使用的最大内存,UltiSnips代码片段提示使用,默认为1000单位Kbyte
 set maxmempattern=2000
+"""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""状态栏(statusline)"""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""
+" :set statusline all 可以查看状态栏的所有选项
+" 添加状态栏命令的提示, 用于兼容默认安装的vim.gtk安装插件后命令提示消失问题
+set wildmenu
+" 关闭右下角当前光标位置
+set noruler
+
+
 
 " vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
 colorscheme vim8
@@ -98,9 +108,6 @@ if has('nvim')
     highlight WinSeparator term=reverse cterm=reverse gui=reverse
 
 else
-    " :set statusline all 可以查看状态栏的所有选项
-    " 添加状态栏命令的提示, 用于兼容默认安装的vim.gtk安装插件后命令提示消失问题
-    set wildmenu
 endif
 
 

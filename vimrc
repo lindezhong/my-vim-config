@@ -98,6 +98,9 @@ if has('nvim')
     highlight WinSeparator term=reverse cterm=reverse gui=reverse
 
 else
+    " :set statusline all 可以查看状态栏的所有选项
+    " 添加状态栏命令的提示, 用于兼容默认安装的vim.gtk安装插件后命令提示消失问题
+    set wildmenu
 endif
 
 

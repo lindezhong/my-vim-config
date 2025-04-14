@@ -270,7 +270,7 @@ vnoremap <C-y> "+y
 " nnoremap <C-S-v> "+p
 " 1. 对于复制大量的文本可能存在复制导致vim崩溃卡住的情况,这个时候可以通过调用系统剪切板到vim功能即执行`"+p`(在normal模式下执行)
 "   1.1 如果文件是从Windows复制过来的在行尾出现 `` 可以将其替换掉, 使用正则
-"   `%s///g` 替换正则里的 `^M` 为`Ctrl+m`, 需要先输入`Ctrl+v`进入块视觉模式(Visual Block mode)后在输入 `Ctrl+m`
+"   `:%s///g` 替换正则里的 `^M` 为`Ctrl+m`, 需要先输入`Ctrl+v`进入块视觉模式(Visual Block mode)后在输入 `Ctrl+m`
 " 2. 如果复制到vim的时候出现缩进格式错乱可以先执行`:set paste`切换到复制模式保证格式, 复制后执行`:set nopaste`结束复制模式
 
 " 替换 :[range]s/{pattern}/{string}/[flags] [count]

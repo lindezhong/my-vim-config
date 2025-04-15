@@ -410,7 +410,7 @@ command! -nargs=1 Q call Quit(<f-args>)
 let g:Lf_WindowPosition='left'
 " 忽略查询的文件列表
 let g:Lf_WildIgnore = {
-\ 'dir': ['.git', '.github', '.vim', '.hg', '.svn'],
+\ 'dir': ['.git', '.github', '.vim', '.hg', '.svn', '.idea', '.vscode'],
 \ 'file': ['*.o', '*.a', '*.d', '*.i', '*.s', '*.bc', '*.so', '*.pyc', '*.swp', '*.class']
 \ }
 
@@ -693,6 +693,8 @@ let g:NERDTreeIgnore = [
             \ '\.swp$',
             \ '\~',
             \ '^\.git$',
+            \ '^\.idea$',
+            \ '^\.vscode$',
             \ '^\.vim$',
             \ '^\.github$',
             \ '^\.gitignore$',

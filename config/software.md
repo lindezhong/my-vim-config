@@ -184,3 +184,12 @@ img {
 */
 
 ```
+
+# QT
+
+如果报错 `Could not load the Qt platform plugin "xcb"`
+需要安装如下软件
+
+libxcb-cursor0
+libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0
+

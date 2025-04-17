@@ -406,8 +406,23 @@ command! -nargs=1 Q call Quit(<f-args>)
 
 
 " =================== Yggdroot/LeaderF ======================
+" 不使用缓存(第一次启动LeaderF的时候)
+let g:Lf_UseCache=0
+" 每次启动LeaderF的时候都刷新
+" let g:Lf_UseMemoryCache=0
+" 设置1则显示隐藏文件
+" let g:Lf_ShowHidden=1
+" 设置为1, 结果从下到上显示, 跟fzf/CtrlP一致, 默认是0, 从上倒下显示.
+" let  g:Lf_ReverseOrder=1
+" 设置哪几个功能自动显示preview 
+" let g:Lf_PreviewResult={
+"        \ 'File': 0,
+"        \ 'Gtags': 0
+"        \}
 " 设置打开搜索的窗口是左边
 let g:Lf_WindowPosition='left'
+" 设置窗口高度为20%吗, 只在Lf_WindowPosition='bottom'生效
+" let g:Lf_WindowHeight='0.2'
 " 忽略查询的文件列表
 let g:Lf_WildIgnore = {
 \ 'dir': ['.git', '.github', '.vim', '.hg', '.svn', '.idea', '.vscode'],
@@ -460,19 +475,22 @@ imap <silent><Esc><S-n> <Esc>`^:NERDTreeFind<CR>
 " 如果:Leaderf后面有感叹号，会直接进入 normal 模式；如果没有感叹号，则是输入模式，此时可以输入字符来进行模糊匹配过滤。可以用 tab 键在两个模式间来回切换。
 " Leaderf rg基本支持 rg 所有的必要选项，用户如果对 rg 命令比较熟悉，可以在 vim 命令行内输入:Leaderf, 然后手敲 rg 命令，命令选项还可以通过 tab 来补全。 当然，更聪明的做法是定义一些快捷键。
 " Leaderf rg的使用也比较简单，只要Leaderf[!] + rg 命令和选项（同命令行上一样）就可以了。 具体使用方法可以用:Leaderf rg -h来查看。
-nmap <silent><C-p> :LeaderfFile<CR>
-imap <silent><C-p> <Esc>`^:LeaderfFile<CR>
+nmap <silent><C-p> :Leaderf file --no-ignore<CR>
+imap <silent><C-p> <Esc>`^:Leaderf file --no-ignore<CR>
 nmap <silent><C-f> :LeaderfLine<CR>
 imap <silent><C-f> <Esc>`^:LeaderfLine<CR>
 " 搜索后不关闭LeaderF , -F 禁用正则表达式
-nmap <Esc><C-p> :Leaderf! rg -F --stayOpen -e ""
-imap <Esc><C-p> <Esc>`^:Leaderf! rg -F --stayOpen -e ""
+nmap <Esc><C-p> :Leaderf! rg -F --stayOpen --no-ignore -e ""
+imap <Esc><C-p> <Esc>`^:Leaderf! rg -F --no-ignore --stayOpen -e ""
 " git 相关快捷键
 nmap <C-g> :Leaderf! git 
 imap <C-g> <Esc>`^:Leaderf!  git 
 
 
 "  -F 禁用正则表达式只搜索文本, --stayOpen 不退出 LeaderF 
+" --no-ignore 搜索不忽略.gitignore配置的文件
+" --stayOpen 确定搜索后不要退出 LeaderF
+" -e 选项用于指定你要搜索的字符串或正则表达式
 " leaderf#Rg#visual()会将上次光标选中的文本赋值给 LeaderF(即用v键后选中的文本)
 " expand("<cword>") 是一个非常实用的函数，用于获取光标下的单词,即光标当前行内容
 

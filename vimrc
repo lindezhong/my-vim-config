@@ -411,7 +411,7 @@ command! -nargs=1 Q call Quit(<f-args>)
 " 每次启动LeaderF的时候都刷新
 " let g:Lf_UseMemoryCache=0
 " 设置1则显示隐藏文件
-" let g:Lf_ShowHidden=1
+let g:Lf_ShowHidden=1
 " 设置为1, 结果从下到上显示, 跟fzf/CtrlP一致, 默认是0, 从上倒下显示.
 " let  g:Lf_ReverseOrder=1
 " 设置哪几个功能自动显示preview 

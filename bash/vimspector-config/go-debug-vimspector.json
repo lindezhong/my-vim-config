@@ -6,6 +6,7 @@
       "adapter": "vscode-go",
       "filetypes": [ "go" ],
       "configuration": {
+        "name": "go调试程序: 远程调试可配置host和port",
         "request": "attach",
         "mode": "remote",
         "host": "${host:localhost}",

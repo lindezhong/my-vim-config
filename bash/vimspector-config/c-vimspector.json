@@ -3,7 +3,7 @@
         "cpp:launch": {
             "adapter": "vscode-cpptools",
             "configuration": {
-                "name": "cpp:launch",
+                "name": "cpp: 本地运行指定运行文件",
                 "stopAtEntry": true,
                 "type": "cppdbg",
                 "request": "launch",

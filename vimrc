@@ -407,7 +407,7 @@ command! -nargs=1 Q call Quit(<f-args>)
 
 " =================== Yggdroot/LeaderF ======================
 " 不使用缓存(第一次启动LeaderF的时候)
-let g:Lf_UseCache=0
+" let g:Lf_UseCache=0
 " 每次启动LeaderF的时候都刷新
 " let g:Lf_UseMemoryCache=0
 " 设置1则显示隐藏文件

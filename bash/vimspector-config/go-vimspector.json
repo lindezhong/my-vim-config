@@ -6,6 +6,7 @@
         "name": "go调试程序: 当前文件",
         "request": "launch",
         "program": "${workspaceRoot}/${file}",
+        "args": [],
         "mode": "debug",
         "dlvToolPath": "${GOPATH}/bin/dlv"
       }

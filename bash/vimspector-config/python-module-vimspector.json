@@ -7,10 +7,11 @@
         "name": "python调试程序: 当前文件",
         "request": "launch",
         "python": "${workspaceRoot}/.venv/bin/python",
-        "program": "${workspaceRoot}/${file}",
-        "args": [],
         "cwd": "${workspaceRoot}",
-        "stopOnEntry": true,
+        "type": "debugpy",
+        "module": "${module}",
+        "args": [],
+
         "justMyCode#json": "false"
       },
       "breakpoints": {
@@ -22,7 +23,8 @@
       }
     }
   },
-  "备注": "1. python -m venv .venv 创建环境 2. source .venv/bin/activate 切换环境 3. deactivate 切换回原始环境"
+  "备注": "1. python -m venv .venv 创建环境 2. source .venv/bin/activate 切换环境 3. deactivate 切换回原始环境",
+  "备注2": "实际执行python -m ${module} args ..."
 }
 
 

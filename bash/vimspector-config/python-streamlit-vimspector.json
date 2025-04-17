@@ -4,13 +4,14 @@
       "adapter": "debugpy",
       "default": true,
       "configuration": {
-        "name": "python调试程序: 当前文件",
+        "name": "python调试程序: 使用streamlit调试当前文件",
         "request": "launch",
         "python": "${workspaceRoot}/.venv/bin/python",
-        "program": "${workspaceRoot}/${file}",
-        "args": [],
         "cwd": "${workspaceRoot}",
-        "stopOnEntry": true,
+        "type": "debugpy",
+        "module": "streamlit",
+        "args": ["run", "${file}"],
+
         "justMyCode#json": "false"
       },
       "breakpoints": {
@@ -22,7 +23,8 @@
       }
     }
   },
-  "备注": "1. python -m venv .venv 创建环境 2. source .venv/bin/activate 切换环境 3. deactivate 切换回原始环境"
+  "备注1": "1. python -m venv .venv 创建环境 2. source .venv/bin/activate 切换环境 3. deactivate 切换回原始环境",
+  "备注2": "streamlit是python用于构建web程序的一个python包, 但需要通过 python -m streamlit run ${file} 执行"
 }
 
 

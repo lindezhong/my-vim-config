@@ -29,6 +29,7 @@
                 "type": "cppdbg",
                 "request": "attach",
                 "program": "${workspaceRoot}/${c_out:a.out}",
+                "args": [],
                 "MIMode": "gdb",
                 "breakpointers": {
                     "exception": {

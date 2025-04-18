@@ -25,7 +25,11 @@
   },
   "备注1": "1. python -m venv .venv 创建环境 2. source .venv/bin/activate 切换环境 3. deactivate 切换回原始环境",
   "备注2": "streamlit是python用于构建web程序的一个python包, 但需要通过 python -m streamlit run ${file} 执行",
-  "备注3": "如果streamlit启动debug的时候出现需要输入邮箱并且停止，需要事先执行`python -m streamlit ${file}` 后输入邮箱，让输入邮箱执行过，或者执行 `streamlit activate email邮箱地址` 输入邮箱"
+  "备注3": "如果streamlit启动debug的时候出现需要输入邮箱并且停止，需要事先执行`python -m streamlit ${file}` 后输入邮箱，让输入邮箱执行过，或者执行 `streamlit activate email邮箱地址` 输入邮箱",
+  "代码demo": "1. 先安装依赖streamlit, 即`pip install streamlit` , demo 代码如下",
+  "code1": "import streamlit as st",
+  "code2": "st.write('hello streamlit')"
+  
 }
 
 

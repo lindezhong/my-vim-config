@@ -11,7 +11,7 @@ windows有时会遇到打开白色网站的时候显示器渐渐变亮，打开�
 3. 修改`FeatureTestControl`的REGDWORD项目。如果是8200则修改为8210，如果是9240就修改为9250
     
 
-本质上是修改"FeatureTestControl"的第五位为1, "FeatureTestControl"为16进制数据, 我们可以对比下步骤3的几个值的例子
+本质上是修改`FeatureTestControl`的第五位为1, `FeatureTestControl`为16进制数据, 我们可以对比下步骤3的几个值的例子
 
 | 16进制 | 2进制            |
 |--------|------------------|
@@ -29,7 +29,6 @@ echo "obase=16; ibase=2; 11111" | bc
 ```
 
 
-9250
 # 修改hosts文件
 
 背景: 由于修改hosts文件需要管理员权限所以需要如下操作

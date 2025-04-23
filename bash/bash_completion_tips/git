@@ -28,3 +28,18 @@ git stash create
 git stash store -m {消息} {gitStashCreate执行结果}
 # 此命令使用指定的stash创建一个新分支，然后删除指定的存储, git stash branch new_branch stash@{1}
 git stash branch {分支名} {stash暂存栈下标}
+# 查看git有哪些tag
+git tag
+# 创建一个轻量标签(轻量标签很像一个不会改变的分支——它只是某个特定提交的引用。)
+# git_version 可忽略, 如果不填写为当前的版本
+git tag {tag_name} {git_version}
+# 创建一个附注标签(附注标签是存储在 Git 数据库中的一个完整对象， 它们是可以被校验的，其中包含打标签者的名字、电子邮件地址、日期时间， 此外还有一个标签信息，并且可以使用 GNU Privacy Guard （GPG）签名并验证。 通常会建议创建附注标签，这样你可以拥有以上所有信息。)
+# git_version 可忽略, 如果不填写为当前的版本
+git tag -a {tag_name} -m {message} {git_version}
+# 通过使用 git show 命令可以看到标签信息和与之对应的提交信息
+git show {tag_name}
+# 默认情况下，git push 命令并不会传送标签到远程仓库服务器上。 在创建完标签后你必须显式地推送标签到共享服务器上。 
+# 这个过程就像共享远程分支一样——你可以运行 git push origin {tag_name}
+git push origin {tag_name}
+# 如果想要一次性推送很多标签，也可以使用带有 --tags 选项的 git push 命令。 这将会把所有不在远程仓库服务器上的标签全部传送到那里。
+git push origin --tags

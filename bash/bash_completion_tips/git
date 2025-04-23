@@ -28,8 +28,8 @@ git stash create
 git stash store -m {消息} {gitStashCreate执行结果}
 # 此命令使用指定的stash创建一个新分支，然后删除指定的存储, git stash branch new_branch stash@{1}
 git stash branch {分支名} {stash暂存栈下标}
-# 查看git有哪些tag
-git tag
+# 查看git有哪些tag, -l 可以过滤某些特定tag 比如  git tag -l "v1.8.5*" 只显示1.8.5 系列
+git tag -l {filter}
 # 创建一个轻量标签(轻量标签很像一个不会改变的分支——它只是某个特定提交的引用。)
 # git_version 可忽略, 如果不填写为当前的版本
 git tag {tag_name} {git_version}
@@ -43,3 +43,7 @@ git show {tag_name}
 git push origin {tag_name}
 # 如果想要一次性推送很多标签，也可以使用带有 --tags 选项的 git push 命令。 这将会把所有不在远程仓库服务器上的标签全部传送到那里。
 git push origin --tags
+# 删除本地tag, 不会影响远程仓库tag
+git tag -d {tag_name}
+# 删除远程仓库tag
+git push origin --delete {tag_name}

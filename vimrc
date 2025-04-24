@@ -236,6 +236,16 @@ vmap <S-l> <S-Right>
 " nmap <silent><C-]> :vertical res+1<CR>
 " nmap <silent><C-PageUp> :res+1<CR>
 " nmap <silent><C-PageDown> :res-1<CR>
+" C-PageUp 加大窗口宽度
+nmap <silent><C-PageUp> :vertical res+1<CR>
+" C-PageDown 减少窗口宽度
+nmap <silent><C-PageDown> :vertical res-1<CR>
+" A-PageUp 加大窗口高度
+nmap <silent><A-PageUp> :res+1<CR>
+" A-PageDown 减少窗口高度
+nmap <silent><A-PageDown> :res-1<CR>
+
+
 
 " 支持从vim复制到剪切版
 " 需要vim支持clipboard

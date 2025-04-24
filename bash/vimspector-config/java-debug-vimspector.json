@@ -1,0 +1,27 @@
+{
+  "adapters": {
+    "java-debug-server": {
+      "name": "vscode-java",
+      "port": "${AdapterPort}"
+    }
+  },
+  "configurations": {
+    "Java Attach": {
+      "name": "java调试程序: 远程调试可配置host和port",
+      "default": true,
+      "adapter": "java-debug-server",
+      "configuration": {
+        "request": "attach",
+        "host": "${host:localhost}",
+        "port": "${port:5005}"
+      },
+      "breakpoints": {
+        "exception": {
+          "caught": "N",
+          "uncaught": "N"
+        }
+      }
+    }
+  }
+}
+

@@ -461,6 +461,8 @@ nmap <silent> <F9> <Plug>VimspectorToggleBreakpoint
 nmap <silent> <Leader><F9> <Plug>VimspectorToggleConditionalBreakpoint
 " F6运行到下个断点
 nmap <silent> <F6> <Plug>VimspectorRunToCursor
+" F4 关闭debug
+nmap <silent> <F4> :VimspectorReset<CR>
 
 
 " =================== preservim/nerdtree =====================

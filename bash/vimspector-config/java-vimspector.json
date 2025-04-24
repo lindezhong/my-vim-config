@@ -1,19 +1,20 @@
 {
   "adapters": {
-    "java-debug-server": {
-      "name": "vscode-java",
+    "coc-java-debug": {
       "port": "${AdapterPort}"
     }
   },
   "configurations": {
-    "Java Attach": {
-      "name": "java调试程序: 远程调试可配置host和port",
+    "javaLaunch": {
+      "name": "java运行本年度项目, 如果当前java类存在main方法执行当前类, 不存在则需输入",
       "default": true,
-      "adapter": "java-debug-server",
+      "adapter": "coc-java-debug",
       "configuration": {
-        "request": "attach",
-        "host": "${host:localhost}",
-        "port": "${port:5005}"
+        "args": "${args}",
+        "request": "launch",
+        "projectName": "${ProjectName}",
+        "mainClass": "${MainClass}",
+        "classPaths": ["*${ClassPaths}"]
       },
       "breakpoints": {
         "exception": {
@@ -24,4 +25,3 @@
     }
   }
 }
-

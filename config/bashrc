@@ -19,6 +19,11 @@ alias 2fa_git='python -c "import pyotp; print(pyotp.TOTP(\"3NQ2ZK7MF2GQP4LE\").n
 # Defaults    env_keep += "socks5_proxy"
 # ```
 proxy () {
+    # 如果是v2rayN, 在wsl中只能用局域网连接(宿主机连接wifi或有线网ip), 或者直接开启Tun模式可代理wsl流量
+    # v2rayN开启局域网共享需要开启允许来自局域网的连接和为局域网开启新的端口
+    # 如果用的是v2rayN的端口如下 
+    # 本地:[socket:10808] 本地:[http:10809] 
+    # 局域网:[socket:10810 局域网:[http:10811] 
     export http_proxy="http://localhost:20181"
     export https_proxy=$http_proxy
     export socks5_proxy="socks5://localhost:20180"

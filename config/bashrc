@@ -23,7 +23,8 @@ proxy () {
     # v2rayN开启局域网共享需要开启允许来自局域网的连接和为局域网开启新的端口
     # 如果用的是v2rayN的端口如下 
     # 本地:[socket:10808] 本地:[http:10809] 
-    # 局域网:[socket:10810 局域网:[http:10811] 
+    # 局域网:[socket:10810] 局域网:[http:10811] 
+    # 手机连接v2rayN的代理使用局域网:[socket:10810]
     export http_proxy="http://localhost:20181"
     export https_proxy=$http_proxy
     export socks5_proxy="socks5://localhost:20180"

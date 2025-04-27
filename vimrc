@@ -107,6 +107,11 @@ if has('nvim')
     " 配置分割符颜色, vim为 VertSplit 颜色组, 但nvim为WinSeparator
     highlight WinSeparator term=reverse cterm=reverse gui=reverse
 
+    " 修复ap/vim-buftabline插件在nvim中颜色被反转的问题,所以事先配置成反转后的颜色,负负得正
+    " 如果后续颜色变了可以查看ap/vim-buftabline/plugin/buftabline.vim中这两个分组颜色
+    highlight BufTabLineCurrent    ctermfg=0 ctermbg=7  guibg=LightGrey
+    highlight BufTabLineHidden     term=bold,underline cterm=bold,underline gui=bold,underline
+
 else
 endif
 

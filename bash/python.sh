@@ -73,23 +73,23 @@ setuptools : 关于python构建/打包的相关操作, 如果python版本过低�
         python.sh setuptools build
         return : 在./dist 生成文件夹
 
-test : 运行单元测试用例, 等价于 python setup.py test
-    python test {要运行的单元测试python:为空则运行所有的单元测试}
-    $1 : 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
-    return : 运行单元测试结果
+    setuptools test : 运行单元测试用例, 等价于 python setup.py test
+        python.sh setuptools test {要运行的单元测试python:为空则运行所有的单元测试}
+        $1 : 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
+        return : 运行单元测试结果
 
     '
 }
 
 
 # 安装构建依赖包,正常无需执行，除非低版本
-setuptoolsEnv() {
+setuptools_env() {
     python3 -m pip install setuptools wheel twine
 }
 
 
 # python项目初始化/创建一个python项目
-setuptoolsInit() {
+setuptools_init() {
     local project_name=$1
 
     local script_path=$0
@@ -162,9 +162,9 @@ setuptoolsInit() {
     done
     local model=${default_map['setuptools_init_setup_model']}
     if [[ "$model" == "static" ]]; then
-        eval "echo \"$(cat ${home_path}/python_project_example/setup.cfg)\" > ${project_name}/setup.cfg"
+        eval "echo \"$(cat ${home_path}/python_project_example_setuptools/setup.cfg)\" > ${project_name}/setup.cfg"
     elif [[ "$model" == "dynamic" ]]; then
-        eval "echo \"$(cat ${home_path}/python_project_example/setup.py)\" > ${project_name}/setup.py"
+        eval "echo \"$(cat ${home_path}/python_project_example_setuptools/setup.py)\" > ${project_name}/setup.py"
     else
         echo "非法的模式 : $model , 需要static或dynamic"
         return -1
@@ -172,63 +172,36 @@ setuptoolsInit() {
     
 
     # 初始化 __init__.py 文件
-    eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/__init__.py)\" > $project_name/$project_name/__init__.py"
-    eval "echo \"$(cat ${home_path}/python_project_example/tests/__init__.py)\" > $project_name/tests/__init__.py"
+    eval "echo \"$(cat ${home_path}/python_project_example_setuptools/python_project_example_setuptools/__init__.py)\" > $project_name/$project_name/__init__.py"
+    eval "echo \"$(cat ${home_path}/python_project_example_setuptools/tests/__init__.py)\" > $project_name/tests/__init__.py"
     # 初始化pyproject.toml文件
-    eval "echo \"$(cat ${home_path}/python_project_example/pyproject.toml)\" > ${project_name}/pyproject.toml"
+    eval "echo \"$(cat ${home_path}/python_project_example_setuptools/pyproject.toml)\" > ${project_name}/pyproject.toml"
     # 初始化example.py文件和相关测试文件test_example.py
-    eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/example.py)\" > $project_name/$project_name/example.py"
-    eval "echo \"$(cat ${home_path}/python_project_example/tests/test_example.py)\" > $project_name/tests/test_example.py"
+    eval "echo \"$(cat ${home_path}/python_project_example_setuptools/python_project_example_setuptools/example.py)\" > $project_name/$project_name/example.py"
+    eval "echo \"$(cat ${home_path}/python_project_example_setuptools/tests/test_example.py)\" > $project_name/tests/test_example.py"
     # 如果为C和Python混合项目则创建相关文件
     if [[ $is_c_project == "y" ]]; then
         mkdir -p $project_name/$project_name/api/example
-        eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/api/__init__.py)\" > $project_name/$project_name/api/__init__.py"
-        eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/api/example/c_fun.c)\" > $project_name/$project_name/api/example/c_fun.c"
-        eval "echo \"$(cat ${home_path}/python_project_example/python_project_example/api/example/pybind11.cpp)\" > $project_name/$project_name/api/example/pybind11.cpp"
+        eval "echo \"$(cat ${home_path}/python_project_example_setuptools/python_project_example_setuptools/api/__init__.py)\" > $project_name/$project_name/api/__init__.py"
+        eval "echo \"$(cat ${home_path}/python_project_example_setuptools/python_project_example_setuptools/api/example/c_fun.c)\" > $project_name/$project_name/api/example/c_fun.c"
+        eval "echo \"$(cat ${home_path}/python_project_example_setuptools/python_project_example_setuptools/api/example/pybind11.cpp)\" > $project_name/$project_name/api/example/pybind11.cpp"
     fi
 
 }
 
 # 将本地python项目安装到site-packages
-setuptoolsInstall() {
+setuptools_install() {
     python3 -m pip install .
 }
 
 # 打包本地python项目
-setuptoolsBuild() {
+setuptools_build() {
     python setup.py build
-}
-
-
-# 关于python构建/打包的相关操作, 如果python版本过低需要执行: python.sh setuptools env
-setuptools() {
-    local SETUPTOOLS_ACTION=$1
-
-    shift 1
-
-    case $SETUPTOOLS_ACTION in
-        env )
-            setuptoolsEnv
-            ;;
-        init )
-            setuptoolsInit $*
-            ;;
-        install )
-            setuptoolsInstall
-            ;;
-        build )
-            setuptoolsBuild
-            ;;
-        * )
-            echo "参数错误请查看帮助文档, setuptools action is : [$SETUPTOOLS_ACTION]"
-            help
-            ;;
-    esac
 }
 
 # 运行单元测试用例
 # $1 : 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
-python_test() {
+setuptools_test() {
     local test_py=$1
 
     if [[ -z $test_py ]]; then
@@ -245,15 +218,43 @@ python_test() {
     fi
 }
 
+
+
+# 关于python构建/打包的相关操作, 如果python版本过低需要执行: python.sh setuptools env
+setuptools() {
+    local SETUPTOOLS_ACTION=$1
+
+    shift 1
+
+    case $SETUPTOOLS_ACTION in
+        env )
+            setuptools_env
+            ;;
+        init )
+            setuptools_init $*
+            ;;
+        install )
+            setuptools_install
+            ;;
+        build )
+            setuptools_build
+            ;;
+        test )
+            setuptools_test $*
+            ;;
+        * )
+            echo "参数错误请查看帮助文档, setuptools action is : [$SETUPTOOLS_ACTION]"
+            help
+            ;;
+    esac
+}
+
 case $ACTION in
     --help )
         help
         ;;
     setuptools )
         setuptools $*
-        ;;
-    test )
-        python_test $*
         ;;
     * )
         echo "未知操作请查看帮助文档"

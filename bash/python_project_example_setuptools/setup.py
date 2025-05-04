@@ -32,10 +32,10 @@ def get_ext_modules() -> list:
     #     [
     #         "api/accumulate.c",
     #     ],
-    #     # include_dirs=["vnpy_ctptest/api/include","vnpy_ctptest/api/vnctp"],
+    #     # include_dirs=["'${project_name}'/api/include","'${project_name}'/api/vnctp"],
     #     define_macros=[],
     #     undef_macros=[],
-    #     # library_dirs=["vnpy_ctptest/api/libs", "vnpy_ctptest/api"],
+    #     # library_dirs=["'${project_name}'/api/libs", "'${project_name}'/api"],
     #     # libraries=["thostmduserapi_se", "thosttraderapi_se"],
     #     extra_compile_args=extra_compile_flags,
     #     extra_link_args=extra_link_args,
@@ -51,7 +51,7 @@ def get_ext_modules() -> list:
         # include_dirs=["'${project_name}'/api/include","'${project_name}'/api/vnctp"],
         define_macros=[],
         undef_macros=[],
-        # library_dirs=["vnpy_ctptest/api/libs", "vnpy_ctptest/api"],
+        # library_dirs=["'${project_name}'/api/libs", "'${project_name}'/api"],
         # libraries=["thostmduserapi_se", "thosttraderapi_se"],
         extra_compile_args=extra_compile_flags,
         extra_link_args=extra_link_args,
@@ -59,6 +59,7 @@ def get_ext_modules() -> list:
         depends=[],
         language="cpp",
     )
+    # 使用pybind11_module需要安装 pybind11 , pip3 install pybind11 & sudo apt install -y python3-pybind11
     pybind11_module = setuptools.Extension(
         "'${project_name}'.api.example.pybind11",
         [
@@ -67,7 +68,7 @@ def get_ext_modules() -> list:
         # include_dirs=["'${project_name}'/api/include","'${project_name}'/api/vnctp"],
         define_macros=[],
         undef_macros=[],
-        # library_dirs=["vnpy_ctptest/api/libs", "vnpy_ctptest/api"],
+        # library_dirs=["'${project_name}'/api/libs", "'${project_name}'/api"],
         # libraries=["thostmduserapi_se", "thosttraderapi_se"],
         extra_compile_args=extra_compile_flags,
         extra_link_args=extra_link_args,

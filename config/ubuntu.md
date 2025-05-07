@@ -7,6 +7,8 @@
 sudo apt install fonts-noto-cjk
 sudo apt install language-pack-zh-hans language-pack-zh-hans-base
 # 2. 设置操作系统语言为UTF-8，该设置将在终端重启后生效
+# 若需立即生效可以执行 `export LANG=zh_CN.UTF-8`
+# 可以通过 ` locale -a` 查看系统拥有的语言包
 echo "LANG=zh_CN.UTF-8" >> ~/.bashrc
 # 3. 重新设置语言为utf-8让其生成步骤1生成的语言
 sudo dpkg-reconfigure locales

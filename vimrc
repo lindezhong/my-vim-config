@@ -712,14 +712,21 @@ inoremap <silent><expr> <TAB>
 nmap <Leader>t <Plug>(coc-translator-p)
 vmap <Leader>t <Plug>(coc-translator-pv)
 " echo
-nmap <Leader>e <Plug>(coc-translator-e)
-vmap <Leader>e <Plug>(coc-translator-ev)
+" nmap <Leader>e <Plug>(coc-translator-e)
+" vmap <Leader>e <Plug>(coc-translator-ev)
 " replace
-nmap <Leader>r <Plug>(coc-translator-r)
-vmap <Leader>r <Plug>(coc-translator-rv)
+" nmap <Leader>r <Plug>(coc-translator-r)
+" jmap <Leader>r <Plug>(coc-translator-rv)
 " coc-markdown-preview-enhanced markdown 插件
 " 快捷键 \v 快速带开markdown预览
 nmap <Leader>v :CocCommand markdown-preview-enhanced.openPreview<CR>
+
+
+" ==================== dhruvasagar/vim-table-mode ====================
+" 在表格中,显示当前光标所在的行列, 
+imap <silent><Leader>r <Esc>`^:echo tablemode#spreadsheet#RowNr('.') .',' . tablemode#spreadsheet#ColumnNr('.') . ' (row,column)' <CR>
+nmap <silent><Leader>r :echo tablemode#spreadsheet#RowNr('.') .',' . tablemode#spreadsheet#ColumnNr('.') . ' (row,column)' <CR>
+
 
 " ==================================================
 " =================== 快捷键配置 ===================
@@ -965,7 +972,106 @@ let g:vimtex_syntax_nospell_comments=1
 " inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 
 " ==================== dhruvasagar/vim-table-mode ====================
-" dhruvasagar/vim-table-mode vim 表格创建
+" # 表格公式使用 
+" 
+" ## 表格公式格式
+" 表达式的格式为`$target = formula`
+" 可以target有两种形式:
+"   1. `$c` 这与表格的列号匹配c。因此，formula将对该列中的每个单元格进行求值，并将结果放入其中。
+"       您可以使用负索引来表示相对于最后一列的列，例如 -1 表示最后一列。
+"   2. `$r,c`: 这匹配表格单元格 r,c(行,列). 因此，在这种情况下，公式将被求值，并将结果放置在此单元格中。
+"       您也可以使用负值来引用相对于单元格大小的单元格，例如 -1 表示最后一行（行或列）
+"   3. 对于行列是从1开始的
+" `formula`是一个简单的数学表达式，涉及的单元格也采用与目标单元格相同的格式定义。
+" 您可以在公式中使用所有原生的 Vim 函数(`:h function-list`查看内置函数)和自定义的函数。
+" 除此之外，表格模式还提供了两个特殊函数Sum和Average。这两个函数都以范围作为输入。范围可以有两种形式
+"   1. `r1:r2`表示当前列中从第r1行 到第r2行的单元格。如果r2为负数，则表示r2当前行（目标单元格）上方的行。
+"   2. `r1,c1:r2,c2`:这代表表格中从单元格 r1,c1 到单元格 r2,c2(行,列)的单元格。
+" 
+" ### 公式具体写法
+" 表达式`$target = formula` , 是记录在注释下由以`tmf:`开头的才能识别,如果有多个`$target = formula`使用`;`分割
+" 比如在 markdown 下的例子为 单个公式: `<!--  tmf: $1,11=$1 * $1 -->` 多个公式 `<!--  tmf: $1,11=$1 * $1;$2,11=$1 * $1 -->`
+" 比如在 sh 下的例子为 单个公式: `# tmf: $1,11=$1 * $1` 多个公式 `# tmf: $1,11=$1 * $1;$2,11=$1 * $1`
+" 比如在txt下的例子为 单个公式: ` tmf: $1,11=$1 * $1` 多个公式 ` tmf: $1,11=$1 * $1;$2,11=$1 * $1` **最前面有个空格不能忽略, 并且需要独立行**
+" 
+" ### `$target = formula` 官方例子
+" 1. `$2 = $1 * $1`
+" 2. `$2 = pow($1, 5)`注意：请记住在 $1 和 5 之间留出空格，否则它将被视为表格单元格。
+" 3. `$2 = $1 / $1,3`
+" 4. `$1,2 = $1,1 * $1,1`
+" 5. `$5,1 = Sum(1:-1)`
+" 6. `$5,1 = float2nr(Sum(1:-1))`
+" 7. `$5,3 = Sum(1,2:5,2)`
+" 8. `$5,3 = Sum(1,2:5,2)/$5,1`
+" 9. `$5,3 = Average(1,2:5,2)/$5,1`
+"
+" ### `$target = formula` 常用例子
+" 1. `$r,c=Sum(1:-1)` 累加第c列,从1到r-1行的数据到(r,c)上
+" 2. `$r,c=Average(1:-1)` 取第c列,从1到r-1行数据的平均值到(r,c)上
+" 3. `$c3=$c1+$c2`  c3列 = c1列 + c2列 (同理 + - * / 都可以实现)
+" 4. `$c3=str2float($c1)/$c2` c3列 = c1列 / c2列 如果 c1 不用str2float函数包裹, 在c1, c2 列都是整数情况下变成向下取整
+" 5. `$c3=$c1$c2`  这个是拼接字符串
+" 6. `$r,n=condition ? value_if_true : value_if_false`可以使用三目运算符
+" 7. 可以使用自定义函数
+" 
+" 先自定义函数SumNumber
+" function! SumNumber(num1,num2)
+"     return a:num1 + a:num2
+" endfunction
+" | 1    | 2  | 3  | 4        | 5            |
+" |------|----|----|----------|--------------|
+" | 11   | 12 | 13 | 0.916667 | 11连接符12   |
+" | 21   | 22 | 23 | 0.954545 | 21连接符22   |
+" | 32.0 | 34 | 0  | 0.941176 | 32.0连接符34 |
+" <!--  tmf: $3,1=Sum(1:-1); $3,2=SumNumber($1,2, $2,2); $3,3=$1,3 > 100 ? $1,3 : 0; $4=str2float($1)/$2; $5=$1 . '连接符' . $2 --> 
+"            累加            自定义函数                  三目运算符                  除法                 拼接字符串
+
+
+"
+" ## 添加表格公式的方式
+" 表格公式一共有两种添加方式 `:TableAddFormula` , `:TableEvalFormulaLine`
+" ### TableAddFormula
+" 您可以在表格单元格中使用`:TableAddFormula`添加公式,出现`f=`后输入`formula`
+" 这种方式对于`$target`来说是固定为光标所在的行列即`$row,column`无法修改
+"
+" 由于TableAddFormula的操作逻辑是如果存在公式行，则输入公式将附加到公式行中；否则，将创建一个新的公式行
+" 所以在附加到公式行中过程中有部分格式会处理异常, 比如在markdown中因为格式为`<!--  tmf:$target = formula  -->` 就会附加失败
+" 测试过程中在 txt 中处理最好
+" 
+" ### TableEvalFormulaLine
+" `:TableEvalFormulaLine` 本质上是重新执行所有的公式将对应表格上的值刷新,即实现需要自己写完公式, 公式如何写看`公式具体写法`
+" 
+" ### 例子
+" 以下例子使用markdown作为演示,由于公式是需要在注释下的所以每种文档在使用中都有细微的区别
+" 
+" #### TableAddFormula添加公式例子 
+" 
+" `TableAddFormula`只能定义光标所在行列的公式
+"
+" 假设光标在内容为@处
+"    原始表格数据             对应操作                      变化后的表格       
+" | 1  | 2  | 3  |        1. 输入`:TableAddFormula`       | 1  | 2  | 3  |
+" |----|----|----|        2. 输入`$1+$2`                  |----|----|----|
+" | 11 | 12 | @  |                                        | 11 | 12 | 23 |
+" | 21 | 22 |    |                                        | 21 | 22 |    |
+"                                                         <!--  tmf: $1,3=$1+$2  --> 
+"
+" #### TableEvalFormulaLine添加公式例子 
+"    原始表格数据        手动添加公式行                    执行`:TableEvalFormulaLine`       
+" | 1  | 2  | 3  |      | 1  | 2  | 3  |                  | 1  | 2  | 3  |
+" |----|----|----|      |----|----|----|                  |----|----|----|
+" | 11 | 12 |    |      | 11 | 12 |    |                  | 11 | 12 | 23 |
+" | 21 | 22 |    |      | 21 | 22 |    |                  | 21 | 22 | 43 |
+"                       <!--  tmf: $3=$1+$2  -->          <!--  tmf: $3=$1+$2  --> 
+"
+" ## 表格公式最佳实践
+"
+" 1. 先在一个空白行公式 `tmf: $target=formula` 
+" 2. 再在公式行`\cc`添加注释(如果是txt格式在公式行前添加一个空格即可)
+" 3. 如果不知道这么添加公式,可以通过`:TableAddFormula`添加一个最简单的公式最为例子
+" 4. 如果需要知道光标所在的行列则输入`\r`即可
+
+
 " 1. 处理类似markdown 表格的数据格式 即 : | a | c | (|间需要空格)
 " 2. :TableModeEnable 打开表格模式才能自动处理表格
 " 3. :TableModeDisable 关闭表格模式

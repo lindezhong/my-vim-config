@@ -1013,6 +1013,8 @@ let g:vimtex_syntax_nospell_comments=1
 " 5. `$c3=$c1$c2`  这个是拼接字符串
 " 6. `$r,n=condition ? value_if_true : value_if_false`可以使用三目运算符
 " 7. 可以使用自定义函数
+" 8. `$-1,-1=ForColumn('SumC(1:-1)', line, row, colm)` : 最后一行统计自身列的和
+" 9. `$r3,-1=ForColumn('#r2 + #r1', line, row, colm)` : r3行 = r2行 + r1行
 "
 "
 " ### vim-table-model 扩展的函数
@@ -1035,6 +1037,7 @@ let g:vimtex_syntax_nospell_comments=1
 " - AutoSumRow(line, row, colm) : 累加r行数据到 $target
 " - AutoAverageRow(line, row, colm) : 取r行平均值到 $target 表格为空认为是0
 " - AutoAverageNERow(line, row, colm) : 取r行平均值到 $target 表格为空忽略
+" - $r,c=ForColumn('formula', line, row, colm) : 这个是一个从 (r, 1) -> (r,c) 循环执行 formula , 本质上是 $c=formula 的列循环版本
 " 
 " 先自定义函数SumNumber
 " function! SumNumber(num1,num2)
@@ -1090,6 +1093,98 @@ let g:vimtex_syntax_nospell_comments=1
 " 2. 再在公式行`\cc`添加注释(如果是txt格式在公式行前添加一个空格即可)
 " 3. 如果不知道这么添加公式,可以通过`:TableAddFormula`添加一个最简单的公式最为例子
 " 4. 如果需要知道光标所在的行列则输入`\r`即可
+
+" ==================== dhruvasagar/vim-table-mode 自定义函数 ====================
+
+" 调用方式 $r,c=ForColumn('formula', line, row, colm) 
+" 这个是一个从 (r, 1) -> (r,c) 循环执行 formula , 本质上是 $c=formula 的列循环版本
+" $target 写出 $r,c 格式是因为需要兼容原始的表格逻辑, 可以理解为 $r 的列循环
+" 在 formula 中添加了 `#r1` 用于表示在在(r,c)执行的 formula 时候 (r1, c) 的元素值
+" 由于vim-table-model本身会对自身提供的函数特殊处理,会导致在列循环的时候使用函数导致问题
+" 所以在列循环的时候这些函数需要在末尾添加一个`C` 比如 Sum(1:-1) -> SumC(1:-1)
+" 下面是使用的几个列子
+"
+" 1. 将最后一行统计其余列的数据, (3,1)=(1,1)+(2,1) (3,2)=(1,2)+(2,2)
+" | 1    | 2    |
+" |------|------|
+" | 11   | 12   |
+" | 21   | 22   |
+" | 32.0 | 34.0 |
+" <!-- tmf: $-1,-1=ForColumn('SumC(1:-1)', line, row, colm) -->
+"
+" 2. 普通的减法, (3,1)=(2,1)-(1,1) (3,2)=(2,2)-(1,2)
+" | 1  | 2  |
+" |----|----|
+" | 11 | 12 |
+" | 21 | 22 |
+" | 10 | 10 |
+" <!-- tmf: $-1,-1=ForColumn('#2 - #1', line, row, colm) -->
+function! ForColumn(expr, line, row, colm)
+    let expr = a:expr
+    let line = a:line 
+    let row = a:row
+    let colm = a:colm
+
+    let column_count = tablemode#spreadsheet#ColumnCount(line)
+    if colm == 0
+        let real_colm = column_count
+    elseif colm < 0
+        let real_colm = column_count + colm + 1 
+        if real_colm < 0
+            let real_colm = 1
+        endif
+    else
+        let real_colm = colm
+    endif
+
+    if expr =~# 'MaxC(.*)'
+        let expr = substitute(expr, 'MaxC(\([^)]*\))', 'tablemode#spreadsheet#Max("\1",'.line.','.colm.')', 'g')
+    endif
+
+
+
+
+    for column in range(1, real_colm)
+        let texpr = expr
+
+        if texpr =~# 'CountEC(.*)'
+            let texpr = substitute(texpr, 'CountEC(\([^)]*\))', 'tablemode#spreadsheet#CountE("\1",'.line.','.column.')', 'g')
+        endif
+
+        if texpr =~# 'CountNEC(.*)'
+            let texpr = substitute(texpr, 'CountNEC(\([^)]*\))', 'tablemode#spreadsheet#CountNE("\1",'.line.','.column.')', 'g')
+        endif
+
+        if texpr =~# 'PercentEC(.*)'
+            let texpr = substitute(texpr, 'PercentEC(\([^)]*\))', 'tablemode#spreadsheet#PercentE("\1",'.line.','.column.')', 'g')
+        endif
+
+        if texpr =~# 'PercentNEC(.*)'
+            let texpr = substitute(texpr, 'PercentNEC(\([^)]*\))', 'tablemode#spreadsheet#PercentNE("\1",'.line.','.column.')', 'g')
+        endif
+
+        if texpr =~# 'SumC(.*)'
+            let texpr = substitute(texpr, 'SumC(\([^)]*\))', 'tablemode#spreadsheet#Sum("\1",'.line.','.column.')', 'g')
+        endif
+
+        if texpr =~# 'AverageC(.*)'
+            let texpr = substitute(texpr, 'AverageC(\([^)]*\))', 'tablemode#spreadsheet#Average("\1",'.line.','.column.')', 'g')
+        endif
+
+        if texpr =~# 'AverageNEC(.*)'
+            let texpr = substitute(texpr, 'AverageNEC(\([^)]*\))', 'tablemode#spreadsheet#AverageNE("\1",'.line.','.column.')', 'g')
+        endif
+
+        if expr =~# '\#'
+            
+            let texpr = substitute(texpr, '\#\(\d\+\)',
+                \  '\=tablemode#spreadsheet#cell#GetCells(line, submatch(1), column)', 'g') 
+
+        endif
+        silent! call tablemode#spreadsheet#cell#SetCell(eval(texpr), line, row, column)
+    endfor
+    return tablemode#spreadsheet#cell#GetCells(line, row, colm)
+endfunction
 
 " 调用方式 AutoSumRow(line, row, colm)
 " 1. `$r,-1=AutoSumRow(line, row, colm)` 累加r行数据到(r,-1)

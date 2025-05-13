@@ -1006,13 +1006,35 @@ let g:vimtex_syntax_nospell_comments=1
 " 9. `$5,3 = Average(1,2:5,2)/$5,1`
 "
 " ### `$target = formula` 常用例子
-" 1. `$r,c=Sum(1:-1)` 累加第c列,从1到r-1行的数据到(r,c)上
-" 2. `$r,c=Average(1:-1)` 取第c列,从1到r-1行数据的平均值到(r,c)上
+" 1. `$r,c=Sum(1:-1)` 累加第c列,从1到r-1行的数据到(r,c)上, r=-1时表示最后一行
+" 2. `$r,c=Average(1:-1)` 取第c列,从1到r-1行数据的平均值到(r,c)上, r=-1时表示最后一行
 " 3. `$c3=$c1+$c2`  c3列 = c1列 + c2列 (同理 + - * / 都可以实现)
 " 4. `$c3=str2float($c1)/$c2` c3列 = c1列 / c2列 如果 c1 不用str2float函数包裹, 在c1, c2 列都是整数情况下变成向下取整
 " 5. `$c3=$c1$c2`  这个是拼接字符串
 " 6. `$r,n=condition ? value_if_true : value_if_false`可以使用三目运算符
 " 7. 可以使用自定义函数
+"
+"
+" ### vim-table-model 扩展的函数
+" 需要看vim-table-model定义了哪些函数查看代码vim-table-mode/autoload/tablemode/spreadsheet/formula.vim#tablemode#spreadsheet#formula#EvaluateExpr
+" 这些函数参数都是一致的都以范围作为输入。范围可以有两种形式
+"   1. `r1:r2`表示当前列中从第r1行 到第r2行的单元格。如果r2为负数，则表示r2当前行（目标单元格）上方的行。
+"   2. `r1,c1:r2,c2`:这代表表格中从单元格 r1,c1 到单元格 r2,c2(行,列)的单元格。
+" - Mix(r1,c1:r2,c2)       : 取范围的最小值
+" - Max(r1,c1:r2,c2)       : 取范围的最大值
+" - CountE(r1,c1:r2,c2)    : 统计范围为空的表格个数
+" - CountNE(r1,c1:r2,c2)   : 统计范围不为空的表格个数
+" - PercentE(r1,c1:r2,c2)  : 统计范围内为空的表格数量所占的百分比 
+" - PercentNE(r1,c1:r2,c2) : 统计范围不为空的表格数量所占的百分比 
+" - Sum(r1,c1:r2,c2)       : 累加范围内的值
+" - Average(r1,c1:r2,c2)   : 取范围内的平均值, 表格为空认为是0, Average = Sum / TotalCells
+" - AverageNE(r1,c1:r2,c2) : 取范围内的平均值, 表格为空忽略该元素 , Average = Sum / CountNE
+
+"
+" ### 自定义的函数
+" - AutoSumRow(line, row, colm) : 累加r行数据到 $target
+" - AutoAverageRow(line, row, colm) : 取r行平均值到 $target 表格为空认为是0
+" - AutoAverageNERow(line, row, colm) : 取r行平均值到 $target 表格为空忽略
 " 
 " 先自定义函数SumNumber
 " function! SumNumber(num1,num2)
@@ -1023,10 +1045,8 @@ let g:vimtex_syntax_nospell_comments=1
 " | 11   | 12 | 13 | 0.916667 | 11连接符12   |
 " | 21   | 22 | 23 | 0.954545 | 21连接符22   |
 " | 32.0 | 34 | 0  | 0.941176 | 32.0连接符34 |
-" <!--  tmf: $3,1=Sum(1:-1); $3,2=SumNumber($1,2, $2,2); $3,3=$1,3 > 100 ? $1,3 : 0; $4=str2float($1)/$2; $5=$1 . '连接符' . $2 --> 
-"            累加            自定义函数                  三目运算符                  除法                 拼接字符串
-
-
+" <!--  tmf: $-1,1=Sum(1:-1); $3,2=SumNumber($1,2, $2,2); $3,3=$1,3 > 100 ? $1,3 : 0; $4=str2float($1)/$2; $5=$1 . '连接符' . $2 --> 
+"            累加             自定义函数                  三目运算符                  除法                 拼接字符串
 "
 " ## 添加表格公式的方式
 " 表格公式一共有两种添加方式 `:TableAddFormula` , `:TableEvalFormulaLine`
@@ -1070,6 +1090,30 @@ let g:vimtex_syntax_nospell_comments=1
 " 2. 再在公式行`\cc`添加注释(如果是txt格式在公式行前添加一个空格即可)
 " 3. 如果不知道这么添加公式,可以通过`:TableAddFormula`添加一个最简单的公式最为例子
 " 4. 如果需要知道光标所在的行列则输入`\r`即可
+
+" 调用方式 AutoSumRow(line, row, colm)
+" 1. `$r,-1=AutoSumRow(line, row, colm)` 累加r行数据到(r,-1)
+" 2. `$-1=AutoSumRow(line, row, colm)` 累加整行数据到最后一列, 每行都这么干
+function! AutoSumRow(line, row, colm)
+    let args = a:row . ',1:' . a:row . ',-1'  
+    return tablemode#spreadsheet#Sum(args, a:line, a:colm) 
+endfunction
+
+" 调用方式 AutoAverageRow(line, row, colm)
+" 1. `$r,-1=AutoAverageRow(line, row, colm)` 取r行平均值到(r,-1)表格为空认为是0
+" 2. `$-1=AutoAverageRow(line, row, colm)` 取r行平均值到(r,-1)表格为空认为是0, 每行都这么干
+function! AutoAverageRow(line, row, colm)
+    let args = a:row . ',1:' . a:row . ',-1'  
+    return tablemode#spreadsheet#Average(args, a:line, a:colm) 
+endfunction
+
+" 调用方式 AutoAverageNERow(line, row, colm)
+" 1. `$r,-1=AutoAverageNERow(line, row, colm)` 取r行平均值到(r,-1)表格为空忽略
+" 2. `$-1=AutoAverageNERow(line, row, colm)` 取r行平均值到(r,-1)表格为空忽略, 每行都这么干
+function! AutoAverageNERow(line, row, colm)
+    let args = a:row . ',1:' . a:row . ',-1'  
+    return tablemode#spreadsheet#AverageNE(args, a:line, a:colm) 
+endfunction
 
 
 " 1. 处理类似markdown 表格的数据格式 即 : | a | c | (|间需要空格)

@@ -1038,6 +1038,8 @@ let g:vimtex_syntax_nospell_comments=1
 " - AutoAverageRow(line, row, colm) : 取r行平均值到 $target 表格为空认为是0
 " - AutoAverageNERow(line, row, colm) : 取r行平均值到 $target 表格为空忽略
 " - $r,c=ForColumn('formula', line, row, colm) : 这个是一个从 (r, 1) -> (r,c) 循环执行 formula , 本质上是 $c=formula 的列循环版本
+"           在 formula 中添加了 `#r1` 用于表示在在(r,c)执行的 formula 时候 (r1, c) 的元素值
+"           特殊处理了vim-table-model的自定义函数在ForColumn使用需要在末尾添加一个`C` 比如 Sum(1:-1) -> SumC(1:-1)
 " 
 " 先自定义函数SumNumber
 " function! SumNumber(num1,num2)

@@ -13,7 +13,7 @@ sed -n "{&#39;s&#47;pattern&#47;string&#47;p&#39;}" {cmd:_comp_file_direct_}
 # `sed '=' table.md` 将文件变为, `行号 \n 内容`  格式
 # `sed 'N;s/\n/: /'` 将其合并为一行 
 # sed '=' table.md | sed 'N;s/\n/: /'
-sed = table.md
+sed = {cmd:_comp_file_direct_} 
 # sed 'N;s/\n/: /'
 sed "&#39;N;s/\n/:&nbsp;/&#39;"
 

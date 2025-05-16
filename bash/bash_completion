@@ -290,6 +290,10 @@ _complete_func() {
 # 格式化提示内容 
 _completion_normaliza() {
     local completion_item="$1"
+    if [[ ! "$completion_item" == *"&"* ]]; then
+        echo "$completion_item"
+        return 0
+    fi
 
     local keyword=""
     local normaliza_value=""

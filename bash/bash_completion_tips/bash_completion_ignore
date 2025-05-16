@@ -4,4 +4,3 @@ pandoc
 sox
 rsync
 nmcli
-sed

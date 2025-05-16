@@ -39,6 +39,11 @@
 #   3.7 {kv:("key(为固定字符串)" "cmd_item" "suffix(后缀为固定字符串可省略)")}, 该形式提示出的格式如下${key}${cmd_item}${suffix}
 #       如果cmd_item生成的是一个数组则提示多个比如${key}${cmd_item[0]}${suffix} ${key}${cmd_item[1]}${suffix} ...
 #       例子: 1. {kv: ("--mainClass=" "{cmd:mvn.sh find_main src/main}")} 2. {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
+#   3.8 可以转义某些关键字比如 ` ` -> `$nbsp;` 转义规则与html转义一致
+#       但这个转义只能使用在最终提示字符上, 如果需要多维数组格式还是需要自己转, 由于&是shell关键字, 所以使用转义需要用 '' 或 "" 包裹
+#       可以转哪些关键字查看变量 `keywords_mapping` 定义, 这里只列出几个 ` ` -> `$nbsp;`  `"` -> `&quot;`   `'` -> `&#39;`
+#       请注意: 在提示中出现 / 会导致后续的无法提示(在如果有重复前缀的情况下) 
+#       例子:  test_complete char '&#39;a&nbsp;b&#39;' -t -f  等价于 test_complete char '/a b' -t -f
 # 通用的命令提示如下
 # 1. {cmd:_comp_file_direct_} : 提示的文件列表
 
@@ -95,6 +100,30 @@ if [ -d ~/.bash_completion ]; then
 
     done
 fi
+
+# 关键字映射, 在最终的提示中会将 key 替换成 value
+# 只是影响到最终的提示, 不影响过程中的转换, 即如果需要嵌套数组还是需要通过 ' " 的变化
+# 规则与html的特殊转义符一致
+declare -A keywords_mapping=(
+    ["&nbsp;"]=" "
+    ["&#160;"]=" "
+    ["&amp;"]="&"
+    ["&#38;"]="&"
+    ["&#39;"]="'"
+    ["&quot;"]='"'
+    ["&#34;"]='"'
+    ["&#124;"]="|"
+    ["&lt;"]="<"
+    ["&#60;"]="<"
+    ["&gt;"]=">"
+    ["&#62;"]=">"
+    ["&#61;"]="="
+    ["&#59;"]=";"
+    ["&#40;"]="("
+    ["&#41;"]=")"
+    ["&#58;"]=":"
+    ["&#47;"]="/"
+)
 
 # 提示列表
 cmd_list=()
@@ -245,12 +274,31 @@ _complete_func() {
 
     if [[ -z $TEST_COMP_WORDS ]]; then
         # 输出tab提示
-        COMPREPLY=($(compgen -W "${global_completion_txt}" -- ${command_name}))
+        local global_completion_list=($(compgen -W "${global_completion_txt}" -- ${command_name}))
+        for completion_item in "${global_completion_list[@]}"; do
+            COMPREPLY[${#COMPREPLY[@]}]=''$(_completion_normaliza "$completion_item")''
+        done
+        # COMPREPLY=($(compgen -W "${global_completion_txt}" -- ${command_name}))
     else
         # 测试
         echo "$global_completion_txt"
     fi
     return 0
+}
+
+
+# 格式化提示内容 
+_completion_normaliza() {
+    local completion_item="$1"
+
+    local keyword=""
+    local normaliza_value=""
+    for keyword in ${!keywords_mapping[@]}; do
+        normaliza_value=${keywords_mapping[$keyword]}
+        completion_item=${completion_item//${keyword}/${normaliza_value}}
+    done
+    echo "$completion_item"
+
 }
 
 # 变动item_index, 并且将相关数据也跟在变动
@@ -360,8 +408,9 @@ _is_match_cmd_simple() {
     eval local match_cmd_item_data=($(_parse_cmd_item_data_ "$match_cmd_item"))
 
     if [[ "${match_cmd_item_data[0]}" == "general" ]]; then
+        local normaliza_match_cmd_item=''$(_completion_normaliza "$match_cmd_item")''
         # 如果为普通的提示需要完全相等
-        if [[ "$match_cmd_item" == "$match_comp_cmd_item" ]]; then
+        if [[ "$normaliza_match_cmd_item" == "$match_comp_cmd_item" ]]; then
             _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
             _cmd_index_index_shift "$item_add_num"
             return 0
@@ -382,8 +431,9 @@ _is_match_cmd_simple() {
         # 例子: {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
         eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "kv")
         local key="${multiple_cmd_item_list[0]}"
+        local normaliza_key=''$(_completion_normaliza "${multiple_cmd_item_list[0]}")''
         
-        if [[ "$match_comp_cmd_item" == ${key}* ]]; then
+        if [[ "$match_comp_cmd_item" == ${normaliza_key}* ]]; then
             _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
             _cmd_index_index_shift "$item_add_num"
             return 0

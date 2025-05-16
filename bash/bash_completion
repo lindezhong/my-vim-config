@@ -43,7 +43,7 @@
 #       但这个转义只能使用在最终提示字符上, 如果需要多维数组格式还是需要自己转, 由于&是shell关键字, 所以使用转义需要用 '' 或 "" 包裹
 #       可以转哪些关键字查看变量 `keywords_mapping` 定义, 这里只列出几个 ` ` -> `$nbsp;`  `"` -> `&quot;`   `'` -> `&#39;`
 #       请注意: 在提示中出现 / 会导致后续的无法提示(在如果有重复前缀的情况下) 
-#       例子:  test_complete char '&#39;a&nbsp;b&#39;' -t -f  等价于 test_complete char '/a b' -t -f
+#       例子:  test_complete char "&#39;a&nbsp;b&#39;" -t -f  等价于 test_complete char '/a b' -t -f
 # 通用的命令提示如下
 # 1. {cmd:_comp_file_direct_} : 提示的文件列表
 

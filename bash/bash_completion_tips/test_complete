@@ -1,7 +1,7 @@
-# 在提示中出现 / 会导致后续的无法提示(在如果有重复前缀的情况下) 比如以下两个前缀重复就会提示不出来
-# test_complete char '/a b' -t -f
+# 在提示中出现 ' " 等特殊字符 会导致后续的无法提示(在如果有重复前缀的情况下) 比如以下两个前缀重复就会提示不出来
+# test_complete char 'a b' -t -f
 test_complete char "&#39;a&nbsp;b&#39;" -t -f
-# test_complete char '/a c' -t -f
+# test_complete char 'a c' -t -f
 # test_complete char '&#39;a&nbsp;c&#39;' -t -f
 test_complete note {提示} -t -f
 test_complete file {cmd:_comp_file_direct_} -f

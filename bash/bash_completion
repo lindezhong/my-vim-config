@@ -41,7 +41,7 @@
 #       例子: 1. {kv: ("--mainClass=" "{cmd:mvn.sh find_main src/main}")} 2. {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
 #   3.8 可以转义某些关键字比如 ` ` -> `$nbsp;` 转义规则与html转义一致
 #       但这个转义只能使用在最终提示字符上, 如果需要多维数组格式还是需要自己转, 由于&是shell关键字, 所以使用转义需要用 '' 或 "" 包裹
-#       可以转哪些关键字查看变量 `keywords_mapping` 定义, 这里只列出几个 ` ` -> `$nbsp;`  `"` -> `&quot;`   `'` -> `&#39;`
+#       可以转哪些关键字查看变量 `keywords_mapping` 定义, 这里只列出几个 ` ` -> `$nbsp;`  `"` -> `&quot;`   `'` -> `&apos;`
 #       请注意: 在提示中出现  ' " 会导致后续的无法提示(在如果有重复前缀的情况下) 
 #       例子:  test_complete char "&#39;a&nbsp;b&#39;" -t -f  等价于 test_complete char 'a b' -t -f
 # 通用的命令提示如下
@@ -106,23 +106,19 @@ fi
 # 规则与html的特殊转义符一致
 declare -A keywords_mapping=(
     ["&nbsp;"]=" "
-    ["&#160;"]=" "
     ["&amp;"]="&"
-    ["&#38;"]="&"
-    ["&#39;"]="'"
+    ["&apos;"]="'"
     ["&quot;"]='"'
-    ["&#34;"]='"'
-    ["&#124;"]="|"
+    ["&vert;"]="|"
     ["&lt;"]="<"
-    ["&#60;"]="<"
     ["&gt;"]=">"
-    ["&#62;"]=">"
-    ["&#61;"]="="
-    ["&#59;"]=";"
-    ["&#40;"]="("
-    ["&#41;"]=")"
-    ["&#58;"]=":"
-    ["&#47;"]="/"
+    ["&equals;"]="="
+    ["&semi;"]=";"
+    ["&lpar;"]="("
+    ["&rpar;"]=")"
+    ["&colon;"]=":"
+    ["&sol;"]="/"
+    ["&bsol;"]='\'
 )
 
 # 提示列表
@@ -729,6 +725,14 @@ _completion_cmd_normaliza_() {
 
 # 文件提示(提示会有多少文件), 请注意调用这个模式后会倒置 compgen 提示模式改成文件提示模式
 _comp_file_direct_() {
+    # 路径关键字转义
+    declare -A path_keywords_mapping=(
+        # ` ` -> `\ `
+        # 由于空格无法作为key, 所以这个需要手动执行
+        [' ']='&nbsp;'
+        ["'"]='&apos;'
+    )
+    
 
     # 认为最后输入的那个字符为要提示的文件名
     local file_path="${COMP_WORDS[COMP_CWORD]}"
@@ -736,12 +740,21 @@ _comp_file_direct_() {
     # 最后要输出的文件提示数组用空格分开
     local file_path_text=""
 
-    # 提示的文件列表
-    local file_path_list=($(compgen -f -- $file_path))
+    # 提示的文件列表, 需要将空格转义为 &nbsp;
+    local file_path_list_txt="$(compgen -f -- $file_path)"
+    file_path_list_txt=${file_path_list_txt// /&nbsp;}
+    local file_path_list=($file_path_list_txt)
 
     # 将数组分割符 \n -> 空格
     local file
+    local keyword
+    local normaliza_value
     for file in "${file_path_list[@]}"; do
+        for keyword in ${!path_keywords_mapping[@]}; do
+            normaliza_value=${path_keywords_mapping[$keyword]}
+            file=${file//${keyword}/${normaliza_value}}
+        done
+        file='"'$file'"'
         file_path_text="$file_path_text $file"
     done
 

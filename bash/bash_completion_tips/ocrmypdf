@@ -1,0 +1,19 @@
+# ocrmypdf是一个扫描pdf文件添加 OCR 文本层的python工具
+# 可以使用`pip install ocrmypdf`
+# 依赖Tesseract OCR引擎识别100多种语言 , 安装方式 `apt-get install tesseract-ocr`
+# 如果需要翻译某个特定的语言还需安装特定的语言包比如,简体中文需要:`apt-get install tesseract-ocr-chi-sim`
+# 可以安装安装语言包可以通过 `apt search tesseract-ocr-*` 来查找
+# 已有的语言编码可以通过`tesseract --list-langs`来查看, 语言编码一般为三位的`ISO 639-2`编码
+
+# output.pdf 文件也可以是输入文件 , 如果为输入文件则只在转换成功的时候覆盖
+ocrmypdf {cmd:_comp_file_direct_} {output.pdf}
+
+# -l 可以指定OCR的语言, 多个语言使用 + 分割 , 语言代码参考`tesseract --list-langs`结果
+# 使用 -l 指定语言时需要安装Tesseract
+# ocrmypdf -l eng+fra Bilingual-English-French.pdf Bilingual-English-French.pdf 
+# ocrmypdf -l eng+chi_sim Bilingual-English-Chinese.pdf Bilingual-English-Chinese.pdf 
+ocrmypdf {cmd:_comp_file_direct_} {output.pdf} -l eng+chi_sim 
+
+# 校正歪斜 
+ocrmypdf {input.pdf} {output.pdf} --deskew 
+

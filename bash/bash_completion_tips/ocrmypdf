@@ -12,8 +12,8 @@ ocrmypdf {cmd:_comp_file_direct_} {output.pdf}
 # 使用 -l 指定语言时需要安装Tesseract
 # ocrmypdf -l eng+fra Bilingual-English-French.pdf Bilingual-English-French.pdf 
 # ocrmypdf -l eng+chi_sim Bilingual-English-Chinese.pdf Bilingual-English-Chinese.pdf 
-ocrmypdf {cmd:_comp_file_direct_} {output.pdf} -l eng+chi_sim 
+ocrmypdf {cmd:_comp_file_direct_} {output.pdf} -l eng+chi_sim --deskew
 
 # 校正歪斜 
-ocrmypdf {input.pdf} {output.pdf} --deskew 
+ocrmypdf {cmd:_comp_file_direct_} {output.pdf} --deskew 
 

@@ -1,0 +1,6 @@
+snippet "([^\s].*)\.upper" "Uppercase(postfix)" r
+`!p snip.rv = match.group(1).upper()`$0
+endsnippet
+snippet "([^\s]\w+)\.lower" "Lowercase(postfix)" r
+`!p snip.rv = match.group(1).lower()`$0
+endsnippet

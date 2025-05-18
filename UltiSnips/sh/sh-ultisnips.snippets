@@ -1,0 +1,31 @@
+global !p
+import re
+def write_function_args_docstring(args: str, sinp):
+    lines: list[str] = args.split('\n')
+    
+    args_doc: list[str]=[]
+    for line in lines:
+        line = line.strip()
+        if line == "":
+            continue
+        match = re.search(r'(local)?(\s*)(.*?)(\s*)=(\s*)"?\$(\w+)"?', line)
+        if match == None:
+            continue
+        args_doc.append(f'# :{match.group(3)}:${match.group(6)}: ')
+
+    if len(args_doc) == 0:
+        return ""
+
+    return "\n".join(args_doc) + "\n"
+
+endglobal
+
+snippet fun "function with docstrings" b
+# ${3:TODO: Docstring for $1.}
+`!p snip.rv = write_function_args_docstring(t[2], snip)`# :return:${4}: ${5:Docstring for $4.} 
+${1:function}() {
+	${2:args}
+	$0
+}
+endsnippet
+

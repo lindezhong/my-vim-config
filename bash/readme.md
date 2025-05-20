@@ -3,9 +3,9 @@
 ## 参数规范
 1. $1...$n 一定为操作(即前几个参数一定为操作,用来定位到执行那个方法)
 2. 如果有默认值使用统一的map:default_map用来储存
-3. 如果对于default_map有根据条件是否初始化的要存在defaultMapInit方法进行初始化,如果default_map值修改了也需要调用defaultMapInit
+3. 如果对于default_map有根据条件是否初始化的要存在default_map_init方法进行初始化,如果default_map值修改了也需要调用default_map_init
 4. 参数名使用下划线格式
-5. 如果调用方法需要传递 $1...$n 的参数则尽量使用 $* (以一个单字符串显示所有向脚本传递的参数), 配合 shitf n 可以去除不要的参数
+5. 如果调用方法需要传递 $1...$n 的参数则尽量使用 `"$@"` (这样能正确传递参数), 配合 shitf n 可以去除不要的参数
 
 ## 脚本名命名规范
 1. 脚本名称使用下划线
@@ -70,8 +70,8 @@ github : github相关操作
         $4 : 可选默认30 github api https://api.github.com/users/USERNAME/repos 每次返回的条数,作为分页结束的条件
         return : clone 组织下的所有存储库
     
-    github upstreamUrl : 解析github项目上游url
-        git.sh github upstreamUrl
+    github upstream_url : 解析github项目上游url
+        git.sh github upstream_url
         return : github项目上游地址
 '
 }

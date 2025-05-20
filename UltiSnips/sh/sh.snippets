@@ -13,6 +13,50 @@
 # if echo “${array[@]}” | grep -w “item_1” &>/dev/null; then
 # echo "Found"
 # fi	判断item_1是否在array中
+# #脚本参数
+# 可以通过 $* 和 $@ 获取所有的脚本参数 
+# ##传递变量#脚本参数
+# 两者在不加引号的时候逻辑一致, 但在加引号的时候两者的逻辑不一致
+# ```shell
+# fun() {
+# }
+# # 假设调用该脚本名为 test.sh , 调用方式为: test.sh "a b" c
+# fun $*   # 相当于调用方法: fun a b c 
+# fun $@   # 相当于调用方法: fun a b c 
+# fun "$*" # 相当于调用方法: fun "a b c" 
+# fun "$@" # 相当于调用方法: fun "a b" "c" 
+# ##循环参数#脚本参数
+# ```shell
+# #!/bin/bash
+# 
+# fun() {
+#     #打印: 1' '2' '3'
+#     for arg in $*; do
+#         echo -n "'$arg' " 
+#     done
+#     echo ""
+# 
+#     #打印: 1' '2' '3'
+#     for arg in $@; do
+#         echo -n "'$arg' " 
+#     done
+#     echo ""
+# 
+#     #打印: 1 2 3'
+#     for arg in "$*"; do
+#         echo -n "'$arg' " 
+#     done
+#     echo ""
+# 
+#     #打印: 1 2' '3'
+#     for arg in "$@"; do
+#         echo -n "'$arg' " 
+#     done
+#     echo ""
+# }
+# 
+# fun "1 2" 3
+# ```
 
 snippet arrLength "获取数组长度" w
 ${2:length}=\$\{#${1:数组名}[@]\}

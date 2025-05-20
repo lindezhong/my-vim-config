@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ACTION=$1
+shift 1
 
 test -z "$ACTION" && ACTION="--help"
 
@@ -84,13 +85,13 @@ function config() {
 
 case $ACTION in
     --help )
-        help
+        help "$@"
         ;;
     config )
-        config "$2"
+        config "$@" 
         ;;
     language )
-        language
+        language "$@"
         ;;
     * )
         echo "未知的操作: $ACTION"

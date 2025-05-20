@@ -205,17 +205,18 @@ function github_repos() {
 # 对github的一些操作, 参数跟返回值查看转发的方法
 function github() {
     local GITHUB_ACTION=$1
+    shift 1
     case "$GITHUB_ACTION" in
         repos)
             # git clone 一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
             # $2 : 组织(organizations)
             # return : clone 组织下的所有存储库
-            github_repos $2 $3
+            github_repos "$@" 
             ;;
         upstream_url)
             # 解析github上游url
             # return : git上游地址
-            github_get_upstream_url
+            github_get_upstream_url "$@"
             ;;
          * )
             echo "未知操作,请查看帮助文档"
@@ -240,11 +241,11 @@ function reset() {
     shift 1
     case "$RESET_ACTION" in
         version )
-            reset_version $*
+            reset_version "$@"
             ;;
         add )
             # git 取消 add文件未cmmit
-            git  reset HEAD $*
+            git  reset HEAD "$@" 
             ;;
         * )
             echo "未知操作"
@@ -292,33 +293,33 @@ function pull() {
 case "$ACTION" in
     --help)
         # 显示帮助文档
-        help $*
+        help "$@"
         ;;
     upstream)
         # Git进行fork后跟原仓库同步
         # $2 : fork 前的原仓库地址
         # return : 会添加一个上游的主干分支名称为 : upstream/master
-        upstream $*
+        upstream "$@" 
         ;;
     github)
-        github $*
+        github "$@"
         ;;
     reset)
         # git回滚到某个版本,或取消add文件
-        reset $*
+        reset "$@"
         ;;
     init_server)
         # 初始化git服务端项目,供git clone user@ip:/项目路径
         # $2 : 项目名
-        init_server $*
+        init_server "$@"
         ;;
     pull)
         # 将当前目录下的所有git项目pull
-        pull $*
+        pull "$@"
         ;;
     * )
         echo "未知操作,请查看帮助文档"
-        help $*
+        help "$@"
         ;;
 esac
 

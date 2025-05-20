@@ -230,19 +230,19 @@ function setuptools() {
 
     case $SETUPTOOLS_ACTION in
         env )
-            setuptools_env
+            setuptools_env "$@"
             ;;
         init )
-            setuptools_init $*
+            setuptools_init "$@"
             ;;
         install )
-            setuptools_install
+            setuptools_install "$@"
             ;;
         build )
-            setuptools_build
+            setuptools_build "$@"
             ;;
         test )
-            setuptools_test $*
+            setuptools_test "$@"
             ;;
         * )
             echo "参数错误请查看帮助文档, setuptools action is : [$SETUPTOOLS_ACTION]"
@@ -253,10 +253,10 @@ function setuptools() {
 
 case $ACTION in
     --help )
-        help
+        help "$@"
         ;;
     setuptools )
-        setuptools $*
+        setuptools "$@"
         ;;
     * )
         echo "未知操作请查看帮助文档"

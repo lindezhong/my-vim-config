@@ -334,7 +334,7 @@ function init_maven() {
     case $INIT_ACTION in
         'jar' )
             # 初始化普通maven项目
-            init_maven_jar $*
+            init_maven_jar "$@"
             ;;
     esac
 }
@@ -344,22 +344,22 @@ case $ACTION in
         help
         ;;
     'deploy' )
-        deploy $*
+        deploy "$@"
         ;;
     'run' )
-        run $*
+        run "$@"
         ;;
     'debug' )
         default_map['remote_debug_suspend']='y'
         default_map_init
-        run $*
+        run "$@"
         ;;
     'find_main' )
-        find_main_class $*
+        find_main_class "$@"
         ;;
     'init' )
         # 初始化maven项目
-        init_maven $*
+        init_maven "$@"
         ;;
     * )
         echo "未知操作"

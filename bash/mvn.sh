@@ -34,7 +34,8 @@ default_map['remote_debug_port']='5005'
 default_map['init_maven_group_id']='com.ldz.demo'
 
 # 初始默认值,如果有default_map改变需要重新调用
-defaultMapInit() {
+# :return:default_map: 初始化默认值
+function default_map_init() {
     if [[ "${default_map['remote_debug_switch']}" == "y" ]]; then
         # 正常使用该值在java运行参数上即可
         default_map['remote_debug']="-agentlib:jdwp=transport=${default_map['remote_debug_transport']},server=${default_map['remote_debug_server']},suspend=${default_map['remote_debug_suspend']},address=${default_map['remote_debug_address']}"
@@ -42,10 +43,10 @@ defaultMapInit() {
 
 }
 
-defaultMapInit
+default_map_init
 
 # 帮助文档
-help() {
+function help() {
     echo '
 --help : 查看mvn.sh脚本帮助文档
 
@@ -82,7 +83,8 @@ init : 初始化maven项目
 }
 
 # 编译mvn项目,跳过测试类(只编译不打包)
-install() {
+# :return: 1: 编译失败
+function install() {
     # 不运行测试类，但打包
     mvn clean install  -Dmaven.test.skip=true
     if (( $? != 0 )); then
@@ -92,7 +94,10 @@ install() {
 }
 
 # 扫描本目录下所有的main java
-_findMainClass_() {
+# :filter_class1:$1: 过滤类列表字符串1
+# :filter_class2:$2: 过滤类列表字符串2
+# :return:echo: main java的类路径比如 com.ldz.Main
+function find_main_class() {
 
 
     local filter_class1=$1
@@ -127,8 +132,11 @@ _findMainClass_() {
 
 }
 
-# 选择main java,需要先扫描main java(执行 findMainClass)
-_selectClass() {
+# 选择main java,需要先扫描main java(执行 find_main_class)
+# :filter_class1:$1: 过滤类列表字符串1
+# :filter_class2:$2: 过滤类列表字符串2
+# :return:select_class_result: 选择后的class name
+function select_class() {
 
     local filter_class1=$1
     local filter_class2=$2
@@ -137,13 +145,13 @@ _selectClass() {
     filter_class2=${filter_class2##*/}
 
     local class_file_path=''
-    local class_file_path_list=($(_findMainClass_ "$filter_class1" "$filter_class2"))
+    local class_file_path_list=($(find_main_class "$filter_class1" "$filter_class2"))
     local class_file_path_list_langth=${#class_file_path_list[@]}
 
 
     if  [[ ! -z $filter_class2 ]] && (( $class_file_path_list_langth == 1  )) ; then
         # 如果存在过滤, 并且过滤后只有一个类说明过滤成功则直接结束
-        _select_class_result=${class_file_path_list[0]}
+        select_class_result=${class_file_path_list[0]}
         return 0
     fi
 
@@ -182,19 +190,20 @@ _selectClass() {
     echo ""
     echo ""
 
-    _select_class_result=$class_file_path
+    select_class_result=$class_file_path
 
 }
 
 # 部署maven项目,运行前强制打包编译
-deploy() {
+# :filter_class:$1: 运行的class过滤字符串
+function deploy() {
 
     local filter_class=$1
 
     install
 
-    _selectClass "src/main" $filter_class
-    local class_file_path=$_select_class_result
+    select_class "src/main" $filter_class
+    local class_file_path=$select_class_result
 
 
     local module_name_path=${class_file_path%/*}
@@ -248,10 +257,11 @@ deploy() {
 
 
 # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005
-run() {
+# :filter_class:$1: 运行的class过滤字符串
+function run() {
     local filter_class=$1
-    _selectClass "src/main" $filter_class
-    local main_class_path=$_select_class_result
+    select_class "src/main" $filter_class
+    local main_class_path=$select_class_result
     if [[ -z $main_class_path ]]; then
         echo "未选择 main java 无法运行"
         return 1
@@ -298,7 +308,7 @@ run() {
 }
 
 # 初始化普通maven项目
-init_maven_jar() {
+function init_maven_jar() {
     # maven groupId
     local groupId
     # maven artifactId
@@ -317,7 +327,8 @@ init_maven_jar() {
 }
 
 # 初始化maven项目
-init_maven() {
+# :INIT_ACTION:$1: 需要初始化的maven项目类型, 现在只是支持jar
+function init_maven() {
     local INIT_ACTION=$1
     shift 1
     case $INIT_ACTION in
@@ -340,11 +351,11 @@ case $ACTION in
         ;;
     'debug' )
         default_map['remote_debug_suspend']='y'
-        defaultMapInit
+        default_map_init
         run $*
         ;;
     'find_main' )
-        _findMainClass_ $*
+        find_main_class $*
         ;;
     'init' )
         # 初始化maven项目

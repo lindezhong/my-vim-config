@@ -4,7 +4,7 @@ test_complete char "&apos;a&nbsp;b&apos;" -t -f
 # test_complete char 'a c' -t -f
 # test_complete char '&apos;a&nbsp;c&apos;' -t -f
 test_complete note {提示} -t -f
-test_complete file {cmd:_comp_file_direct_} -f
+test_complete file {cmd:comp_file_direct} -f
 test_complete cmd {cmd:ls} -f
 test_complete or "{or:(-d -l)}" -t -f
 test_complete and '{and:(-v "{dir}")}' -t -f

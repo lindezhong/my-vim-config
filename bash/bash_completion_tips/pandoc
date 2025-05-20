@@ -2,4 +2,4 @@
 # 文件格式转换工具, 比如epub转pdf, 使用 `apt install calibre` 安装
 
 # pandoc 文件格式转换如果需要转pdf需要安装latex 
-pandoc {cmd:_comp_file_direct_} -o {输出文件名} --pdf-engine=xelatex
+pandoc {cmd:comp_file_direct} -o {输出文件名} --pdf-engine=xelatex

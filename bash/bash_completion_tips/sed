@@ -1,23 +1,26 @@
 # sed 替换
-# sed 's/pattern/string/g' {cmd:_comp_file_direct_} 
-sed "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:_comp_file_direct_} 
+# sed 's/pattern/string/g' {cmd:comp_file_direct} 
+sed "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:comp_file_direct} 
 # 将整个文件作为'一行'输入替换
-# sed -z 's/pattern/string/g' {cmd:_comp_file_direct_}
-sed -z "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:_comp_file_direct_}
+# sed -z 's/pattern/string/g' {cmd:comp_file_direct}
+sed -z "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:comp_file_direct}
 # 禁止自动输出，仅输出匹配的内容
-# sed -n 's/pattern/string/p' {cmd:_comp_file_direct_}
-sed -n "{&apos;s&sol;pattern&sol;string&sol;p&apos;}" {cmd:_comp_file_direct_}
+# sed -n 's/pattern/string/p' {cmd:comp_file_direct}
+sed -n "{&apos;s&sol;pattern&sol;string&sol;p&apos;}" {cmd:comp_file_direct}
+# 在原文件上直接替换
+# sed -i 's/pattern/string/g' {cmd:comp_file_direct}
+sed -i "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:comp_file_direct}
 
 
 # 在文件上的每行行首添加行号
 # `sed '=' table.md` 将文件变为, `行号 \n 内容`  格式
 # `sed 'N;s/\n/: /'` 将其合并为一行 
 # sed '=' table.md | sed 'N;s/\n/: /'
-sed = {cmd:_comp_file_direct_} 
+sed = {cmd:comp_file_direct} 
 # sed 'N;s/\n/: /'
 sed "&apos;N;s/\n/:&nbsp;/&apos;"
 
 # 去除重复行, 其中 -z 表示将整个文件作为'一行'输入 
-# sed -z "&apos;s/\n\(.*\)\n\1//g&apos;" {cmd:_comp_file_direct_}
-# sed -z "&apos;s/\n\(.*\)\n\1//g&apos;" {cmd:_comp_file_direct_}
+# sed -z "&apos;s/\n\(.*\)\n\1//g&apos;" {cmd:comp_file_direct}
+# sed -z "&apos;s/\n\(.*\)\n\1//g&apos;" {cmd:comp_file_direct}
 

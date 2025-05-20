@@ -17,9 +17,9 @@ go install
 # 添加依赖包会修改 go.mod , go.sum 内容
 go get {package}
 # 添加某个目录到工作空间(第一次运行), 添加文件 go.work
-go work init {cmd:_comp_file_direct_}
+go work init {cmd:comp_file_direct}
 # 添加某个目录到工作空间, 会修改 go.work 内容 (需要先执行 go work init)
-go work use {cmd:_comp_file_direct_}
+go work use {cmd:comp_file_direct}
 # go 运行
-go run {cmd:_comp_file_direct_}
+go run {cmd:comp_file_direct}
 

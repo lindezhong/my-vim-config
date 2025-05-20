@@ -46,7 +46,7 @@ bypy downdir {remotepath} {localpath} -v
 # │   └── xxx
 # └── xxx
 # 正确填写为bypy upload ./dicts/ /dicts -v
-bypy upload {cmd:_comp_file_direct_} {remotepath} -v
+bypy upload {cmd:comp_file_direct} {remotepath} -v
 # 查看远程文件
 bypy ls {remotepath} 
 # 创建远程文件夹

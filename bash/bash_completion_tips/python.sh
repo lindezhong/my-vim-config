@@ -9,4 +9,4 @@ python.sh setuptools install
 # 打包本地python项目,在./dist 生成文件夹
 python.sh setuptools build
 # 运行单元测试用例, 等价于 python setup.py test
-python.sh setuptools test {cmd:_comp_file_direct_}
+python.sh setuptools test {cmd:comp_file_direct}

@@ -6,14 +6,14 @@
 # 已有的语言编码可以通过`tesseract --list-langs`来查看, 语言编码一般为三位的`ISO 639-2`编码
 
 # output.pdf 文件也可以是输入文件 , 如果为输入文件则只在转换成功的时候覆盖
-ocrmypdf {cmd:_comp_file_direct_} {output.pdf}
+ocrmypdf {cmd:comp_file_direct} {output.pdf}
 
 # -l 可以指定OCR的语言, 多个语言使用 + 分割 , 语言代码参考`tesseract --list-langs`结果
 # 使用 -l 指定语言时需要安装Tesseract
 # ocrmypdf -l eng+fra Bilingual-English-French.pdf Bilingual-English-French.pdf 
 # ocrmypdf -l eng+chi_sim Bilingual-English-Chinese.pdf Bilingual-English-Chinese.pdf 
-ocrmypdf {cmd:_comp_file_direct_} {output.pdf} -l eng+chi_sim --deskew
+ocrmypdf {cmd:comp_file_direct} {output.pdf} -l eng+chi_sim --deskew
 
 # 校正歪斜 
-ocrmypdf {cmd:_comp_file_direct_} {output.pdf} --deskew 
+ocrmypdf {cmd:comp_file_direct} {output.pdf} --deskew 
 

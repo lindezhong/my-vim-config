@@ -9,7 +9,7 @@ git.sh github upstreamUrl
 # git回滚到某个版本
 git.sh reset version {git_commit_id}
 # git撤销add 文件列表
-git.sh reset add {cmd:_comp_file_direct_}
+git.sh reset add {cmd:comp_file_direct}
 # 初始化git服务端项目,供git clone user@ip:/项目路径
 git.sh init_server {项目名}
 # 将当前目录下的所有git项目pull

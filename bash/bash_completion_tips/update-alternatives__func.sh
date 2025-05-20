@@ -19,7 +19,7 @@ function get_link_path() {
 
     if (( ${#link_path[@]}==0 )); then
        # 如果已有的软链接都不符合情况则提示目录 
-       echo '{cmd:_comp_file_direct_}'
+       echo '{cmd:comp_file_direct}'
     else
         echo "{-filenames}"
     fi

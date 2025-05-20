@@ -45,7 +45,7 @@
 #       请注意: 在提示中出现  ' " 会导致后续的无法提示(在如果有重复前缀的情况下) 
 #       例子:  test_complete char "&#39;a&nbsp;b&#39;" -t -f  等价于 test_complete char 'a b' -t -f
 # 通用的命令提示如下
-# 1. {cmd:_comp_file_direct_} : 提示的文件列表
+# 1. {cmd:comp_file_direct} : 提示的文件列表
 
 
 
@@ -724,7 +724,8 @@ _completion_cmd_normaliza_() {
 
 
 # 文件提示(提示会有多少文件), 请注意调用这个模式后会倒置 compgen 提示模式改成文件提示模式
-_comp_file_direct_() {
+# :return:echo: 当前目录下的文件提示 + '{-filenames}' 
+comp_file_direct() {
     # 路径关键字转义
     declare -A path_keywords_mapping=(
         # ` ` -> `\ `

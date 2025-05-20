@@ -24,8 +24,10 @@ git.sh python.sh mvn.sh
 # :var_name:$args_index: var_name为从方法参数获取的变量名, $args_index 为从那个方法参数上获取, 例子 :var:$1:
 # :return:echo: 这种格式表明是通过 echo "返回值" 格式返回的
 # :return:return_var: 这种格式表明是通过全局变量返回的,并且该全局变量名为 return_var
+#                     这种格式本质上是是说这个方法影响了这个全局变量, 一个方法可以有多少这种return
+#                     如果return_var格式为 ${function_name}_result , 即表明是这个方法的返回值, 为调用方法后立即需要使用, 不做持久化
 # :return: 这种格式说明是通过 return 返回的, 只能返回数字 
-function() {
+function function_name() {
     local var="$1"
     ... 
 }

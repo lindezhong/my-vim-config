@@ -8,7 +8,7 @@
 #   2.1 在聚合文件中需要添加 `# cmd: 需要提示的命令` 告诉脚本这个文件支持提示那些文件
 #   2.2 可以通过 `# end` 结束查找需要哪些提示的命令以提高性能, 如何遇到 `# end` 之后的 `# cmd: 需要提示的命令` 会失效
 #   2.3 如以下例子就是将命令`test_cmd`添加到了提示中可以提示`test_cmd add ls xxx`这个命令
-#   如果没有cmd: test_cmd 这行就没执行`complete -F _complete_func test_cmd`就没法调用到test_cmd的提示
+#   如果没有cmd: test_cmd 这行就没执行`complete -F complete_func test_cmd`就没法调用到test_cmd的提示
 #   ```shell
 #   # 用作测试聚合脚本的提示
 #   # cmd: test_cmd
@@ -88,14 +88,14 @@ if [ -d ~/.bash_completion ]; then
             do
                 if [[ "$line" == \#\ cmd:\ * ]]; then
                     cmd=${line#*\#\ cmd:\ }
-                    eval complete -F _complete_func $cmd
+                    eval complete -F complete_func $cmd
                 elif [[ "$line" == "# end" ]]; then
                     break
                 fi
             done  < ~/.bash_completion/$complete_file
         else
             # 如果有提示文件则也追加到提示中
-            eval complete -F _complete_func $complete_file
+            eval complete -F complete_func $complete_file
         fi
 
     done
@@ -129,7 +129,7 @@ cmd_item_list=()
 cmd_item_list_length=0
 # cmd_item_list的某个提示项
 cmd_item=""
-# cmd_item运行参赛
+# cmd_item相关信息, 比如类型, 下移下标等
 cmd_item_data=("type: cmd类型" 
     "index: 需要添加提示下标列表(该下标相对于item_index)比如 (-1 0 1 2) 真实下标为 (item_index-1 item_index item_index+1 item_index+2)"
 )
@@ -142,8 +142,10 @@ comp_cmd_item=""
 # 最后提示的命令文本
 global_completion_txt=""
 
-# 初始化cmd_list
-_init_cmd_list() {
+# 初始化cmd_list, 去读取 ${original_cmd} 文件内容生成 ${cmd_list} 列表
+# :original_cmd:$1: 具体是那个命令的提示, 比如 mvn 这样
+# :return:cmd_list: 提示列表
+function init_cmd_list() {
     local original_cmd="$1"
     
     cmd_list=()
@@ -186,7 +188,9 @@ _init_cmd_list() {
 
 }
 
-_complete_func() {
+# 用于命令行提示, 将最后的提示设置到 COMPREPLY
+# :return:COMPREPLY: 命令的最后提示
+function complete_func() {
 
     # COMP_WORDS: 类型为数组，存放当前命令行中输入的所有单词
     # COMP_CWORD: 型为整数，当前输入的单词在COMP_WORDS中的索引
@@ -240,7 +244,7 @@ _complete_func() {
     global_completion_txt=""
 
     local original_cmd=${COMP_WORDS[0]}
-    _init_cmd_list "$original_cmd"
+    init_cmd_list "$original_cmd"
 
 
 
@@ -254,13 +258,13 @@ _complete_func() {
         
         # 匹配的次数/要提示的位置,重置, 并且重置相关数据
         item_index=0
-        _cmd_index_index_shift
+        cmd_index_index_shift
         comp_index=0
-        _comp_cmd_index_index_shift
+        comp_cmd_index_index_shift
         while (( comp_index<$COMP_CWORD && item_index<cmd_item_list_length )); do
 
             # 匹配单个命令
-            _is_match_cmd 
+            is_match_cmd 
             if (( $?>200 )); then
                 # 如果执行不匹配则退出
                 break
@@ -272,7 +276,7 @@ _complete_func() {
         # 输出tab提示
         local global_completion_list=($(compgen -W "${global_completion_txt}" -- ${command_name}))
         for completion_item in "${global_completion_list[@]}"; do
-            COMPREPLY[${#COMPREPLY[@]}]=''$(_completion_normaliza "$completion_item")''
+            COMPREPLY[${#COMPREPLY[@]}]=''$(completion_normaliza "$completion_item")''
         done
         # COMPREPLY=($(compgen -W "${global_completion_txt}" -- ${command_name}))
     else
@@ -283,8 +287,10 @@ _complete_func() {
 }
 
 
-# 格式化提示内容 
-_completion_normaliza() {
+# 格式化提示内容,即将提示内容中的某些关键字替换为转义字符,需要替换的内容查看 ${keywords_mapping}
+# :completion_item:$1: 需要被替换的提示内容 
+# :return:echo: 被转义后的 ${completion_item}
+function completion_normaliza() {
     local completion_item="$1"
     if [[ ! "$completion_item" == *"&"* ]]; then
         echo "$completion_item"
@@ -302,18 +308,27 @@ _completion_normaliza() {
 }
 
 # 变动item_index, 并且将相关数据也跟在变动
-_cmd_index_index_shift() {
+# :index_shift:$1: item_index减少的位数
+# :return:item_index: cmd 转换成list的匹配下标 
+# :return:cmd_item: cmd_item_list的某个提示项
+# :return:cmd_item_data: cmd_item相关信息, 比如类型, 下移下标等
+function cmd_index_index_shift() {
     local index_shift="$1"
     test -z "$index_shift" && index_shift="0"
     # 先变item_index
     (( item_index=item_index+index_shift ))
     cmd_item=${cmd_item_list[item_index]}
-    eval cmd_item_data=($(_parse_cmd_item_data_ "$cmd_item"))
+    eval cmd_item_data=($(parse_cmd_item_data "$cmd_item"))
 }
 
 # 变动comp_item_index, 并且将相关数据也跟在变动, 可能会触发提示
-# 需要保证_comp_cmd_index_index_shift在_cmd_index_index_shift前执行
-_comp_cmd_index_index_shift() {
+# 需要保证comp_cmd_index_index_shift在_cmd_index_index_shift前执行
+# :comp_index_shift:$1: 需要将comp_item_index和comp_index减少的位数, 默认为0即不减少
+# :close_comp:$2: 是否关闭comp_item_index的提示, 0:关闭, 非0打开, 默认1
+# :return:comp_index: 用户输入的匹配下标
+# :reutrn:comp_cmd_item: 用户输入的匹配项
+# :return:global_completion_txt: 最后提示的命令文本
+function comp_cmd_index_index_shift() {
     local comp_index_shift="$1"
     test -z "$comp_index_shift" && comp_index_shift="0"
 
@@ -332,7 +347,7 @@ _comp_cmd_index_index_shift() {
             local add_item_index_list=(${cmd_item_data[1]})
     
             for add_item_index in "${add_item_index_list[@]}"; do
-                _completion_cmd_add "${cmd_item_list[item_index+add_item_index]}"
+                completion_cmd_add "${cmd_item_list[item_index+add_item_index]}"
             done        
         fi
     fi
@@ -340,8 +355,10 @@ _comp_cmd_index_index_shift() {
 }
 
 
-# result ("匹配模式", "要添加提示cmd_item_data下标, 是相对当前")
-_parse_cmd_item_data_(){
+# 解析cmd_item的相关信息 
+# :cmd_str:$1: 命令提示项, 即 cmd_item 
+# :return:echo: ("匹配模式", "要添加提示cmd_item_data下标, 是相对当前")
+function parse_cmd_item_data(){
     local cmd_str="$1"
 
     if [[ "$cmd_str" == "{-filenames}" ]]; then
@@ -354,7 +371,7 @@ _parse_cmd_item_data_(){
         # 多参数or模式, or模式需要提示下一个cmd_item(or模式支持完全不匹配)
         echo '"or" "0 1"'
     elif [[ "$cmd_str" == {and:* ]]; then
-        # and模式 , and模式由匹配方法 _is_match_cmd_and 追加所以其实会导致一个提示重复添加的情况, 后续优化
+        # and模式 , and模式由匹配方法 is_match_cmd_and 追加所以其实会导致一个提示重复添加的情况, 后续优化
         echo '"and" ""'
     elif [[ "$cmd_str" == {kv:* ]]; then
         # kv模式 
@@ -369,14 +386,19 @@ _parse_cmd_item_data_(){
 }
 
 # 是否命令行匹配
-# result: [0-200]: 匹配成功, (200,]匹配失败
-_is_match_cmd() {
-    _is_match_cmd_simple
+# :result: [0-200]: 匹配成功, (200,]匹配失败
+function is_match_cmd() {
+    is_match_cmd_simple
     return $?
 }
 
 # 是否命令行匹配
-# result:   
+# :match_cmd_item:$1: 匹配的cmd_item, 默认为${cmd_item} 
+# :match_comp_cmd_item:$2: 匹配的comp_cmd_item, 默认为${comp_cmd_item}
+# :item_add_num:$3: item下标是否向前加n, 只有在匹配成功的时候生效
+# :comp_add_num:$4: comp下标是否向前加n, 只有在匹配成功的时候生效
+# :close_comp:$5: 是否关闭提示, 只有在匹配成功且comp_add_num>0情况下生效
+# :result: 是否匹配成功的信息, 不同的返回值有不同的表示, 以下是表示 
 #      [0,200]: 匹配成功
 #       (200,): 匹配失败
 #         (,0): 匹配失败
@@ -385,7 +407,7 @@ _is_match_cmd() {
 #   (100, 200): and模式不完全匹配则返回 100 + n (匹配到地n个(and模式), 从1开始)
 #          200: and模式完全匹配, 而且匹配完成(整个命令匹配完)
 #   (100, 200]: and模式匹配, 已经有提示,也由and模式自己提供提示
-_is_match_cmd_simple() {
+function is_match_cmd_simple() {
 
     local match_cmd_item="$1" 
     test -z "$match_cmd_item" && match_cmd_item="$cmd_item"
@@ -405,44 +427,44 @@ _is_match_cmd_simple() {
     local close_comp="$5"
     test -z "$close_comp" && close_comp="1"
 
-    eval local match_cmd_item_data=($(_parse_cmd_item_data_ "$match_cmd_item"))
+    eval local match_cmd_item_data=($(parse_cmd_item_data "$match_cmd_item"))
 
     if [[ "${match_cmd_item_data[0]}" == "general" ]]; then
-        local normaliza_match_cmd_item=''$(_completion_normaliza "$match_cmd_item")''
+        local normaliza_match_cmd_item=''$(completion_normaliza "$match_cmd_item")''
         # 如果为普通的提示需要完全相等
         if [[ "$normaliza_match_cmd_item" == "$match_comp_cmd_item" ]]; then
-            _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
-            _cmd_index_index_shift "$item_add_num"
+            comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+            cmd_index_index_shift "$item_add_num"
             return 0
         fi
     elif [[ "${match_cmd_item_data[0]}" == "cmd" ]]; then
         # 如果为命令模式暂时不考虑需要匹配防止cmd执行过久导致的性能问题
-        _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
-        _cmd_index_index_shift "$item_add_num"
+        comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+        cmd_index_index_shift "$item_add_num"
         return 0
     elif [[ "${match_cmd_item_data[0]}" == "note" ]]; then
         # 如果只是提示则直接匹配
-        _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
-        _cmd_index_index_shift "$item_add_num"
+        comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+        cmd_index_index_shift "$item_add_num"
         return 0
     elif [[ "${match_cmd_item_data[0]}" == "kv" ]]; then
         # kv模式的v往往是命令模式的所以只是提示是否为k前缀
         # 例子: {kv: ("--mainClass=" "{cmd:mvn.sh find_main src/main}")}
         # 例子: {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
-        eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "kv")
+        eval local multiple_cmd_item_list=$(cmd_normaliza "$match_cmd_item" "kv")
         local key="${multiple_cmd_item_list[0]}"
-        local normaliza_key=''$(_completion_normaliza "${multiple_cmd_item_list[0]}")''
+        local normaliza_key=''$(completion_normaliza "${multiple_cmd_item_list[0]}")''
         
         if [[ "$match_comp_cmd_item" == ${normaliza_key}* ]]; then
-            _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
-            _cmd_index_index_shift "$item_add_num"
+            comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+            cmd_index_index_shift "$item_add_num"
             return 0
         fi
     elif [[ "${match_cmd_item_data[0]}" == "or" ]]; then
-        _is_match_cmd_or "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
+        is_match_cmd_or "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
         return $?
     elif [[ "${match_cmd_item_data[0]}" == "and" ]]; then
-        _is_match_cmd_and "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
+        is_match_cmd_and "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
         return $?
     fi
 
@@ -451,11 +473,11 @@ _is_match_cmd_simple() {
     return -1
 }
 
-# or 模式匹配
-_is_match_cmd_or() {
+# or 模式匹配, 参数和返回值保持跟 is_match_cmd_simple 一致
+function is_match_cmd_or() {
     local match_cmd_item="$1" 
     test -z "$match_cmd_item" && match_cmd_item="$cmd_item"
-    eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "or")
+    eval local multiple_cmd_item_list=$(cmd_normaliza "$match_cmd_item" "or")
 
     local match_comp_cmd_item="$2"
     test -z "$match_comp_cmd_item" && match_comp_cmd_item="$comp_cmd_item"
@@ -476,7 +498,7 @@ _is_match_cmd_or() {
     local is_comp_index_shift="false"
     local multiple_cmd_item
     for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
-        _is_match_cmd_simple "$multiple_cmd_item" "$match_comp_cmd_item" "0" "0" "1"
+        is_match_cmd_simple "$multiple_cmd_item" "$match_comp_cmd_item" "0" "0" "1"
         local match_result="$?"
         if (( $match_result<=200 )); then
             # 如果有一个可以匹配则需要下移
@@ -492,10 +514,10 @@ _is_match_cmd_or() {
     done
 
     if $is_comp_index_shift; then
-        _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+        comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
     else
         # 所有都不匹配,则需要下移自己的提示,是or的关系, 就算没有一个匹配也可以
-        _cmd_index_index_shift "$item_add_num"
+        cmd_index_index_shift "$item_add_num"
     fi
 
 
@@ -503,11 +525,11 @@ _is_match_cmd_or() {
     return 0
 }
 
-# and 模式匹配
-_is_match_cmd_and() {
+# and 模式匹配, 参数和返回值保持跟 is_match_cmd_simple 一致
+function is_match_cmd_and() {
     local match_cmd_item="$1" 
     test -z "$match_cmd_item" && match_cmd_item="$cmd_item"
-    eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$match_cmd_item" "and")
+    eval local multiple_cmd_item_list=$(cmd_normaliza "$match_cmd_item" "and")
 
     local match_comp_cmd_item="$2"
     test -z "$match_comp_cmd_item" && match_comp_cmd_item="$comp_cmd_item"
@@ -527,7 +549,7 @@ _is_match_cmd_and() {
     # 倒叙查看匹配的第一条数据
     local match_comp_index
     for (( match_comp_index = comp_index; match_comp_index >= 0; match_comp_index-- )); do
-         _is_match_cmd_simple "${multiple_cmd_item_list[0]}" "${COMP_WORDS[match_comp_index]}" "0" "0" "0"
+         is_match_cmd_simple "${multiple_cmd_item_list[0]}" "${COMP_WORDS[match_comp_index]}" "0" "0" "0"
         if (( $?<=200 )); then
             # 有找到匹配第一个下标的数据
             break
@@ -541,7 +563,7 @@ _is_match_cmd_and() {
 
     local i
     for(( i=0; match_comp_index<COMP_CWORD && match_comp_index<=comp_index && i<${#multiple_cmd_item_list[@]}; i++)) do
-        _is_match_cmd_simple "${multiple_cmd_item_list[i]}" "${COMP_WORDS[match_comp_index]}" "0" "0" "0"
+        is_match_cmd_simple "${multiple_cmd_item_list[i]}" "${COMP_WORDS[match_comp_index]}" "0" "0" "0"
         if (( $?>200 )); then
             # 如果有一个不匹配则直接结束
             return -1
@@ -557,23 +579,23 @@ _is_match_cmd_and() {
     # 匹配成功往下走一个
     if (( i>=${#multiple_cmd_item_list[@]} )); then
         # 如果and完全匹配则跳过了
-        _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
-        _cmd_index_index_shift "$item_add_num"
+        comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+        cmd_index_index_shift "$item_add_num"
 
         if (( match_comp_index>=COMP_CWORD && close_comp!=0 )); then 
             # 如果完全匹配到则往提示里加一个
-            _completion_cmd_add "${cmd_item_list[item_index+1]}"
+            completion_cmd_add "${cmd_item_list[item_index+1]}"
         fi
 
         # 完全匹配则返回100
         return 100
     fi
 
-    _comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+    comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
     if (( match_comp_index>=COMP_CWORD )); then 
         if (( close_comp!=0 )); then
             # 如果匹配到则往提示里加一个
-            _completion_cmd_add "${multiple_cmd_item_list[i]}"
+            completion_cmd_add "${multiple_cmd_item_list[i]}"
         fi
         # 如果有添加则返回200(即使被close_comp=0实际没添加也返回200)
         return 200
@@ -588,7 +610,9 @@ _is_match_cmd_and() {
 
 
 # 将 {option:cmd} 格式的字符串 中的cmd提取出来
-_cmd_normaliza_() {
+# :cmd:$1: 待提取的 cmd_item , 格式为 {option:cmd}
+# :return:echo: cmd格式
+function cmd_normaliza() {
     local cmd=$1
 
     shift 1
@@ -605,20 +629,24 @@ _cmd_normaliza_() {
 
 
 # 添加到提示命令到提示中
-_completion_cmd_add() {
+# :completion_cmd:$1: 提示的cmd命令, 这个需要进行格式化
+# :return:global_completion_txt: 最后提示的命令文本
+function completion_cmd_add() {
     
-    _completion_cmd_normaliza_ "$1"
-    global_completion_txt=''$global_completion_txt' '$_completion_cmd_normaliza_result''
+    completion_cmd_normaliza "$1"
+    global_completion_txt=''$global_completion_txt' '$completion_cmd_normaliza_result''
 }
 
 # 将提示出的命令格式化, 支持递归操作
-_completion_cmd_normaliza_() {
+# :completion_cmd:$1: 提示的命令
+# :return:completion_cmd_normaliza_result: 格式化后的${completion_cmd}
+function completion_cmd_normaliza() {
 
     local completion_cmd="$1"
 
 
     if [[ -z $completion_cmd ]]; then
-        _completion_cmd_normaliza_result=""
+        completion_cmd_normaliza_result=""
         # 为空不格式化
         return
     fi
@@ -638,7 +666,7 @@ _completion_cmd_normaliza_() {
         unset completion_cmd_stack[${#completion_cmd_stack[@]}-1]
 
 
-        eval local completion_stack_cmd_data=($(_parse_cmd_item_data_ "$completion_stack_cmd"))
+        eval local completion_stack_cmd_data=($(parse_cmd_item_data "$completion_stack_cmd"))
 
         if [[ "${completion_stack_cmd_data[0]}" == "general" ]]; then
             # 如果为普通提示
@@ -648,7 +676,7 @@ _completion_cmd_normaliza_() {
             completion_txt="$completion_txt $completion_stack_cmd"
         elif [[ "${completion_stack_cmd_data[0]}" == "cmd" ]]; then
             # 如果 option 是cmd, 则需要执行cmd命令并将结果 push 到 completion_cmd_stack
-            local completion_normaliza_cmd=$(_cmd_normaliza_ "$completion_stack_cmd" "cmd")
+            local completion_normaliza_cmd=$(cmd_normaliza "$completion_stack_cmd" "cmd")
             local completion_normaliza_cmd_result=$(eval $completion_normaliza_cmd)
             # 使用eval保证 '' 包裹起来的元素不被拆分
             eval local completion_normaliza_cmd_result=($completion_normaliza_cmd_result)
@@ -665,7 +693,7 @@ _completion_cmd_normaliza_() {
             true
         elif [[ "${completion_stack_cmd_data[0]}" == "kv" ]]; then
             # 如果为kv模式
-            eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "kv")
+            eval local multiple_cmd_item_list=$(cmd_normaliza "$completion_stack_cmd" "kv")
             local key="${multiple_cmd_item_list[0]}"
             local value="${multiple_cmd_item_list[1]}"
             local suffix=""
@@ -673,9 +701,9 @@ _completion_cmd_normaliza_() {
                 suffix="${multiple_cmd_item_list[2]}"
             fi
 
-            local old_completion_cmd_normaliza_result="$_completion_cmd_normaliza_result"
-            _completion_cmd_normaliza_ "$value"
-            local value_list=($_completion_cmd_normaliza_result)
+            local old_completion_cmd_normaliza_result="$completion_cmd_normaliza_result"
+            completion_cmd_normaliza "$value"
+            local value_list=($completion_cmd_normaliza_result)
             local value_item
             for value_item in "${value_list[@]}"; do
                 completion_txt="$completion_txt ${key}${value_item}${suffix}"
@@ -684,12 +712,12 @@ _completion_cmd_normaliza_() {
 
         elif [[ "${completion_stack_cmd_data[0]}" == "or" ]]; then
             # 多参数模式
-            eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "or")
+            eval local multiple_cmd_item_list=$(cmd_normaliza "$completion_stack_cmd" "or")
             local multiple_cmd_item
             for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
-                eval local multiple_cmd_item_data=($(_parse_cmd_item_data_ "$multiple_cmd_item"))
+                eval local multiple_cmd_item_data=($(parse_cmd_item_data "$multiple_cmd_item"))
                 if [[ "${multiple_cmd_item_data[0]}" == "and" ]]; then
-                     _is_match_cmd_and "$multiple_cmd_item" "" "0" "0" "1"
+                     is_match_cmd_and "$multiple_cmd_item" "" "0" "0" "1"
                      if (( $?<=200 && $?>100 )); then
                         # 特殊逻辑兼容,在or模式中有个cmd_item是and模式,如果这个and模式不完全匹配则只提示这个and模式的命令
                         multiple_cmd_item_list=()
@@ -704,10 +732,10 @@ _completion_cmd_normaliza_() {
 
         elif [[ "${completion_stack_cmd_data[0]}" == "and" ]]; then
             # and 模式由匹配添加所以可能死循环
-            _is_match_cmd_and "$completion_stack_cmd" "" "0" "0" "1"
+            is_match_cmd_and "$completion_stack_cmd" "" "0" "0" "1"
             if (( $?>200 )); then
                 # 如果是完全不匹配说明可能是要最新的提示
-                eval local multiple_cmd_item_list=$(_cmd_normaliza_ "$completion_stack_cmd" "and")
+                eval local multiple_cmd_item_list=$(cmd_normaliza "$completion_stack_cmd" "and")
                 completion_cmd_stack[${#completion_cmd_stack[@]}]=${multiple_cmd_item_list[0]}
             fi
 
@@ -718,14 +746,14 @@ _completion_cmd_normaliza_() {
 
     done
 
-    _completion_cmd_normaliza_result="$completion_txt"
+    completion_cmd_normaliza_result="$completion_txt"
 
 }
 
 
 # 文件提示(提示会有多少文件), 请注意调用这个模式后会倒置 compgen 提示模式改成文件提示模式
 # :return:echo: 当前目录下的文件提示 + '{-filenames}' 
-comp_file_direct() {
+function comp_file_direct() {
     # 路径关键字转义
     declare -A path_keywords_mapping=(
         # ` ` -> `\ `
@@ -765,6 +793,6 @@ comp_file_direct() {
 }
 
 if [[ ! -z $TEST_COMP_WORDS ]]; then
-    _complete_func
+    complete_func
 fi
 

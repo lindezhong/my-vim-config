@@ -23,7 +23,7 @@ endglobal
 snippet fun "function with docstrings" b
 # ${3:TODO: Docstring for $1.}
 `!p snip.rv = write_function_args_docstring(t[2], snip)`# :return:${4}: ${5:Docstring for $4.} 
-${1:function}() {
+function ${1:function_name}() {
 	${2:args}
 	$0
 }

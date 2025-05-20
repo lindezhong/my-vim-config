@@ -6,6 +6,8 @@ test_complete char "&apos;a&nbsp;b&apos;" -t -f
 test_complete note {提示} -t -f
 test_complete file {cmd:comp_file_direct} -f
 test_complete cmd {cmd:ls} -f
+# 这个方法由test_complete__func.sh提供
+test_complete cmd {cmd:__func_file_fun} -f
 test_complete or "{or:(-d -l)}" -t -f
 test_complete and '{and:(-v "{dir}")}' -t -f
 test_complete and_or '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}' -t -f

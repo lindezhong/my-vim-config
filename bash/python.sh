@@ -37,7 +37,7 @@ test -z $ACTION && ACTION="--help"
 current_path=$(readlink -f $(dirname "$0"))
 
 # 帮助文档
-help() {
+function help() {
     echo '
 --help : 查看帮助文档
     python.sh --help
@@ -83,13 +83,14 @@ setuptools : 关于python构建/打包的相关操作, 如果python版本过低�
 
 
 # 安装构建依赖包,正常无需执行，除非低版本
-setuptools_env() {
+function setuptools_env() {
     python3 -m pip install setuptools wheel twine
 }
 
 
 # python项目初始化/创建一个python项目
-setuptools_init() {
+# :project_name:$1: 项目名
+function setuptools_init() {
     local project_name=$1
 
     local script_path=$0
@@ -190,18 +191,18 @@ setuptools_init() {
 }
 
 # 将本地python项目安装到site-packages
-setuptools_install() {
+function setuptools_install() {
     python3 -m pip install .
 }
 
 # 打包本地python项目
-setuptools_build() {
+function setuptools_build() {
     python setup.py build
 }
 
 # 运行单元测试用例
-# $1 : 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
-setuptools_test() {
+# :test_py:$1: 要运行的单元测试python路径,如果为空则运行所有的单元测试, 比如: test/${project_name}/test_${project_name}.py
+function setuptools_test() {
     local test_py=$1
 
     if [[ -z $test_py ]]; then
@@ -221,7 +222,8 @@ setuptools_test() {
 
 
 # 关于python构建/打包的相关操作, 如果python版本过低需要执行: python.sh setuptools env
-setuptools() {
+# :SETUPTOOLS_ACTION:$1: setuptools相关操作
+function setuptools() {
     local SETUPTOOLS_ACTION=$1
 
     shift 1

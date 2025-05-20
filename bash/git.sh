@@ -11,7 +11,7 @@ if [[ -z $ACTION ]]; then
 fi
 
 # 帮助文档
-help() {
+function help() {
     echo '
 upstream : Git进行fork后跟原仓库同步
     git.sh upstream [{git上游地址:默认去github获取}]
@@ -45,8 +45,8 @@ github : github相关操作
         $4 : 可选默认30 github api https://api.github.com/users/USERNAME/repos 每次返回的条数,作为分页结束的条件
         return : clone 组织下的所有存储库
     
-    github upstreamUrl : 解析github项目上游url
-        git.sh github upstreamUrl
+    github upstream_url : 解析github项目上游url
+        git.sh github upstream_url
         return : github项目上游地址
 
 pull : 将当前目录下的所有git项目pull
@@ -56,10 +56,11 @@ pull : 将当前目录下的所有git项目pull
 }
 
 # Github进行fork后跟原仓库同步
-upstream() {
+# :upstream_git_address:$1: git上游地址, 默认去github上获取, 如果github上获取失败需要手动输入
+function upstream() {
     local upstream_git_address=$1 
 
-    test -z $upstream_git_address && upstream_git_address=$(_githubGetUpstreamUrl_)
+    test -z $upstream_git_address && upstream_git_address=$(github_get_upstream_url)
 
     if [[ -z $upstream_git_address ]]; then
         echo '请输入上游(fork)git地址,在$2位置'
@@ -95,7 +96,9 @@ upstream() {
 }
 
 # 解析github上游url
-_githubGetUpstreamUrl_() {
+# :return:echo: github上游url
+# :return: 1: 解析失败非github项目 , 0: 解析成功 
+function github_get_upstream_url() {
 
     # 判断远程url中origin是否出现github
     local github_url_list=($(git remote -v | grep "^origin" | grep "github.com"))
@@ -125,8 +128,9 @@ _githubGetUpstreamUrl_() {
 }
 
 
-# git clone 一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
-githubRepos() {
+# git clone 一个组织(organizations)下的所有存储库
+# :org:$1: github组织(organizations), 比如https://github.com/lindezhong/ 的组织是 lindezhong
+function github_repos() {
     local org=$1
 
     while [ -z $org ]; do
@@ -198,20 +202,20 @@ githubRepos() {
     return 0
 }
 
-# 对github的一些操作
-github() {
+# 对github的一些操作, 参数跟返回值查看转发的方法
+function github() {
     local GITHUB_ACTION=$1
     case "$GITHUB_ACTION" in
         repos)
             # git clone 一个组织(organizations)下的所有存储库,比如https://github.com/lindezhong/ 的组织是 lindezhong
             # $2 : 组织(organizations)
             # return : clone 组织下的所有存储库
-            githubRepos $2 $3
+            github_repos $2 $3
             ;;
-        upstreamUrl)
+        upstream_url)
             # 解析github上游url
             # return : git上游地址
-            _githubGetUpstreamUrl_
+            github_get_upstream_url
             ;;
          * )
             echo "未知操作,请查看帮助文档"
@@ -221,7 +225,8 @@ github() {
 }
 
 # git回滚到某个版本
-resetVersion() {
+# :commit_id:$1: git 的commit id
+function reset_version() {
     local commit_id=$1
     while [ -z $commit_id ]; do
         read -p "git commit_id不允许输入空请重新输入 : " commit_id
@@ -230,12 +235,12 @@ resetVersion() {
 }
 
 # git回滚到某个版本,或取消commit
-reset() {
+function reset() {
     local RESET_ACTION=$1
     shift 1
     case "$RESET_ACTION" in
         version )
-            resetVersion $*
+            reset_version $*
             ;;
         add )
             # git 取消 add文件未cmmit
@@ -249,7 +254,8 @@ reset() {
 }
 
 # 初始化git服务端项目,供git clone user@ip:/项目路径
-initServer() {
+# :project_name:$1: 项目名
+function init_server() {
     local project_name=$1
 
     while [ -z $project_name ]; do
@@ -272,7 +278,7 @@ initServer() {
 }
 
 # 将当前目录下的所有git项目pull
-pull() {
+function pull() {
     local dir_list=($(ls -d */))
     local i
     for(( i=0; i<${#dir_list[@]}; i++)) do
@@ -304,7 +310,7 @@ case "$ACTION" in
     init_server)
         # 初始化git服务端项目,供git clone user@ip:/项目路径
         # $2 : 项目名
-        initServer $*
+        init_server $*
         ;;
     pull)
         # 将当前目录下的所有git项目pull

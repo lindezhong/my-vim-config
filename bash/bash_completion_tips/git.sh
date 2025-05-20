@@ -5,7 +5,7 @@ git.sh upstream {上游git地址}
 # git clone github上一个组织(organizations)下的所有存储库
 git.sh github repos {github组织} {pageSize:30}
 # 解析github项目上游url
-git.sh github upstreamUrl
+git.sh github upstream_url
 # git回滚到某个版本
 git.sh reset version {git_commit_id}
 # git撤销add 文件列表

@@ -6,7 +6,7 @@
   },
   "configurations": {
     "javaLaunch": {
-      "name": "java运行本年度项目, 如果当前java类存在main方法执行当前类, 不存在则需输入",
+      "name": "java调试程序, 如果当前java类存在main方法执行当前类, 不存在则需输入",
       "default": true,
       "adapter": "coc-java-debug",
       "configuration": {

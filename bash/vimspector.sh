@@ -12,7 +12,9 @@ default_map['config_file_suffix']="-vimspector.json"
 # 将vimspector配置文件复制到那个文件目录(默认当前文件夹下 .vimspector.json 文件)
 default_map['config_file_target_path']=".vimspector.json"
 
-defaultMapInit() {
+# 初始化默认参数
+# :return:default_map: 默认参数map
+function default_map_init() {
 
     local script_path=$0
     while [ -L $script_path ]; do
@@ -26,10 +28,10 @@ defaultMapInit() {
     default_map['config_path']="$home_path/${default_map['config_dir']}"
 }
 
-defaultMapInit
+default_map_init
 
 # 帮助文档
-help() {
+function help() {
     echo '
 --help : 查看帮助文档
     vimspector.sh --help
@@ -47,7 +49,8 @@ config : 复制对应语言的配置到本目录下
 }
 
 # 查看支持的语言
-_language_() {
+# :return:echo: 支持的语言列表
+function language() {
     local vimspector_config_path_list=($(ls ${default_map['config_path']}/*-vimspector.json))
     local vimspector_config=""
     local i
@@ -65,9 +68,10 @@ _language_() {
 
 
 # 复制对应语言的配置到本目录下
-config() {
+# :language:$1: 语言, 要复制那个语言配置
+function config() {
     local language=$1
-    local language_list=$(_language_)
+    local language_list=$(language)
     while [[ ! "${language_list[@]}" =~ "${language}" ]] || [ -z "${language}" ]; do
         read -p "只支持语言 [$language_list] : " language
     done
@@ -86,7 +90,7 @@ case $ACTION in
         config "$2"
         ;;
     language )
-        _language_
+        language
         ;;
     * )
         echo "未知的操作: $ACTION"

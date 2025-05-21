@@ -641,11 +641,30 @@ do
 done  < ${1:file_path}
 endsnippet
 
+snippet readFileFd "读取文件内容, 每次读取一行从文件描述符 FD 读取，而不是从标准输入(0)读取 , FD 需要大于等于3的数字, 默认的描述符如下, 0: 标准输入 , 1: 标准输出, 2: 标准错误"
+exec ${2:fd}< ${1:file_path}
+while read -u$2 ${3:line}
+do
+    $0
+done
+exec $2<&- # 关闭描述符 $2
+endsnippet
+
+
 snippet readCommand "读取命令执行结果, 每次读取一行, >() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
 while read ${2:line}
 do
     $0
 done  < <(${1:command})
+endsnippet
+
+snippet readCommandFd "读取命令执行结果, 每次读取一行,从文件描述符 FD 读取，而不是从标准输入(0)读取 , FD 需要大于等于3的数字, 默认的描述符如下, 0: 标准输入 , 1: 标准输出, 2: 标准错误 ， >() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
+exec ${2:fd}< <(${1:command})
+while read -u$2 ${3:line}
+do
+    $0
+done
+exec $2<&- # 关闭描述符 $2
 endsnippet
 
 
@@ -665,7 +684,7 @@ eval
 endsnippet
 
 snippet template_engine "使用eval命令实现模板引擎,模板文件中出现特殊字符使用'\'转义比如 \->\\ `->`\` 双引号->\双引号"
-eval "echo \"$(cat ${1:模板引擎文件路径})\" > ${2:生成文件路径}"
+eval "echo \"$(cat "${1:模板引擎文件路径}")\" > \"${2:生成文件路径}\""
 $0
 endsnippet
 

@@ -129,14 +129,18 @@ function template_generate_dir() {
         # 将子目录添加到处理路径中
         while read template_src_path
         do
-            process_path_list[${#process_path_list[@]}]="${template_src_path}"
 
             local generate_target_path=''$(convert_real_path "${template_src_path/${template_path}/\.}" "$template_path" "$generate_path")''
+            if [[ -z $generate_target_path ]]; then
+                # 如果为忽略文件夹跳过创建, 并且其子目录也不处理
+                continue
+            fi
+            process_path_list[${#process_path_list[@]}]="${template_src_path}"
             generate_target_path=${generate_target_path/\./${generate_path}}
-            
             generate_path_before "$template_src_path" "$generate_target_path"
             mkdir -p "$generate_target_path"
             generate_path_after "$template_src_path" "$generate_target_path"
+
         done  < <(find "$process_path" -maxdepth 1 -mindepth 1 -type d)
 
         local template_src_path=""
@@ -151,6 +155,10 @@ function template_generate_dir() {
                 continue
             fi
             generate_target_path=''$(convert_real_path "$generate_target_path" "$template_path" "$generate_path")''
+            if [[ -z $generate_target_path ]]; then
+                # 如果为忽略文件直接跳过不处理
+                continue
+            fi
             # 还原 ${template_path} 路径
             generate_target_path=${generate_target_path/\./${generate_path}}
             generate_path_before "$template_src_path" "$generate_target_path"

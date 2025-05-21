@@ -1,13 +1,20 @@
 #!/bin/bash
 
-
+# 全局的变量可在config_init初始化
+# 忽略文件列表
+ignore_file_list=()
 
 # 模板默认方法, 初始化模板时候调用
-# 通常来说是如果需要影响到模板需要定义一些全局变量
+# 通常来说是如果需要影响到模板需要定义一些全局变量, 有些系统自带的全局变量的作用也只限与这个脚本的方法使用
+# 系统的可初始化的变量和作用查看这个脚本的全局变量和这个方法的注释
+# :template_path:$1: 模板路径
+# :generate_path:$2: 生成目录路径
 function config_init() {
     local template_path="$1"
     local generate_path="$2"
-    # var="测试变量值"
+
+    # 添加忽略文件列表
+    ignore_file_list[${#ignore_file_list[@]}]=""
 }
 
 # 模板默认方法, 将路径转换为真实路径
@@ -19,7 +26,11 @@ function convert_real_path() {
     local template_scr_path="$1"
     local template_path="$2"
     local generate_path="$3"
-    eval echo "$1"
+    eval 'local real_path="'$template_scr_path'"'
+    if [[ ! "${ignore_file_list[@]}" =~ "${template_scr_path}" ]] && [[ ! "${ignore_file_list[@]}" =~ "${real_path}" ]]; then
+        # 只有转换前后的路径不在忽略文件列表中才返回
+        echo "$real_path"
+    fi
 }
 
 # 生成文件/目录前做的事情

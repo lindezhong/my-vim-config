@@ -119,6 +119,9 @@ declare -A keywords_mapping=(
     ["&colon;"]=":"
     ["&sol;"]="/"
     ["&bsol;"]='\'
+    ["&grave;"]='`'
+    ["&dollar;"]='$'
+    ["&excl;"]=''
 )
 
 # 提示列表

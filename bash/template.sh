@@ -10,6 +10,8 @@ while [ -L $script_path ]; do
     script_path=${script_path##*->}
 done
 home_path=$(readlink -f $(dirname "$script_path"))
+# bash -x debug的时候需要打开这个注释, 在bash -x 的情况下home_path会获取到 '.' 路径
+home_path="/home/ldz/.vim/bash"
 
 # 默认的配置脚本
 default_config_shell_path="$home_path/template_config.sh"
@@ -106,6 +108,7 @@ function template_generate_dir() {
     source $config_shell_path
     config_init "$template_path" "$generate_path"
 
+
     local template_src_path="$template_path"
     local generate_target_path="$generate_path"
     if [ -f "$template_path" ]; then
@@ -164,6 +167,9 @@ function template_generate_dir() {
             generate_path_before "$template_src_path" "$generate_target_path"
             # eval "echo \"$(cat "$template_src_path")\" > \"$generate_file_path\""
             eval "local generate_file_content=\"$(cat "$template_src_path")\""
+            if [ ! $? -eq 0 ]; then
+                echo "模板生成异常 ${template_src_path} ==> ${generate_target_path}"
+            fi
             
             # 关键字转义
             if [[ "$generate_file_content" == *"&"* ]]; then

@@ -14,7 +14,7 @@ function config_init() {
     local generate_path="$2"
 
     # 添加忽略文件列表
-    ignore_file_list[${#ignore_file_list[@]}]=""
+    # ignore_file_list[${#ignore_file_list[@]}]=""
 }
 
 # 模板默认方法, 将路径转换为真实路径
@@ -27,10 +27,16 @@ function convert_real_path() {
     local template_path="$2"
     local generate_path="$3"
     eval 'local real_path="'$template_scr_path'"'
-    if [[ ! "${ignore_file_list[@]}" =~ "${template_scr_path}" ]] && [[ ! "${ignore_file_list[@]}" =~ "${real_path}" ]]; then
-        # 只有转换前后的路径不在忽略文件列表中才返回
-        echo "$real_path"
-    fi
+
+    local ignore_file
+    for ignore_file in "${ignore_file_list[@]}"; do
+        if [[ "$ignore_file" == "$template_scr_path" ]] || [[ "$ignore_file" == "$real_path" ]]; then
+            echo "忽略生成文件 $template_scr_path ==> $real_path" >&2
+            return 0
+        fi
+    done
+    echo "$real_path"
+    
 }
 
 # 生成文件/目录前做的事情

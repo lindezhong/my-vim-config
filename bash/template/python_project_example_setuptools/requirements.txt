@@ -1,0 +1,25 @@
+`
+# 项目依赖的第三方包,为数组用空格分割,默认不依赖
+local packages=${default_map["setuptools_init_packages"]}
+read -p "请输入第三方依赖包，使用空格分割: " packages
+# 对于第三方依赖包需要在默认的基础上添加 
+if [[ -z $packages ]]; then
+    packages="${default_map['setuptools_init_packages']}"
+else
+    packages="$packages ${default_map['setuptools_init_packages']}"
+fi
+# 间第三方依赖包转json "a b" -> ["a", "b"]
+local package_list=()
+if [[ ! -z $packages ]]; then
+    package_list=($packages)
+fi
+
+
+local i
+for(( i=0; i<${#package_list[@]}; i++)) do
+    local item=${package_list[i]}
+    # 将第三方依赖包追加到requirements.txt文件为后续install依赖作准备
+    # python3 -m pip install -r requirements.txt --index $pypi_index
+    echo $item
+done
+`

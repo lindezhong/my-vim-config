@@ -48,7 +48,25 @@ declare -A keywords_mapping=(
 # 帮助文档
 help() {
     echo '
+template.sh --help 
+template.sh list
 
+template : 通过模板生成一个目录 
+    template.sh template {模板路径} {生成目录路径} {配置脚本路径:} 
+    $2 : 模板路径
+    $3 : 生成目录路径
+    $4 : 配置脚本路径, 可不传, 不传取默认逻辑上的配置脚本
+    return : 生成目录, 这个目录中的内容是根据模板路径上的内容生成的 
+
+internal : 已有的内部提供的模板, 本质上只是转发template_generate_dir方法, 但无需配置脚本, 因为内部的模板的配置脚本应该由内部模板自身提供
+    template.sh internal {模板名} {生成目录路径}
+    $2 : 模板名, 拼接 ${internal_template_base_path} 生成模板路径 
+    $3 : 生成目录路径
+    return : 与template结果一致, 生成目录
+ 
+list : 获取内部提供出来的模板的模板名列表 
+    template.sh list
+    return : 内部模板名列表, 一行是一个模板 
 
     '
 }
@@ -200,8 +218,8 @@ function internal_template_generate_dir() {
     template_generate_dir "${internal_template_base_path}/${template_name}" "$generate_path"
 }
 
-# 获取内部模板名列表
-# :return:echo: 内部模板名列表, 用换行分割 
+# 获取内部提供出来的模板的模板名列表 
+# :return:echo: 内部模板名列表, 一行是一个模板 
 function internal_template_list() {
     
     local template_dir

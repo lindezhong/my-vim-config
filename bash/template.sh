@@ -106,54 +106,56 @@ function template_generate_dir() {
     source $config_shell_path
     config_init "$template_path" "$generate_path"
 
+    local template_src_path="$template_path"
+    local generate_target_path="$generate_path"
     if [ -f "$template_path" ]; then
         # 如果模板是一个文件路径直接生成对应的文件
-        generate_path_before "$template_path" "$template_path"
-        eval "echo \"$(cat "$template_path")\" > \"$generate_path\""
-        generate_path_after "$template_path" "$template_path"
+        generate_path_before "$template_src_path" "$generate_target_path"
+        eval "echo \"$(cat "$template_src_path")\" > \"$generate_target_path\""
+        generate_path_after "$template_src_path" "$generate_target_path"
         return 0
     fi
 
     #  开始生成内容
-    generate_path_before "$template_path" "$generate_path"
+    generate_path_before "$template_src_path" "$generate_target_path"
     mkdir -p $generate_path
-    generate_path_after "$template_path" "$generate_path"
+    generate_path_after "$template_src_path" "$generate_target_path"
     local process_path_list=("$template_path")
     while (( ${#process_path_list[@]} > 0 )); do
         local process_path=${process_path_list[${#process_path_list[@]}-1]}
         unset process_path_list[${#process_path_list[@]}-1]
         
-        local sub_dir=""
+        local template_src_path=""
         # 将子目录添加到处理路径中
-        while read sub_dir
+        while read template_src_path
         do
-            process_path_list[${#process_path_list[@]}]="${sub_dir}"
+            process_path_list[${#process_path_list[@]}]="${template_src_path}"
 
-            local generate_dir_path=''$(convert_real_path "${sub_dir/${template_path}/\.}" "$template_path" "$generate_path")''
-            generate_dir_path=${generate_dir_path/\./${generate_path}}
+            local generate_target_path=''$(convert_real_path "${template_src_path/${template_path}/\.}" "$template_path" "$generate_path")''
+            generate_target_path=${generate_target_path/\./${generate_path}}
             
-            generate_path_before "$sub_dir" "$generate_dir_path"
-            mkdir -p "$generate_dir_path"
-            generate_path_after "$sub_dir" "$generate_dir_path"
+            generate_path_before "$template_src_path" "$generate_target_path"
+            mkdir -p "$generate_target_path"
+            generate_path_after "$template_src_path" "$generate_target_path"
         done  < <(find "$process_path" -maxdepth 1 -mindepth 1 -type d)
 
-        local sub_file=""
+        local template_src_path=""
         # 处理文件, 自定义描述符3 , 防止在eval中使用到read导致描述符被占用
         exec 3< <(find "$process_path" -maxdepth 1 -mindepth 1 -type f)
-        while read -u3 sub_file
+        while read -u3 template_src_path
         do
             # 将 ${template_path} -> . 这样在转换路径的时候会跟方便
-            local generate_file_path=${sub_file/${template_path}/.}
-            if [[ "$generate_file_path" == "$ignore_generate_config_path" ]]; then
+            local generate_target_path=${template_src_path/${template_path}/.}
+            if [[ "$generate_target_path" == "$ignore_generate_config_path" ]]; then
                 # 如果为忽略文件直接跳过不处理
                 continue
             fi
-            generate_file_path=''$(convert_real_path "$generate_file_path" "$template_path" "$generate_path")''
+            generate_target_path=''$(convert_real_path "$generate_target_path" "$template_path" "$generate_path")''
             # 还原 ${template_path} 路径
-            generate_file_path=${generate_file_path/\./${generate_path}}
-            generate_path_before "$sub_file" "$generate_file_path"
-            # eval "echo \"$(cat "$sub_file")\" > \"$generate_file_path\""
-            eval "local generate_file_content=\"$(cat "$sub_file")\""
+            generate_target_path=${generate_target_path/\./${generate_path}}
+            generate_path_before "$template_src_path" "$generate_target_path"
+            # eval "echo \"$(cat "$template_src_path")\" > \"$generate_file_path\""
+            eval "local generate_file_content=\"$(cat "$template_src_path")\""
             
             # 关键字转义
             if [[ "$generate_file_content" == *"&"* ]]; then
@@ -165,10 +167,10 @@ function template_generate_dir() {
                 done
             fi
         
-            echo "$generate_file_content" > "$generate_file_path"
+            echo "$generate_file_content" > "$generate_target_path"
             # 复制原始文件的权限到生成路径
-            chmod "--reference=$sub_file" "$generate_file_path"
-            generate_path_after "$sub_file" "$generate_file_path"
+            chmod "--reference=$template_src_path" "$generate_target_path"
+            generate_path_after "$template_src_path" "$generate_target_path"
         done
         exec 3<&-
     done

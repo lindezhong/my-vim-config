@@ -97,11 +97,14 @@ function template_generate_dir() {
         ignore_generate_config_path=${config_shell_path/${template_path}/.}
     fi
 
+    # 定义一些在脚本中可用的变量
+    local project_name=''$(basename "$generate_path")''
+
     #  加载 config_shell 脚本, 执行初始化脚本
     #  先加载默认脚本让方法都存在, 再加载其它定义的脚本覆盖默认脚本
     source $default_config_shell_path
     source $config_shell_path
-    config_init
+    config_init "$template_path" "$generate_path"
 
     if [ -f "$template_path" ]; then
         # 如果模板是一个文件路径直接生成对应的文件
@@ -111,7 +114,7 @@ function template_generate_dir() {
         return 0
     fi
 
-    # 2. 开始生成目录
+    #  开始生成内容
     generate_path_before "$template_path" "$generate_path"
     mkdir -p $generate_path
     generate_path_after "$template_path" "$generate_path"
@@ -125,7 +128,10 @@ function template_generate_dir() {
         while read sub_dir
         do
             process_path_list[${#process_path_list[@]}]="${sub_dir}"
-            local generate_dir_path=${sub_dir/${template_path}/${generate_path}}
+
+            local generate_dir_path=''$(convert_real_path "${sub_dir/${template_path}/\.}" "$template_path" "$generate_path")''
+            generate_dir_path=${generate_dir_path/\./${generate_path}}
+            
             generate_path_before "$sub_dir" "$generate_dir_path"
             mkdir -p "$generate_dir_path"
             generate_path_after "$sub_dir" "$generate_dir_path"
@@ -137,15 +143,14 @@ function template_generate_dir() {
         while read -u3 sub_file
         do
             # 将 ${template_path} -> . 这样在转换路径的时候会跟方便
-            sub_file=${sub_file/${template_path}/.}
-            if [[ "$sub_file" == "$ignore_generate_config_path" ]]; then
+            local generate_file_path=${sub_file/${template_path}/.}
+            if [[ "$generate_file_path" == "$ignore_generate_config_path" ]]; then
                 # 如果为忽略文件直接跳过不处理
                 continue
             fi
-            sub_file=''$(convert_real_path "$sub_file")''
+            generate_file_path=''$(convert_real_path "$generate_file_path" "$template_path" "$generate_path")''
             # 还原 ${template_path} 路径
-            local generate_file_path=${sub_file/\./${generate_path}}
-            sub_file=${sub_file/\./${template_path}}
+            generate_file_path=${generate_file_path/\./${generate_path}}
             generate_path_before "$sub_file" "$generate_file_path"
             # eval "echo \"$(cat "$sub_file")\" > \"$generate_file_path\""
             eval "local generate_file_content=\"$(cat "$sub_file")\""

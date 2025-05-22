@@ -14,15 +14,15 @@ function config_init() {
     local generate_path="$2"
 
     # 添加忽略文件列表
-    # ignore_file_list[${#ignore_file_list[@]}]=""
+    # ignore_file_list[${#ignore_file_list[@]}]=''
 }
 
-# 模板默认方法, 将路径转换为真实路径
+# 内置的模板方法, 将路径转换为真实路径 , 这个方法是给覆盖的配置脚本调用的
 # :template_scr_path:$1: 待转换的路径, 会将${template_path}替换成'.'以方便做处理, 如果需要原始的路径需要替换回去
 # :template_path:$2: 将要生成的文件路径, 可能会传入文件或目录
 # :generate_path:$3: 将要生成的文件路径, 可能会传入文件或目录
 # :returns:echo: 转换后的路径,无返回则表示忽略改路径
-function convert_real_path() {
+function internal_convert_real_path() {
     local template_scr_path="$1"
     local template_path="$2"
     local generate_path="$3"
@@ -37,6 +37,20 @@ function convert_real_path() {
     done
     echo "$real_path"
     
+}
+
+# 模板默认方法, 将路径转换为真实路径
+# 默认方法直接转发到 internal_convert_real_path 实现
+# :template_scr_path:$1: 待转换的路径, 会将${template_path}替换成'.'以方便做处理, 如果需要原始的路径需要替换回去
+# :template_path:$2: 将要生成的文件路径, 可能会传入文件或目录
+# :generate_path:$3: 将要生成的文件路径, 可能会传入文件或目录
+# :returns:echo: 转换后的路径,无返回则表示忽略改路径
+function convert_real_path() {
+    local template_scr_path="$1"
+    local template_path="$2"
+    local generate_path="$3"
+    internal_convert_real_path "$@"
+
 }
 
 # 生成文件/目录前做的事情

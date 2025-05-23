@@ -1,8 +1,16 @@
 #!/bin/bash
 
 # 全局的变量可在config_init初始化
-# 忽略文件列表
-ignore_file_list=()
+
+# 忽略路径列表, 可以匹配, ${template_scr_path} 或 ${generate_target_path}
+# 如果匹配成功的路径则不做任何事情
+# 添加格式为 . 开头 . 开头可以表示 ${template_path} 或 ${generate_path}
+ignore_path_list=()
+
+# 只复制路径列表, 可以匹配, ${template_scr_path} 或 ${generate_target_path}
+# 如果匹配成功的路径则只是复制
+# 添加格式为 . 开头 . 开头可以表示 ${template_path} 或 ${generate_path}
+only_copy_path_list=()
 
 # 模板默认方法, 初始化模板时候调用
 # 通常来说是如果需要影响到模板需要定义一些全局变量, 有些系统自带的全局变量的作用也只限与这个脚本的方法使用
@@ -13,25 +21,42 @@ function config_init() {
     local template_path="$1"
     local generate_path="$2"
 
-    # 添加忽略文件列表
-    # ignore_file_list[${#ignore_file_list[@]}]=''
+    # 添加忽略路径列表
+    # ignore_path_list[${#ignore_path_list[@]}]=''
+    
+    # 添加只复制路径列表
+    # only_copy_path_list[${#only_copy_path_list[@]}]=''
+
 }
 
 # 内置的模板方法, 将路径转换为真实路径 , 这个方法是给覆盖的配置脚本调用的
+# 如果遇到忽略文件返回空, 如果是只复制文件需要手动复制并且返回空
 # :template_scr_path:$1: 待转换的路径, 会将${template_path}替换成'.'以方便做处理, 如果需要原始的路径需要替换回去
 # :template_path:$2: 将要生成的文件路径, 可能会传入文件或目录
 # :generate_path:$3: 将要生成的文件路径, 可能会传入文件或目录
-# :returns:echo: 转换后的路径,无返回则表示忽略改路径
+# :returns:echo: 转换后的路径,无返回则表示忽略改路径, 需要调用方会将 . 转换为generate_path
 function internal_convert_real_path() {
     local template_scr_path="$1"
     local template_path="$2"
     local generate_path="$3"
     eval 'local real_path="'$template_scr_path'"'
 
-    local ignore_file
-    for ignore_file in "${ignore_file_list[@]}"; do
-        if [[ "$ignore_file" == "$template_scr_path" ]] || [[ "$ignore_file" == "$real_path" ]]; then
+    local ignore_path
+    for ignore_path in "${ignore_path_list[@]}"; do
+        if [[ "$ignore_path" == "$template_scr_path" ]] || [[ "$ignore_file" == "$real_path" ]]; then
             echo "忽略生成文件 $template_scr_path ==> $real_path" >&2
+            return 0
+        fi
+    done
+
+    local only_copy_path
+    for only_copy_path in "${only_copy_path_list[@]}"; do
+        if [[ "$only_copy_path" == "$template_scr_path" ]] || [[ "$only_copy_path" == "$real_path" ]]; then
+            # 将 . 还原为原始路径
+            echo "只复制文件 $template_scr_path ==> $real_path" >&2
+            template_scr_path=${template_scr_path/\./${template_path}}
+            real_path=${real_path/\./${generate_path}}
+            cp -r "$template_scr_path" "$real_path"
             return 0
         fi
     done

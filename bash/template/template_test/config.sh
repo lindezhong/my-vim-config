@@ -11,8 +11,10 @@ function config_init() {
     local template_path="$1"
     local generate_path="$2"
     var="测试变量值"
-    ignore_file_list[${#ignore_file_list[@]}]='./ignore_file.md'
-    ignore_file_list[${#ignore_file_list[@]}]='./${project_name}/ignore_dir'
+    ignore_path_list[${#ignore_path_list[@]}]='./ignore_file.md'
+    ignore_path_list[${#ignore_path_list[@]}]='./${project_name}/ignore_dir'
+    only_copy_path_list[${#only_copy_path_list[@]}]='./only_copy_dir'
+    only_copy_path_list[${#only_copy_path_list[@]}]='./only_copy.md'
 }
 
 # 模板默认方法, 将路径转换为真实路径

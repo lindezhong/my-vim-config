@@ -63,12 +63,12 @@ function config_init() {
     read -p "是否为C和Python混合项目, y:是 n:否 , 默认[${default_map["setuptools_init_c_project"]}] : " is_c_project
     test -z "$is_c_project" && is_c_project="${default_map["setuptools_init_c_project"]}"
     # 忽略的文件列表
-    ignore_file_list=()
+    ignore_path_list=()
     local model=${default_map['setuptools_init_setup_model']}
     if [[ "$model" == "static" ]]; then
-        ignore_file_list[${#ignore_file_list[@]}]="./setup.py"
+        ignore_path_list[${#ignore_path_list[@]}]="./setup.py"
     elif [[ "$model" == "dynamic" ]]; then
-        ignore_file_list[${#ignore_file_list[@]}]="./setup.cfg"
+        ignore_path_list[${#ignore_path_list[@]}]="./setup.cfg"
     else
         echo "非法的模式 : $model , 需要static或dynamic"
         exit -1
@@ -77,7 +77,7 @@ function config_init() {
      # 如果为C和Python混合项目则创建相关文件
     if [[ $is_c_project != "y" ]]; then
         # 忽略api下所有目录
-        ignore_file_list[${#ignore_file_list[@]}]='./${project_name}/api'
+        ignore_path_list[${#ignore_path_list[@]}]='./${project_name}/api'
     fi
 
 

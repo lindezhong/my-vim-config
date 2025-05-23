@@ -51,28 +51,18 @@ help() {
 这个是一个通过 shell 命令 : eval "echo \"$(cat "模板引擎文件路径")\" > \"生成文件路径\"" 根据模板生成文件的脚本
 支持以下几个特点
     1. 可用通过 ``/$() 来执行shell命令, 使用echo最终替换被``/$()包裹的行
-    2. 由于实现逻辑会导致部分特殊字符出现在模板文件的时候执行错误, 所以支持通过转义实现特殊字符的替换, 以下是替换规则
-
-    &nbsp; => " "(空格)
-        &amp; => &
-        &apos; => '\''
-        &quot; => "
-        &vert; => |
-        &lt; => <
-        &gt; => >
-        &equals; => =
-        &semi; => ;
-        &lpar; => (
-        &rpar; => )
-        &colon; => =>
-        &sol; => /
-        &bsol; => \
-        &grave; => `
-        &dollar; => $
-        &excl; => !
+    2. 由于实现逻辑会导致部分特殊字符出现在模板文件的时候执行错误, 所以支持通过转义实现特殊字符的替换, 以下是替换规则'
+    local key=""
+    local value=""
+    local key_conversion_rule=""
+    for key in ${!keywords_mapping[@]}; do
+        value=${keywords_mapping[$key]}
+        echo "      $key => $value"
+    done
 
 
 
+echo '
 template : 通过模板生成一个目录 
     template.sh template {模板路径} {生成目录路径} {配置脚本路径:} 
     $2 : 模板路径

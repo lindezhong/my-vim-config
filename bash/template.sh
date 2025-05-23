@@ -97,9 +97,14 @@ function template_generate_dir() {
     # 这个变量就是获取该路径的
     local ignore_generate_config_path=""
 
-    if [[ -z $template_path ]] || ( [ ! -d $template_path ] && [ ! -f $template_path ] ); then
+    if [[ -z $template_path ]]; then
         echo "需要指定模板路径, 请查看帮助文档"
         help
+        return 1
+    fi
+    
+    if [ ! -d $template_path ] && [ ! -f $template_path ]; then
+        echo "模板路径[$template_path]不存在"
         return 1
     fi
 

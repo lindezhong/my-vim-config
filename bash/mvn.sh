@@ -26,13 +26,6 @@ default_map['remote_debug_transport']='dt_socket'
 # 开放远程debug端口
 default_map['remote_debug_port']='5005'
 
-
-#####################################################################################################################
-# maven初始化默认值
-#####################################################################################################################
-# maven默认group_id
-default_map['init_maven_group_id']='com.ldz.demo'
-
 # 初始默认值,如果有default_map改变需要重新调用
 # :return:default_map: 初始化默认值
 function default_map_init() {
@@ -73,12 +66,11 @@ find_main : 扫描本目录下所有的main java
     $3: 路径中要包含的字符,默认不过滤,一般为类名, 如果过滤字符包含模块名会被去除比如 module_name/com.class_name -> com.class_name
     return 本目录下所有的main 模块名/java全路径(module_name/package.class_name)
 
-init : 初始化maven项目
-
-    init jar : 初始化普通maven项目, 打包为jar
-        mvn.sh init jar
-        在运行过程中需要手动输入 groupId 和 artifactId
-        return : 在本地会创建一个 artifactId 的maven项目
+init : 根据maven模板初始化maven项目, 本质上是调用 template.sh internal 初始化, 但只能初始化以 mvn_ 开头的内部模板
+    mvn.sh init {模板类型}
+    $2 : maven模板类型, 会拼接 mvn_$2 最终转发到template.sh internal mvn_$2
+    在运行过程中需要手动输入 groupId 和 artifactId
+    return : 在本地会创建一个 artifactId 的maven项目
     '
 }
 
@@ -307,36 +299,16 @@ function run() {
  
 }
 
-# 初始化普通maven项目
-function init_maven_jar() {
-    # maven groupId
-    local groupId
-    # maven artifactId
-    local artifactId
-
-    read -p "请输入groupId,如果输入空则默认使用 [${default_map['init_maven_group_id']}]  :" groupId
-    test -z "$groupId" && groupId="${default_map['init_maven_group_id']}"
-
-    read -p "请输入artifactId : " artifactId
-    while [ -z $artifactId ]; do
-        read -p "不允许输入空请重新输入, artifactId : " artifactId
-    done
-
-    # 初始化普通maven项目, 使用模板maven-archetype-quickstart
-    mvn archetype:generate -DgroupId=$groupId -DartifactId=$artifactId -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
-}
-
 # 初始化maven项目
 # :INIT_ACTION:$1: 需要初始化的maven项目类型, 现在只是支持jar
 function init_maven() {
     local INIT_ACTION=$1
     shift 1
-    case $INIT_ACTION in
-        'jar' )
-            # 初始化普通maven项目
-            init_maven_jar "$@"
-            ;;
-    esac
+    read -p "请输入artifactId : " artifact_id
+    while [ -z $artifact_id ]; do
+        read -p "不允许输入空请重新输入, artifactId : " artifact_id
+    done
+    template.sh internal mvn_${INIT_ACTION} "$artifact_id"
 }
 
 case $ACTION in

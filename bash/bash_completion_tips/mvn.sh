@@ -8,5 +8,5 @@ mvn.sh deploy "{cmd:mvn.sh find_main src/main}"
 mvn.sh run "{cmd:mvn.sh find_main src/main}"
 # 运行maven项目,只是编译不打包,开启远程debug,远程端口5005,阻塞启动
 mvn.sh debug "{cmd:mvn.sh find_main src/main}"
-# 初始化普通maven项目, 打包为jar
-mvn.sh init jar
+# 初始化模板项目, 读取以 mvn_ 开头的模板项目
+mvn.sh init "{cmd:template.sh list | grep ^mvn_ | sed 's/mvn_//g'}"

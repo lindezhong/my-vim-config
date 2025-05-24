@@ -65,7 +65,7 @@ function setuptools_env() {
 # :project_name:$1: 项目名
 function setuptools_init() {
     local project_name=$1
-    template.sh internal python_project_example_setuptools "$project_name"
+    template.sh internal python_setuptools "$project_name"
 }
 
 # 将本地python项目安装到site-packages

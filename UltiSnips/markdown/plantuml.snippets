@@ -11,6 +11,41 @@ $0
 @enduml
 \`\`\`
 endsnippet
+# ```plantuml
+# @startuml
+# allowmixing
+# title 图表混合测试
+# 
+# ' 类图(class-diagram)
+# class 类图 { }
+# ' 部署图(deployment-diagram)
+# agent 部署图agent
+# ' 实体关系图(ie-diagram)
+# Entity01 }|..|| Entity02
+# Entity03 }o..o| Entity04
+# Entity05 ||--o{ Entity06
+# Entity07 |o--|| Entity08
+# ' json
+# json XX {
+#     "k": "v"
+# }
+# ' object
+# object 对象1
+# object "第 2 个对象" as o2
+# 
+# @enduml
+# ```
+snippet plantUmlInitAllowmixing "初始化plant uml, 设置allowmixing允许混合图形,能让类图支持其它图表, 但只支持部分图表的混合, 支持类型: 类图(class),部署图(deployment),实体关系图(ie),json,object"
+\`\`\`plantuml
+@startuml
+allowmixing
+title ${1: 标题}
+
+$0
+@enduml
+\`\`\`
+endsnippet
+
 
 # #样式
 # ##连线#样式

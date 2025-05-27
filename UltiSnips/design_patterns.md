@@ -171,7 +171,7 @@ end note
 
 Client -up-> Context
 Client .right.> ConcreteStrategy
-Context -right--* Strategy : Context(上下文)这个类的executeStrategy()被调用\n会委托给Strategy.doOperation()来处理
+Context *-right-- Strategy : Context(上下文)这个类的executeStrategy()被调用\n会委托给Strategy.doOperation()来处理
 
 @enduml
 ```
@@ -5809,7 +5809,7 @@ if (如果可以访问)
     subject.request();
 end note
 
-Proxy -right--* RealSubject : subject
+Proxy *-right-- RealSubject : subject
 
 @enduml
 ```
@@ -7992,7 +7992,7 @@ note bottom of BMWModel : 宝马实现类
 
 CarBuilder -right-> CarModel
 Client --> Director
-Director --o CarBuilder
+Director o-- CarBuilder
 Director ..> CarModel
 
 @enduml
@@ -9709,8 +9709,8 @@ note "在该实现方法中， 备忘录类将被嵌套在原发器中。\n 这�
 
 
 Originator .right.> Memento
-Caretaker --o Originator
-Caretaker --o Memento
+Caretaker o-- Originator
+Caretaker o-- Memento
 
 @enduml
 ```

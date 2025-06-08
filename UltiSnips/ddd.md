@@ -1390,7 +1390,7 @@ rl --> ul : 把名称输入
 ```plantuml
 @startuml
 allowmixing
-title 职责层的划分
+title 职责层的常用两种划分方式
 
 rectangle 指责层1 [
     决策层

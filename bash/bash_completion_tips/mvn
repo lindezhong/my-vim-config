@@ -8,3 +8,17 @@ mvn dependency:tree
 mvn compile
 # 编译maven项目
 mvn compiler:compile
+# 运行spring boot项目
+mvn spring-boot:run
+# 根据pom.xml中的reporting生成站点内容,并且运行
+mvn site:run
+# 生成mvnw, 需要在项目根目录, 即有pom.xml的目录执行
+# mvnw为Maven Wrapper的缩写。 mvnw 可以指定当前项目使用某个maven版本而不使用全局安装的Maven
+# 使用生成mvnw同时会生成 .mvn/ 目录
+# 不指定-Dmaven使用最新的maven版本
+mvn wrapper:wrapper "{kv:('-Dmaven=' '{mvn-version}')}"
+mvn archetype:generate "{kv:('-Dfilter=' '{过滤字符需要&colon;结尾}')}"
+# 生成spring项目
+mvn archetype:generate -Dfilter=org.springframework.boot:
+# 生成mvan官方项目
+mvn archetype:generate -Dfilter=org.apache.maven.archetypes:

@@ -634,16 +634,23 @@ done
 $0
 endsnippet
 
-snippet readFile "读取文件内容, 每次读取一行"
-while read ${2:line}
+snippet readPipeline "从命令管道中读取内容, 每次读取一行, 临时修改IFS让行首空格可以显示, 为防止卡住设置超时时间为1 , 比如`echo -e 'aa\nbb' | shell.sh` 使得可以读取到两行, aa , bb 到line"
+while IFS= read -t 1 ${1:line}
+do
+    $0
+done
+endsnippet
+
+snippet readFile "读取文件内容, 每次读取一行, 临时修改IFS让行首空格可以显示"
+while IFS= read ${2:line}
 do
     $0
 done  < ${1:file_path}
 endsnippet
 
-snippet readFileFd "读取文件内容, 每次读取一行从文件描述符 FD 读取，而不是从标准输入(0)读取 , FD 需要大于等于3的数字, 默认的描述符如下, 0: 标准输入 , 1: 标准输出, 2: 标准错误"
+snippet readFileFd "读取文件内容, 临时修改IFS让行首空格可以显示, 每次读取一行从文件描述符 FD 读取，而不是从标准输入(0)读取 , FD 需要大于等于3的数字, 默认的描述符如下, 0: 标准输入 , 1: 标准输出, 2: 标准错误"
 exec ${2:fd}< ${1:file_path}
-while read -u$2 ${3:line}
+while IFS= read -u$2 ${3:line}
 do
     $0
 done
@@ -651,16 +658,16 @@ exec $2<&- # 关闭描述符 $2
 endsnippet
 
 
-snippet readCommand "读取命令执行结果, 每次读取一行, >() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
-while read ${2:line}
+snippet readCommand "读取命令执行结果, 临时修改IFS让行首空格可以显示, 每次读取一行, >() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
+while IFS= read ${2:line}
 do
     $0
 done  < <(${1:command})
 endsnippet
 
-snippet readCommandFd "读取命令执行结果, 每次读取一行,从文件描述符 FD 读取，而不是从标准输入(0)读取 , FD 需要大于等于3的数字, 默认的描述符如下, 0: 标准输入 , 1: 标准输出, 2: 标准错误 ， >() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
+snippet readCommandFd "读取命令执行结果, 临时修改IFS让行首空格可以显示, 每次读取一行,从文件描述符 FD 读取，而不是从标准输入(0)读取 , FD 需要大于等于3的数字, 默认的描述符如下, 0: 标准输入 , 1: 标准输出, 2: 标准错误 ， >() 或 <() 是一种称为'过程替换'（process substitution）的语法。这种语法允许你把一个命令的输出作为一个文件名从而传递给另一个命令，从而实现一些复杂的 I/O 操作"
 exec ${2:fd}< <(${1:command})
-while read -u$2 ${3:line}
+while IFS= read -u$2 ${3:line}
 do
     $0
 done

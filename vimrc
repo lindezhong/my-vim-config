@@ -790,6 +790,7 @@ let g:coc_global_extensions = [
             \ 'coc-webview',
             \ 'coc-translator',
             \ 'coc-json',
+            \ 'coc-yaml',
             \ 'coc-ultisnips',
             \ 'coc-java',
             \ 'coc-java-debug',

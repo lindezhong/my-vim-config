@@ -358,9 +358,11 @@ let g:MkSessionDirectory = expand('~') .  "/.vim-session"
 " 初始化g:MkSessionFile(当前需要保存的mksession路径)
 function! InitDirectoryMkSession()
 
-    if  expand('%:p') != "" || !isdirectory(g:MkSessionDirectory)
+    if  expand('%:p') != "" || expand('%:p:h') =~ '/sql$' || !isdirectory(g:MkSessionDirectory)
         " expand('%:p')为当前文件的完整路径
         " 如果为 '' 则说明是一个目录, 不为空是一个文件
+        " expand('%:p:h')为当前文件夹的完整路径
+        " 排查掉sql目录,这样让插件vim-dadbod的数据不保存
         " 如果vim打开的是一个文件直接结束, 这个方法只是保存文件夹得 mksession
         " 如果数据存储目录不存在则也不做任何事情
         return
@@ -1309,6 +1311,8 @@ autocmd VimEnter * silent TableModeEnable
 
 " 关闭 `:w`(写入文件) 的时候执行整个sql
 let  g:db_ui_execute_on_save=0
+" 抽屉(左侧边栏)打开时的宽度为30%
+let g:db_ui_winwidth = 30
 " 自动执行表格助手的查询
 let g:db_ui_auto_execute_table_helpers=1
 " 定义表格助手

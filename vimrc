@@ -54,8 +54,8 @@ Plug 'dhruvasagar/vim-table-mode'
 " 1. 使用 `:DBUI` 打开sql客户端
 " 2. 使用 `\W` 报错sql文件
 " 3. 使用 `\E` 编辑绑定参数, 绑定参数例子 : select * from table where id = :id;
-" 4. 使用 `:w` 执行当前文件的所有sql
-" 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 执行选中sql
+" 4. 使用 `\S` 执行当前文件的所有sql, 或选中的SQL
+" 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
 " 6. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
 " 7. 使用 `DBUIAddConnection` 添加执行数据库连接, URL格式详见介绍
 Plug 'tpope/vim-dadbod'
@@ -1280,8 +1280,8 @@ autocmd VimEnter * silent TableModeEnable
 " 1. 使用 `:DBUI` 打开sql客户端
 " 2. 使用 `\W` 报错sql文件
 " 3. 使用 `\E` 编辑绑定参数, 绑定参数例子 : select * from table where id = :id;
-" 4. 使用 `:w` 执行当前文件的所有sql
-" 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 执行选中sql
+" 4. 使用 `\S` 执行当前文件的所有sql, 或选中的SQL
+" 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
 " 6. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
 " 7. 使用 `DBUIAddConnection` 添加执行数据库连接, URL格式如下
 "   7.1 MySQL : mysql://username:password@host:port/database_name
@@ -1306,3 +1306,17 @@ autocmd VimEnter * silent TableModeEnable
 "   R - 重绘 ( <Plug>(DBUI_Redraw))
 "   A——添加连接（<Plug>(DBUI_AddConnection)）
 "   H——切换数据库详细信息（<Plug>(DBUI_ToggleDetails)）
+
+" 关闭 `:w`(写入文件) 的时候执行整个sql
+let  g:db_ui_execute_on_save=0
+" 自动执行表格助手的查询
+let g:db_ui_auto_execute_table_helpers=1
+" 定义表格助手
+let g:db_ui_table_helpers = {
+\   'mysql': {
+\     'Columns': 'SELECT COLUMN_NAME AS "Field", COLUMN_TYPE AS "Type", COLUMN_COMMENT AS "Comment", IS_NULLABLE AS "NULL", COLUMN_DEFAULT AS "Default", COLUMN_KEY AS "Key", EXTRA AS "Extra" FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = "{table}";',
+\     'Schema': 'SHOW CREATE TABLE `{table}`;'
+\   }
+\ }
+
+

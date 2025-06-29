@@ -353,16 +353,20 @@ set sessionoptions-=blank
 set sessionoptions+=localoptions
 set sessionoptions-=options
 
+" 去除掉db_ui路径, 在使用插件 vim-dadbod 的时候不保存临时执行文件
+let g:ExcludeMkSessionDirectoryList = [
+\ expand('~') .  "/db_ui"
+\ expand('~') .  "/.local/share/db_ui"
+\ ]
 let g:MkSessionDirectory = expand('~') .  "/.vim-session"
 
 " 初始化g:MkSessionFile(当前需要保存的mksession路径)
 function! InitDirectoryMkSession()
 
-    if  expand('%:p') != "" || expand('%:p:h') =~ '/sql$' || !isdirectory(g:MkSessionDirectory)
+    if  expand('%:p') != "" || index(g:ExcludeMkSessionDirectoryList,expand('%:p:h')) != -1 || !isdirectory(g:MkSessionDirectory)
         " expand('%:p')为当前文件的完整路径
         " 如果为 '' 则说明是一个目录, 不为空是一个文件
-        " expand('%:p:h')为当前文件夹的完整路径
-        " 排查掉sql目录,这样让插件vim-dadbod的数据不保存
+        " expand('%:p:h')为当前文件夹的完整路径, 如果在排除目录中目则直接结束
         " 如果vim打开的是一个文件直接结束, 这个方法只是保存文件夹得 mksession
         " 如果数据存储目录不存在则也不做任何事情
         return

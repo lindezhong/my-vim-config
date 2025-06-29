@@ -355,8 +355,8 @@ set sessionoptions-=options
 
 " 去除掉db_ui路径, 在使用插件 vim-dadbod 的时候不保存临时执行文件
 let g:ExcludeMkSessionDirectoryList = [
-\ expand('~') .  "/db_ui"
-\ expand('~') .  "/.local/share/db_ui"
+\ expand('~') .  "/db_ui",
+\ expand('~') .  "/.local/share/db_ui",
 \ ]
 let g:MkSessionDirectory = expand('~') .  "/.vim-session"
 

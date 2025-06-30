@@ -57,7 +57,7 @@ Plug 'dhruvasagar/vim-table-mode'
 " 4. 使用 `\S` 执行当前文件的所有sql, 或选中的SQL
 " 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
 " 6. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
-" 7. 使用 `DBUIAddConnection` 添加执行数据库连接, URL格式详见介绍
+" 7. 使用 `:DBUIAddConnection` 添加执行数据库连接, 这个本质是调用插件vim-dadbod的`:DB`能力, url格式见`:h dadbod` 
 Plug 'tpope/vim-dadbod'
 Plug 'kristijanhusak/vim-dadbod-ui'
 " Plug 'kristijanhusak/vim-dadbod-completion' " Optional
@@ -1289,7 +1289,7 @@ autocmd VimEnter * silent TableModeEnable
 " 4. 使用 `\S` 执行当前文件的所有sql, 或选中的SQL
 " 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
 " 6. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
-" 7. 使用 `DBUIAddConnection` 添加执行数据库连接, URL格式如下
+" 7. 使用 `:DBUIAddConnection` 添加执行数据库连接, 这个本质是调用插件vim-dadbod的`:DB`能力, url格式见`:h dadbod` 
 "   7.1 MySQL : mysql://username:password@host:port/database_name
 "   7.2 PostgreSQL: postgres://username:password@host:port/database_name
 "   7.3 SQLite: sqlite:///path/to/database_file.db

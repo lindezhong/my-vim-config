@@ -1317,8 +1317,12 @@ autocmd VimEnter * silent TableModeEnable
 let  g:db_ui_execute_on_save=0
 " 抽屉(左侧边栏)打开时的宽度为30%
 let g:db_ui_winwidth = 30
+" 消息同的宽度, 要比抽屉小一点, 让通知在抽屉内
+let g:db_ui_notification_width = 25
 " 自动执行表格助手的查询
 let g:db_ui_auto_execute_table_helpers=1
+" 关闭info级别通知
+let g:db_ui_disable_info_notifications = 1
 " 定义表格助手
 let g:db_ui_table_helpers = {
 \   'mysql': {

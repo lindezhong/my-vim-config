@@ -1,0 +1,60 @@
+snippet createSqliteTable "创表语句基础"
+CREATE TABLE ${1:table} 
+-- ${2:comment}
+(
+  id INTEGER PRIMARY KEY AUTOINCREMENT, -- 主键
+  gmt_create TEXT DEFAULT (datetime('now', 'localtime')) NOT NULL,  -- 创建时间
+  gmt_modified TEXT DEFAULT (datetime('now', 'localtime')) NOT NULL, -- 更新时间
+  is_deleted INTEGER DEFAULT '0', -- 逻辑删除 0:未删除 1:已删除
+  $0
+);
+endsnippet
+
+snippet columnSqliteNull "null类型NULL, 一个没有值的字段"
+${1:column_name} NULL -- ${2:comment}$0
+endsnippet
+
+snippet columnSqliteInteger "int类型INTEGER, 用于存储整数，存储大小可以在 1 到 8 字节之间，根据值的大小决定。"
+${1:column_name} INTEGER NOT NULL DEFAULT '${2:0}' -- ${3:comment}$0
+endsnippet
+
+snippet columnSqliteReal "float类型REAL, 用于存储浮点数（实数），通常为 8 字节（双精度浮点数）。"
+${1:column_name} REAL NOT NULL DEFAULT '${2:0}' -- ${3:comment}$0
+endsnippet
+
+snippet columnSqliteText "str类型TEXT, 用于存储文本字符串，可以是任意大小的字符串，实际上是以 UTF-8 或 UTF-16 编码存储。"
+${1:column_name} TEXT NOT NULL DEFAULT '${2:}' -- ${3:comment}$0
+endsnippet
+
+snippet columnSqliteBlob "byte类型BLOB, 用于存储二进制数据（Binary Large Object），大小可以是任意的。"
+${1:column_name} TEXT NOT NULL DEFAULT '${2:}' -- ${3:comment}$0
+endsnippet
+
+snippet columnSqliteDatetime "SQLite 没有一个单独的用于存储日期和/或时间的存储类，但 SQLite 能够把日期和时间存储为 TEXT(格式为YYYY-MM-DD HH:MM:SS.SSS 的日期)、REAL(从公元前 4714 年 11 月 24 日格林尼治时间的正午开始算起的天数。) 或 INTEGER(从 1970-01-01 00:00:00 UTC 算起的秒数。) 值"
+columnSqliteText
+endsnippet
+
+snippet columnSqliteAddAfter "添加一个字段,在另一个字段后, 例子 ALTER TABLE table ADD column TEXT COMMENT 'comment' AFTER last_column;"
+ALTER TABLE ${1:table}
+ADD ${3:column} AFTER ${2:last_column};
+endsnippet
+
+snippet columnSqliteAdd "添加一个字段,在表字段最后添加, 例子 ALTER TABLE table ADD column TEXT COMMENT 'comment';"
+ALTER TABLE ${1:table}
+ADD ${2:column} ;
+endsnippet
+
+snippet columnSqliteAlter "修改一个字段,例子ALTER TABLE table MODIFY column TEXT COMMENT 'comment';"
+ALTER TABLE ${1:table}
+MODIFY ${2:column} ;
+endsnippet
+
+snippet indexSqliteAdd "添加普通索引, 普通索引可以包含重复值，增加基于某列的查询性能"
+CREATE INDEX idx_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+endsnippet
+
+snippet indexSqliteAddUnique "添加唯一索引, 唯一索引与普通索引类似，但不允许列中存在重复值"
+CREATE UNIQUE INDEX uniq_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+endsnippet
+
+

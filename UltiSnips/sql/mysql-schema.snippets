@@ -1,0 +1,176 @@
+snippet createMysqlTable "创表语句基础"
+CREATE TABLE \`${1:table}\` (
+  \`id\` BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT COMMENT '主键',
+  \`gmt_create\` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  \`gmt_modified\` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  \`is_deleted\` TINYINT DEFAULT '0' COMMENT '逻辑删除 0:未删除 1:已删除',
+  ${0}
+) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4 COMMENT='${2:comment}';
+endsnippet
+
+
+snippet columnMysqlTinyint "int类型TINYINT 占用 1 字节，范围 -128 到 127（有符号）或 0 到 255（无符号）"
+\`${1:column_name}\` TINYINT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlSmallint "int类型SMALLINT 占用 2 字节，范围 -32,768 到 32,767（有符号）或 0 到 65,535（无符号）"
+\`${1:column_name}\` SMALLINT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlMediumint "int类型MEDIUMINT 占用 3 字节，范围 -8,388,608 到 8,388,607（有符号）或 0 到 16,777,215（无符号）。"
+\`${1:column_name}\` MEDIUMINT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlInt "int类型INT 占用 4 字节，范围 -2,147,483,648 到 2,147,483,647（有符号）或 0 到 4,294,967,295（无符号）。"
+\`${1:column_name}\` INT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlBigint "int类型BIGINT 占用 8 字节，范围 -9,223,372,036,854,775,808 到 9,223,372,036,854,775,807（有符号）或 0 到 18,446,744,073,709,551,615（无符号）。"
+\`${1:column_name}\` INT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+
+snippet columnMysqlFloat "float类型FLOAT 占用 4 字节，范围  -3,402,823,466 到 3,402,823,466 尾数只能有7位"
+\`${1:column_name}\` FLOAT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlDouble "float类型DOUBLE 占用 4 字节，范围  -3,402,823,466 到 3,402,823,466 尾数只能有15位"
+\`${1:column_name}\` DOUBLE NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlDecimal "float类型DECIMAL(M,D), DECIMAL(M, D)，其中 M 是总位数，D 是小数位数。最大可占用 65 字节 D：最大为65 。"
+\`${1:column_name}\` DECIMAL(${3:10}, ${4:2}) NOT NULL DEFAULT '${5:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlChar "str类型CHAR(M), 定长字符串，最大长度为 255 字符, 即M最大为255"
+\`${1:column_name}\` CHAR(${3:64}) NOT NULL DEFAULT '${4:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlVarchar "str类型VARCHAR(M), 可变长度字符串，最大长度为 65,535 字符（受行大小限制）。M > 1024 建议使用文本类型"
+\`${1:column_name}\` VARCHAR(${3:64}) NOT NULL DEFAULT '${4:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlTinytext "str类型TINYTEXT, 最大长度为 255 字符"
+\`${1:column_name}\` TINYTEXT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlText "str类型TEXT, 最大长度为 265,535 字符"
+\`${1:column_name}\` TEXT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlMediumtext "str类型MEDIUMTEXT, 最大长度为 16,777,215 字符"
+\`${1:column_name}\` MEDIUMTEXT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlLongtext "str类型LONGTEXT, 最大长度为 4,294,967,295 字符"
+\`${1:column_name}\` LONGTEXT NOT NULL DEFAULT '${3:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlBinary "byte类型BINARY(M), 定长二进制字符串"
+\`${1:column_name}\` BINARY(${3:64}) NOT NULL DEFAULT '${4:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlVarbinary "byte类型VARBINARY(M), 可变长度二进制字符串。"
+\`${1:column_name}\` VARBINARY(${3:64}) NOT NULL DEFAULT '${4:0}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlTinyblob "byte类型TINYBLOB, 最大长度为 255 字节"
+\`${1:column_name}\` TINYBLOB NULL COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlBlob "byte类型BLOB,  最大长度 65,535 字节的二进制对象。"
+\`${1:column_name}\` BLOB NULL COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlMediumblob "byte类型MEDIUMBLOB, 最大长度 16,777,215 字节的二进制对象。"
+\`${1:column_name}\` MEDIUMBLOB NULL COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlLongblob "byte类型LONGBLOB, 最大长度 4,294,967,295 字节的二进制对象。"
+\`${1:column_name}\` LONGBLOB NULL COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlDate "date类型DATE, 日期，格式 YYYY-MM-DD。"
+\`${1:column_name}\` DATE NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlDateUpdate "date类型DATE,update时候自动更新, 日期，格式 YYYY-MM-DD。"
+\`${1:column_name}\` DATE NOT NULL CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlYear "date类型YEAR(4),  年，格式 YYYY"
+\`${1:column_name}\` YEAR(4) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlYearUpdate "date类型YEAR(4),update时候自动更新, 年，格式 YYYY"
+\`${1:column_name}\` YEAR(4) NOT NULL CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlTime "date类型TIME, 时间，格式 HH:MM:SS。"
+\`${1:column_name}\` TIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlTimeUpdate "date类型TIME,update时候自动更新, 时间，格式 HH:MM:SS。"
+\`${1:column_name}\` TIME NOT NULL CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlDatetime "date类型DATETIME, 日期和时间，格式 YYYY-MM-DD HH:MM:SS。"
+\`${1:column_name}\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlDatetimeUpdate "date类型DATETIME,update时候自动更新, 日期和时间，格式 YYYY-MM-DD HH:MM:SS。"
+\`${1:column_name}\` DATETIME NOT NULL CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlTimestamp "date类型TIMESTAMP, 时间戳，标准格式"
+\`${1:column_name}\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlTimestampUpdate "date类型TIMESTAMP,update时候自动更新, 时间戳，标准格式"
+\`${1:column_name}\` TIMESTAMP NOT NULL CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlEnum "enum类型ENUM('enum1', 'enum2'), 字符串对象，定义一系列的可选值"
+\`${1:column_name}\` ENUM(${3:enums}) NOT NULL DEFAULT '${4:enum}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlSet "set类型SET('value1', 'value2'), 定义一系列的可选值，可以允许一个或多个值。"
+\`${1:column_name}\` SET(${3:value}) NOT NULL DEFAULT '${4:value1,value2}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlJson "json类型JSON,可以使用 column->'$.key' 查询json里面的字段 "
+\`${1:column_name}\` JSON NOT NULL DEFAULT '${4:{}}' COMMENT '${2:comment}'$0
+endsnippet
+
+snippet columnMysqlAddAfter "添加一个字段,在另一个字段后, 例子 ALTER TABLE table ADD column VARCHAR(100) COMMENT 'comment' AFTER last_column;"
+ALTER TABLE \`${1:table}\`
+ADD ${3:column} AFTER ${2:last_column};
+endsnippet
+
+snippet columnMysqlAdd "添加一个字段,在表字段最后添加, 例子 ALTER TABLE table ADD column VARCHAR(100) COMMENT 'comment';"
+ALTER TABLE \`${1:table}\`
+ADD ${2:column} ;
+endsnippet
+
+snippet columnMysqlAlter "修改一个字段,例子ALTER TABLE table MODIFY column VARCHAR(100) COMMENT 'comment';"
+ALTER TABLE \`${1:table}\`
+MODIFY ${2:column} ;
+endsnippet
+
+
+snippet indexMysqlAdd "添加普通索引, 普通索引可以包含重复值，增加基于某列的查询性能"
+CREATE INDEX idx_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+endsnippet
+
+snippet indexMysqlAddUnique "添加唯一索引, 唯一索引与普通索引类似，但不允许列中存在重复值"
+CREATE UNIQUE INDEX uniq_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+endsnippet
+
+snippet indexMysqlAddFulltext "添加全文索引, 全文索引只能添加在文本类型上, 可以通过MATCH (title, content) AGAINST ('FULLTEXT search')使用全文索引"
+CREATE FULLTEXT INDEX ft_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+endsnippet
+
+snippet indexMysqlAddFulltext "添加空间索引, 可以通过ST_Within()、ST_Contains() 和 ST_Distance()等空间函数使用索引"
+CREATE SPATIAL INDEX sp_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+endsnippet
+

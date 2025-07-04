@@ -1,0 +1,101 @@
+snippet concat "Join two strings"
+CONCAT(${1:arg1}, ${2:arg2})
+endsnippet
+
+snippet length "Get the length of a string"
+LENGTH(${1:string})
+endsnippet
+
+snippet lower "Convert to lowercase"
+LOWER(${1:string})
+endsnippet
+
+snippet upper "Convert to uppercase"
+UPPER(${1:string})
+endsnippet
+
+snippet substring "截取子字符串。SELECT SUBSTRING('Hello World', 1, 5);  -- 返回 'Hello'"
+SUBSTRING(${1:string}, ${2:start}, ${3:length})
+endsnippet
+
+snippet trim
+TRIM(${1:string})
+endsnippet
+
+snippet replace
+REPLACE(${1:string}, ${2:find}, ${3:replace})
+endsnippet
+
+snippet abs "ABS(): 返回绝对值。"
+ABS(${1:number})
+endsnippet
+
+snippet round "ROUND(): 四舍五入。SELECT ROUND(123.4567, 2);  -- 返回 123.46"
+ROUND(${1:number}, ${2:decimals})
+endsnippet
+
+snippet floor "FLOOR(): 向下取整。SELECT FLOOR(12.34);  -- 返回 12"
+FLOOR(${1:number})
+endsnippet
+
+snippet ceil "向上取整, SELECT CEIL(12.34);  -- 返回 13"
+CEIL(${1:number})
+endsnippet
+
+snippet rand "返回 0 到 1 之间的随机浮点数"
+RAND()
+endsnippet
+
+snippet curdate "返回当前日期, YYYY-MM-DD格式"
+CURDATE()
+endsnippet
+
+snippet now "返回当前日期和时间。YYYY-MM-DD HH:MM:SS 格式"
+NOW()
+endsnippet
+
+snippet date_add "DATE_ADD(): 向日期添加指定时间, SELECT DATE_ADD('2023-01-01', INTERVAL 10 DAY);  -- 返回 '2023-01-11'"
+DATE_ADD(${1:date}, INTERVAL ${2:value} ${3:unit})
+endsnippet
+
+snippet date_sub "从日期中减去指定时间。SELECT DATE_SUB('2023-01-11', INTERVAL 10 DAY);  -- 返回 '2023-01-01'"
+DATE_SUB(${1:date}, INTERVAL ${2:value} ${3:unit})
+endsnippet
+
+snippet datediff "返回两个日期之间的天数, SELECT DATEDIFF('2023-01-11', '2023-01-01');  -- 返回 10"
+DATEDIFF(${1:end_date}, ${2:start_date})
+endsnippet
+
+snippet count
+COUNT(${1:*})
+endsnippet
+
+snippet sum
+SUM(${1:column})
+endsnippet
+
+snippet avg
+AVG(${1:column})
+endsnippet
+
+snippet max
+MAX(${1:column})
+endsnippet
+
+snippet min
+MIN(${1:column})
+endsnippet
+
+# MySQL Control Flow Functions
+snippet if
+IF(${1:condition}, ${2:true_value}, ${3:false_value})
+endsnippet
+
+snippet case
+CASE
+	WHEN ${1:condition} THEN ${2:value}
+	WHEN ${3:condition} THEN ${4:value}
+	ELSE ${5:default_value}
+END AS ${6:alias}
+endsnippet
+

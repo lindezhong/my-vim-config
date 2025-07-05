@@ -845,6 +845,10 @@ let g:coc_global_extensions = [
 " 并且下载后的lombok的jar包需要保持 lombok-${version}.jar 格式
 " 比如将lombok下载到: ~/.config/coc/extensions/node_modules/coc-java/lombok/lombok-1.18.36.jar
 " 如果路径修改了需要修改java.jdt.ls.vmargs
+" ## coc-db
+" 对于coc-db来说现在在npm上的不是最新版本如果需要最新版本需要自己手动下载
+" 即将https://github.com/kristijanhusak/vim-dadbod-completion clone 到~/.config/coc/extensions/node_modules/coc-db上
+" cd ~/.config/coc/extensions/node_modules && rm -rf coc-db && git clone https://github.com/kristijanhusak/vim-dadbod-completion coc-db
 
 " coc-markdown-preview-enhanced coc markdown 预览插件
 " 如果需要隐藏头部title(由插件 coc-webview 提供) 修改文件 ~/.config/coc/extensions/node_modules/coc-webview/lib/index.js

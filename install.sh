@@ -32,6 +32,8 @@ ln -s ~/.vim/autoload/plug.vim ~/.local/share/nvim/site/autoload/
 # vim 配置链接
 mkdir -p ~/.config/nvim/
 ln -s ~/.vim/vimrc ~/.config/nvim/init.vim
+# 兼容nvim远程shh复制到剪切板问题
+sudo apt install -y xsel
 
 # nvim配色方案链接
 # 由于~/.config/nvim/colors/目录的配色方案优先所以可以覆盖默认的配色方案

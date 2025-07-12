@@ -159,18 +159,18 @@ endsnippet
 
 
 snippet indexMysqlAdd "添加普通索引, 普通索引可以包含重复值，增加基于某列的查询性能"
-CREATE INDEX idx_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+CREATE INDEX idx_${3:index_name_is_column_name_list} ON ${1:table_name} (${2:column_name});
 endsnippet
 
 snippet indexMysqlAddUnique "添加唯一索引, 唯一索引与普通索引类似，但不允许列中存在重复值"
-CREATE UNIQUE INDEX uniq_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+CREATE UNIQUE INDEX uniq_${3:index_name_is_column_name_list} ON ${1:table_name} (${2:column_name});
 endsnippet
 
 snippet indexMysqlAddFulltext "添加全文索引, 全文索引只能添加在文本类型上, 可以通过MATCH (title, content) AGAINST ('FULLTEXT search')使用全文索引"
-CREATE FULLTEXT INDEX ft_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+CREATE FULLTEXT INDEX ft_${3:index_name_is_column_name_list} ON ${1:table_name} (${2:column_name});
 endsnippet
 
 snippet indexMysqlAddFulltext "添加空间索引, 可以通过ST_Within()、ST_Contains() 和 ST_Distance()等空间函数使用索引"
-CREATE SPATIAL INDEX sp_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+CREATE SPATIAL INDEX sp_${3:index_name_is_column_name_list} ON ${1:table_name} (${2:column_name});
 endsnippet
 

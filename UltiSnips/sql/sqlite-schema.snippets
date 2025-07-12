@@ -50,11 +50,11 @@ MODIFY ${2:column} ;
 endsnippet
 
 snippet indexSqliteAdd "添加普通索引, 普通索引可以包含重复值，增加基于某列的查询性能"
-CREATE INDEX idx_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+CREATE INDEX idx_${3:index_name_is_column_name_list} ON ${1:table_name} (${2:column_name});
 endsnippet
 
 snippet indexSqliteAddUnique "添加唯一索引, 唯一索引与普通索引类似，但不允许列中存在重复值"
-CREATE UNIQUE INDEX uniq_${1:index_name_is_column_name_list} ON ${2:table_name} (${3:column_name});
+CREATE UNIQUE INDEX uniq_${3:index_name_is_column_name_list} ON ${1:table_name} (${2:column_name});
 endsnippet
 
 

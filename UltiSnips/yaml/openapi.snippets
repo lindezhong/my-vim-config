@@ -1,0 +1,436 @@
+snippet openapiInit "openapi初始化"
+openapi: 3.0.4
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    ${1:描述详情,支持markdown语法}
+  termsOfService: ${2:http://localhost}
+  contact:
+    email: ${3:2872611588@qq.com}
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+externalDocs:
+  description: ${4:附加的外部文档}
+  url: ${5:http://localhost}
+servers:
+  - url: ${6:http://localhost/api/v1} 
+tags:
+  openapiTag$0
+paths:
+  openapiPath
+components:
+  schemas:
+    Response:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        data:
+          type: object
+        message:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    openapiComponentSchema
+endsnippet
+
+snippet openapiTag "定义一个标签用于聚合paths的, 在tag下有多个path, path也可以定义多个tag这样path会在多个path中出现"
+- name: ${1:tag_name}
+  description: ${2:tag description}
+  externalDocs:
+    description: ${3:附加的外部文档}
+    url: ${4:http://localhost}
+endsnippet
+
+snippet openapiPath "定义一个请求路径"
+${1:/path}:
+  ${2:get, head, post, put, patch, delete, options, trace}:
+    tags:
+	  - ${3:tag}
+    summary: ${4:summary}
+    description: ${5:description}
+    operationId: ${6:id}
+    openapiRequest$0
+    responses:
+      '200':
+	      description: Successful
+        content:
+		      openapiPathContent
+      default:
+        description: Unexpected error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+endsnippet
+
+snippet openapiRequestBody "requestBody 是请求的主体部分(非url部分),通常在POST,PUT,PATCH等请求中使用，用于传递较大或复杂的数据"
+requestBody:
+  description: ${1:body description}
+  content:
+    openapiPathContent$0
+  required: true
+endsnippet
+
+snippet openapiPathContentJsonRef "requestBody json格式类型, 引用复用对象(components/schemas/Object)"
+application/json:
+  schema:
+    $ref: '#/components/schemas/${1:Object}'
+endsnippet
+snippet openapiPathContentFormRef "requestBody 简单表单格式格式类型只能传递简单key value, 引用复用对象(components/schemas/Object), 表单格式本质上是从url中传递参数spring mvc 试用@RequestParam或@ModelAttribute获取, curl例子curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'  -d 'name=John&age=30' http://localhost:8080/submit"
+application/x-www-form-urlencoded:
+  schema:
+    $ref: '#/components/schemas/${1:Object}'
+endsnippet
+snippet openapiPathContentFormDataRef "requestBody 复杂表单格式格式类型可以传递复杂对象(同时传文件和复杂参数比如数组), 引用复用对象(components/schemas/Object), form-data 使用边界（boundary）分隔多个部分,spring mvc可以通过@RequestParam获取, curl例子curl -X POST http://localhost:8080/upload -H 'Content-Type: multipart/form-data' -F 'file=@/path/to/your/file.txt' -F 'description=This is a sample description'" 
+application/x-www-form-urlencoded:
+  schema:
+    $ref: '#/components/schemas/${1:Object}'
+endsnippet
+
+snippet openapiPathContentJsonListRef "requestBody list类型的json格式类型, 引用复用对象(components/schemas/Object)"
+application/json:
+  schema:
+    type: array
+    items:
+      $ref: '#/components/schemas/${1:Object}'
+endsnippet
+snippet openapiPathContentFormListRef "requestBody list简单表单格式格式类型只能传递简单key value, 引用复用对象(components/schemas/Object), 表单格式本质上是从url中传递参数spring mvc 试用@RequestParam或@ModelAttribute获取, curl例子curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'  -d 'name=John&age=30' http://localhost:8080/submit"
+application/x-www-form-urlencoded:
+  schema:
+    type: array
+    items:
+      $ref: '#/components/schemas/${1:Object}'
+endsnippet
+snippet openapiPathContentFormDataListRef "requestBody list复杂表单格式格式类型可以传递复杂对象(同时传文件和复杂参数比如数组), 引用复用对象(components/schemas/Object), form-data 使用边界（boundary）分隔多个部分,spring mvc可以通过@RequestParam获取, curl例子curl -X POST http://localhost:8080/upload -H 'Content-Type: multipart/form-data' -F 'file=@/path/to/your/file.txt' -F 'description=This is a sample description'" 
+application/x-www-form-urlencoded:
+  schema:
+    type: array
+    items:
+      $ref: '#/components/schemas/${1:Object}'
+endsnippet
+
+snippet openapiPathContentJsonMapRef "requestBody Map类型的json格式类型, 引用复用对象(components/schemas/Object)"
+application/json:
+  schema:
+    type: object
+    additionalProperties:
+      $ref: '#/components/schemas/${1:Object}'
+endsnippet
+snippet openapiPathContentFormMapRef "requestBody Map简单表单格式格式类型只能传递简单key value, 引用复用对象(components/schemas/Object), 表单格式本质上是从url中传递参数spring mvc 试用@RequestParam或@ModelAttribute获取, curl例子curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'  -d 'name=John&age=30' http://localhost:8080/submit"
+application/x-www-form-urlencoded:
+  schema:
+    type: object
+    additionalProperties:
+      $ref: '#/components/schemas/${1:Object}'
+endsnippet
+snippet openapiPathContentFormDataListRef "requestBody Map复杂表单格式格式类型可以传递复杂对象(同时传文件和复杂参数比如数组), 引用复用对象(components/schemas/Object), form-data 使用边界（boundary）分隔多个部分,spring mvc可以通过@RequestParam获取, curl例子curl -X POST http://localhost:8080/upload -H 'Content-Type: multipart/form-data' -F 'file=@/path/to/your/file.txt' -F 'description=This is a sample description'" 
+application/x-www-form-urlencoded:
+  schema:
+    type: object
+    additionalProperties:
+      $ref: '#/components/schemas/${1:Object}'
+endsnippet
+
+
+snippet openapiRequestParameters "请求参数在url中出现"
+parameters:
+  openapiRequestParametersItem
+endsnippet
+
+snippet openapiRequestParametersItemInteger "请求参数在url,header,cookie中出现, 参数类型integer"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:0}
+    type: integer
+    format: int32
+endsnippet
+
+snippet openapiRequestParametersItemLong "请求参数在url,header,cookie中出现, 参数类型long"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:0}
+    type: integer
+    format: int64
+endsnippet
+
+snippet openapiRequestParametersItemFloat "请求参数在url,header,cookie中出现, 参数类型float"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:0.0}
+    type: number
+    format: float
+endsnippet
+
+snippet openapiRequestParametersItemDouble "请求参数在url,header,cookie中出现, 参数类型double"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:0.0}
+    type: number
+    format: double
+endsnippet
+
+snippet openapiRequestParametersItemString "请求参数在url,header,cookie中出现, 参数类型string"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:}
+    type: string
+endsnippet
+
+snippet openapiRequestParametersItemBoolean "请求参数在url,header,cookie中出现, 参数类型boolean"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:true}
+    type: boolean
+endsnippet
+
+snippet openapiRequestParametersItemDate "请求参数在url,header,cookie中出现, 参数类型date, 日期格式: YYYY-MM-DD, 比如1970-01-01"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:1970-01-01}
+    type: string
+    format: date
+endsnippet
+
+snippet openapiRequestParametersItemEnum "请求参数在url,header,cookie中出现, 参数类型enum"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  explode: true
+  schema:
+    default: ${5:}
+    type: string
+    enum:
+      - $5
+endsnippet
+
+
+
+snippet openapiRequestParametersItemDateTime "请求参数在url,header,cookie中出现, 参数类型dateTime, 非0时区日期格式: YYYY-MM-DDTHH:MM:SS± HH:MM(1970-01-01T00:00:00+08:00), 0时区日期格式: YYYY-MM-DDTHH:MM:SSZ(1970-01-01T00:00:00Z)"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  schema:
+    default: ${5:1970-01-01T00:00:00Z}
+    type: string
+    format: date-time
+endsnippet
+
+snippet openapiRequestParametersItemArray "请求参数在url,header,cookie中出现, 参数类型array, 试用`,`分割数组"
+- name: ${1:parameter_name}
+  in: ${2:query,header,path,cookie}
+  description: ${3:parameter_description}
+  required: ${4:true}
+  explode: true
+  schema:
+    default: ${5:1,2}
+    type: array
+    items:
+      type: ${6:integer,number,string,boolean}
+endsnippet
+
+
+
+snippet openapiComponentSchema "定义一个可以被复用的对象, 通过 `$ref: '#/components/schemas/SchemaName'` 来使用"
+${1:SchemaName}:
+  required:
+    - field_name
+  type: object
+  properties:
+    openapiComponentSchemaField$0
+endsnippet
+
+snippet openapiComponentSchemaFieldInteger "可服用对象字段integer"
+${1:field_name}:
+  type: integer
+  format: int32
+  description: ${2:int}
+  example: ${3:0}
+endsnippet
+
+snippet openapiComponentSchemaFieldLong "可服用对象字段long"
+${1:field_name}:
+  type: integer
+  format: int64
+  description: ${2:long}
+  example: ${3:0}
+endsnippet
+
+snippet openapiComponentSchemaFieldFloat "可服用对象字段float"
+${1:field_name}:
+  type: number
+  format: float
+  description: ${2:float}
+  example: ${3:0.0}
+endsnippet
+
+snippet openapiComponentSchemaFieldDouble "可服用对象字段double"
+${1:field_name}:
+  type: number
+  format: double
+  description: ${2:double}
+  example: ${3:0.0}
+endsnippet
+
+snippet openapiComponentSchemaFieldString "可服用对象字段string"
+${1:field_name}:
+  type: string
+  description: ${2:string}
+  example: ${3:}
+endsnippet
+
+snippet openapiComponentSchemaFieldEnum "可服用对象字段enum"
+${1:field_name}:
+  type: string
+  description: ${2:string}
+  example: ${3:}
+  enum:
+    - $3
+endsnippet
+
+
+snippet openapiComponentSchemaFieldBoolean "可服用对象字段boolean"
+${1:field_name}:
+  type: boolean
+  description: ${2:string}
+  example: ${3:true}
+endsnippet
+
+snippet openapiComponentSchemaFieldPassword "可服用对象字段password, 告知输入界面不应该明文显示输入信息。"
+${1:field_name}:
+  type: string
+  format: password
+  description: ${2:password}
+  example: ${3:}
+endsnippet
+
+snippet openapiComponentSchemaFieldDate "可服用对象字段date, 日期格式: YYYY-MM-DD, 比如1970-01-01"
+${1:field_name}:
+  type: string
+  format: date
+  description: ${2:date}
+  example: ${3:1970-01-01}
+endsnippet
+
+snippet openapiComponentSchemaFieldDateTime "可服用对象字段dateTime, 非0时区日期格式: YYYY-MM-DDTHH:MM:SS± HH:MM(1970-01-01T00:00:00+08:00), 0时区日期格式: YYYY-MM-DDTHH:MM:SSZ(1970-01-01T00:00:00Z)"
+${1:field_name}:
+  type: string
+  format: date-time
+  description: ${2:dateTime}
+  example: ${3:1970-01-01T00:00:00Z}
+endsnippet
+
+
+snippet openapiComponentSchemaFieldByte "可服用对象字段byte, 二进制数据以base64编码成字符串, 比如 `ZGF0YQo=` "
+${1:field_name}:
+  type: string
+  format: byte
+  description: ${2:byte}
+  example: ${3:ZGF0YQo=}
+endsnippet
+
+snippet openapiComponentSchemaFieldBinary "可服用对象字段binary, 二进制原始数据,一般为一个文件 ,curl使用--data-binary传递, 比如curl -X POST 'http://example.com/upload' -H 'Content-Type: application/octet-stream' --data-binary @path/to/your/file "
+${1:field_name}:
+  type: string
+  format: binary
+  description: ${2:binary}
+  example: ${3:}
+endsnippet
+
+snippet openapiComponentSchemaFieldArray "可服用对象字段array, 子类型是简单类型"
+${1:field_name}:
+  type: array
+  description: ${2:array}
+  example: [${3:}]
+  items:
+    type: ${4:integer,number,string,boolean}
+endsnippet
+
+snippet openapiComponentSchemaFieldArrayObject "可服用对象字段array, 子类型是一个对象"
+${1:field_name}:
+  type: array
+  description: ${2:array}
+  example: [${3:}]
+  items:
+    type: object
+    properties:
+      openapiComponentSchemaField$0
+endsnippet
+
+snippet openapiComponentSchemaFieldArrayRef "可服用对象字段array, 子类型引用其它对象"
+${1:field_name}:
+  type: array
+  description: ${2:array}
+  example: [${3:}]
+  items:
+    $ref: "#/components/schemas/${4:Object}"
+endsnippet
+
+snippet openapiComponentSchemaFieldMap "可服用对象字段map,key无法指定固定是string,value类型是简单类型"
+${1:field_name}:
+  type: object
+  description: ${2:map}
+  example: {"key": ${3:value}}
+  additionalProperties:
+    type: ${4:integer,number,string,boolean}
+endsnippet
+
+snippet openapiComponentSchemaFieldMapObject "类可服用对象字段map,key无法指定固定是string,value型是一个对象"
+${1:field_name}:
+  type: object
+  description: ${2:map}
+  example: {"key": ${3:value}}
+  additionalProperties:
+    type: object
+    properties:
+      openapiComponentSchemaField$0
+endsnippet
+
+snippet openapiComponentSchemaFieldMapRef "可服用对象字段map,key无法指定固定是string,value类型引用其它对象"
+${1:field_name}:
+  type: object
+  description: ${2:map}
+  example: {"key": ${3:value}}
+  additionalProperties:
+    $ref: "#/components/schemas/${5:Object}"
+endsnippet
+
+snippet openapiComponentSchemaFieldRef "可服用对象字段ref, 引用其它对象"
+${1:field_name}:
+  $ref: "#/components/schemas/${2:Object}"
+endsnippet
+

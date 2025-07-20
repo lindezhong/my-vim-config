@@ -1,0 +1,19 @@
+spring:
+  sql.init:
+    platform: test 
+    mode: always
+    continue-on-error: true
+  jpa:
+    show-sql: true
+    hibernate:
+      # 禁用hibernate自动创表, 使用schema.sql
+      ddl-auto: none 
+  # 测试用例强制使用内存数据库进行测试
+  dataSource:
+    continue-on-error: true
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE 
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: &quot;&quot;
+
+

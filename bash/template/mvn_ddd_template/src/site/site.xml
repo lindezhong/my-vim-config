@@ -1,0 +1,28 @@
+<project name=&quot;${pom_name}&quot;>
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>2.1.0</version>
+  </skin>
+  <!--<bannerLeft>-->
+    <!--<name>顶部banner</name>-->
+    <!--指向resources/images/banner-left.png-->
+    <!--<src>images/banner-left.png</src>-->
+    <!--点击的链接-->
+    <!--<href>http://dddsample.sf.net</href>-->
+  <!--</bannerLeft>-->
+  <version position=&quot;left&quot;/>
+  <!--<poweredBy>-->
+    <!--<logo name=&quot;Sourceforge&quot; href=&quot;http://sourceforge.net/&quot;-->
+          <!--img=&quot;http://sflogo.sourceforge.net/sflogo.php?group_id=210606&amp;type=2&quot;/>-->
+  <!--</poweredBy>-->
+  <body>
+    <links>
+      <item name=&quot;项目地址&quot; href=&quot;http://localhost&quot; />
+    </links>
+    <menu name=&quot;项目信息&quot;>
+      <item name=&quot;介绍&quot; href=&quot;index.html&quot;/>
+    </menu>
+    <menu ref=&quot;reports&quot;/>
+  </body>
+</project>

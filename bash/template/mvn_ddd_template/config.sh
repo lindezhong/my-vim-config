@@ -17,7 +17,6 @@ function config_init() {
 
     read -p "请输入项目名, 默认[${artifact_id}] : " pom_name
     test -z $pom_name && pom_name=${artifact_id}
-    echo $pom_name
 
 
     database_type_list="mysql mariadb h2"

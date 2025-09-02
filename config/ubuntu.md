@@ -17,6 +17,16 @@ sudo dpkg-reconfigure locales
 sudo apt install ibus ibus-libpinyin
 ```
 
+# 安装中文字体
+
+如果plantuml中文字体重叠可以通过安装中文字体解决
+
+sudo apt-get install ttf-wqy-microhei #文泉驿-微米黑
+sudo apt-get install ttf-wqy-zenhei #文泉驿-正黑 
+sudo apt-get install xfonts-wqy #文泉驿-点阵宋体
+sudo apt-get install fonts-arphic-ukai #文鼎明体(宋体)
+sudo apt-get install fonts-arphic-uming #文鼎楷体
+
 # 隐藏活动按钮(左上角的按钮)
 1. 安装 `gnome-shell-extension-manager`
 sudo apt install gnome-shell-extension-manager

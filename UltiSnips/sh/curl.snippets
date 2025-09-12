@@ -25,10 +25,10 @@ snippet curlHeadLanguage "curl 语言"
 -H 'Accept-Language: zh-CN,zh;'  \
 endsnippet
 snippet curlUrlencode "使用curl对url进行编码成可请求的url, 只要参数部分, 如果需要保留host(需要一个host作为url_effective)部分则去除cut命令, 比如 key=? -> key=%3f 或 ? -> %3f"
-${$3:params}=''$(curl -s -o /dev/null -w '%{url_effective}' --get --data-urlencode "${1:key=value}" "${2:http://example.com}" | cut -d '?' -f2-)''
+${3:params}=''$(curl -s -o /dev/null -w '%{url_effective}' --get --data-urlencode "${1:key=value}" "${2:http://example.com}" | cut -d '?' -f2-)''
 endsnippet
 snippet urlencode "使用curl对url进行编码成可请求的url, 只要参数部分, 如果需要保留host(需要一个host作为url_effective)部分则去除cut命令, 比如 key=? -> key=%3f 或 ? -> %3f"
-${$3:params}=''$(curl -s -o /dev/null -w '%{url_effective}' --get --data-urlencode "${1:key=value}" "${2:http://example.com}" | cut -d '?' -f2-)''
+${3:params}=''$(curl -s -o /dev/null -w '%{url_effective}' --get --data-urlencode "${1:key=value}" "${2:http://example.com}" | cut -d '?' -f2-)''
 endsnippet
 
 

@@ -85,10 +85,22 @@ set wildmenu
 " 关闭右下角当前光标位置
 set noruler
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""" autocmd 命令 """"""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 对于不同的文件设置不同的宽度(tab)
+autocmd FileType mysql setlocal tabstop=2 shiftwidth=2
+autocmd FileType sql setlocal tabstop=2 shiftwidth=2
+autocmd FileType yaml setlocal tabstop=2 shiftwidth=2
+" vim退出的时候自动保持 session , 在启动vim的时候可以使用 `LoadDirectoryMkSession` 加载
+autocmd VimEnter * call InitDirectoryMkSession()
+autocmd VimLeave * call SaveDirectoryMkSession()
 
 
-" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
-colorscheme vim8
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""" nvim定制化配置 """"""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
 if has('nvim')
     " neovim 报错: vimspector unavailable: Requires Vim Compiled with +python3:
     " 解决方案: `pip3 install pynvim` 从 0.3.1 版本开始，python 包 neovim 已更名为 pynvim，将命令更新为 pip3 install pynvim
@@ -136,6 +148,11 @@ endif
 " 如果觉得<Ctrl-X><Ctrl-K>组合键太麻烦 ，那么也可以直接将字典补全添加到默认补全列表中，在vimrc中添加下面的代码
 " set complete-=k complete+=k
 
+"""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""  颜色配置 """"""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""
+" vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
+colorscheme vim8
 " 要选择其他背景颜色，您可以使用 
 " :highlight CocFloating ctermbg=color
 " 并更改错误消息的前景（文本）颜色，请使用
@@ -149,10 +166,6 @@ endif
 highlight CocMenuSel ctermbg=LightGray
 " coc浮动窗口颜色
 highlight CocFloating ctermfg=DarkGray ctermbg=LightMagenta
-" vim退出的时候自动保持 session , 在启动vim的时候可以使用 `LoadDirectoryMkSession` 加载
-autocmd VimEnter * call InitDirectoryMkSession()
-autocmd VimLeave * call SaveDirectoryMkSession()
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """"""""""""""""""""  在终端背景是暗色但的时候启用以下配置""""""""""""""""""
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

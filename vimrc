@@ -55,9 +55,10 @@ Plug 'dhruvasagar/vim-table-mode'
 " 2. 使用 `\w`  保存sql文件
 " 3. 使用 `\e` 编辑绑定参数, 绑定参数例子 : select * from table where id = :id;
 " 4. 使用 `\e` 执行当前文件的所有sql, 或选中的SQL
-" 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
-" 6. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
-" 7. 使用 `:DBUIAddConnection` 添加执行数据库连接, 这个本质是调用插件vim-dadbod的`:DB`能力, url格式见`:h dadbod` 
+" 5. 使用 `\r` 在结果缓冲区中切换展开视图, 效果与MySQL \G 模式一致, 只支持 MySQL 和 PostgreSQL, 有bug部分SQL没法展开
+" 6. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
+" 7. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
+" 8. 使用 `:DBUIAddConnection` 添加执行数据库连接, 这个本质是调用插件vim-dadbod的`:DB`能力, url格式见`:h dadbod` 
 Plug 'tpope/vim-dadbod'
 Plug 'kristijanhusak/vim-dadbod-ui'
 " Plug 'kristijanhusak/vim-dadbod-completion' " Optional
@@ -766,8 +767,8 @@ nmap <Leader>v :CocCommand markdown-preview-enhanced.openPreview<CR>
 
 " ==================== dhruvasagar/vim-table-mode ====================
 " 在表格中,显示当前光标所在的行列, 
-imap <silent><Leader>r <Esc>`^:echo tablemode#spreadsheet#RowNr('.') .',' . tablemode#spreadsheet#ColumnNr('.') . ' (row,column)' <CR>
-nmap <silent><Leader>r :echo tablemode#spreadsheet#RowNr('.') .',' . tablemode#spreadsheet#ColumnNr('.') . ' (row,column)' <CR>
+" imap <silent><Leader>r <Esc>`^:echo tablemode#spreadsheet#RowNr('.') .',' . tablemode#spreadsheet#ColumnNr('.') . ' (row,column)' <CR>
+" nmap <silent><Leader>r :echo tablemode#spreadsheet#RowNr('.') .',' . tablemode#spreadsheet#ColumnNr('.') . ' (row,column)' <CR>
 
 " =================== kristijanhusak/vim-dadbod-ui ======================
 " \w 保存临时查询到文件
@@ -775,6 +776,8 @@ nmap <silent><Leader>w <Plug>(DBUI_SaveQuery)
 " \e 编辑参数或执行sql
 nmap <silent><Leader>e <Plug>(DBUI_EditBindParameters)
 vmap <silent><Leader>e <Plug>(DBUI_ExecuteQuery)
+" \r 在结果缓冲区中切换展开视图, 效果与MySQL \G 模式一致, 只支持 MySQL 和 PostgreSQL, 有bug部分SQL没法展开
+nmap <silent><Leader>r <Plug>(DBUI_ToggleResultLayout)
 
 " ==================================================
 " =================== 快捷键配置 ===================
@@ -1316,25 +1319,26 @@ autocmd VimEnter * silent TableModeEnable
 " 2. 使用 `\w`  保存sql文件
 " 3. 使用 `\e` 编辑绑定参数, 绑定参数例子 : select * from table where id = :id;
 " 4. 使用 `\e` 执行当前文件的所有sql, 或选中的SQL
-" 5. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
-" 6. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
-" 7. 使用 `:DBUIAddConnection` 添加执行数据库连接, 这个本质是调用插件vim-dadbod的`:DB`能力, url格式见`:h dadbod` 
-"   7.1 MySQL : mysql://username:password@host:port/database_name
-"   7.2 PostgreSQL: postgres://username:password@host:port/database_name
-"   7.3 SQLite: sqlite:///path/to/database_file.db
-"   7.4 Oracle: oracle://username:password@host:port/service_name
-"   7.5 Microsoft SQL Server: mssql://username:password@hostname:port/database_name
-"   7.6 Redis: redis://username:password@host:port
-"   7.7 MongoDB: mongodb://username:password@host:port/database_name
-"   7.8 Cassandra: cassandra://username:password@host:port/keyspace_name
+" 5. 使用 `\r` 在结果缓冲区中切换展开视图, 效果与MySQL \G 模式一致, 只支持 MySQL 和 PostgreSQL, 有bug部分SQL没法展开
+" 6. 执行选中sql需要 1. v 进入Visual Mode选择sql  2. 使用 `:'<,'>DB` 或 `\S` 执行选中sql
+" 7. 默认配置存储目录是~/.local/share/db_ui, 可以通过let g:db_ui_save_location = '/path' 修改
+" 8. 使用 `:DBUIAddConnection` 添加执行数据库连接, 这个本质是调用插件vim-dadbod的`:DB`能力, url格式见`:h dadbod` 
+"   8.1 MySQL : mysql://username:password@host:port/database_name
+"   8.2 PostgreSQL: postgres://username:password@host:port/database_name
+"   8.3 SQLite: sqlite:///path/to/database_file.db
+"   8.4 Oracle: oracle://username:password@host:port/service_name
+"   8.5 Microsoft SQL Server: mssql://username:password@hostname:port/database_name
+"   8.6 Redis: redis://username:password@host:port
+"   8.7 MongoDB: mongodb://username:password@host:port/database_name
+"   8.8 Cassandra: cassandra://username:password@host:port/keyspace_name
 "   ...
-" 8. 可以配置表格助手, 如下
+" 9. 可以配置表格助手, 如下
 " let g:db_ui_table_helpers = {
 " \   'postgresql': {
 " \     'Count': 'select count(*) from "{table}"'
 " \   }
 " \ }
-" 9. 在左侧DB栏默认映射如下
+" 10. 在左侧DB栏默认映射如下
 "   o / <CR> - 打开/切换抽屉选项（<Plug>(DBUI_SelectLine)）
 "   S - 垂直分割打开（<Plug>(DBUI_SelectLineVsplit)）
 "   d-删除缓冲区或已保存的sql（<Plug>(DBUI_DeleteLine)）

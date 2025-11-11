@@ -5,3 +5,4 @@ sox
 rsync
 nmcli
 sed
+jq

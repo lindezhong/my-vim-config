@@ -2,14 +2,14 @@
 # sed 's/pattern/string/g' {cmd:comp_file_direct} 
 sed "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:comp_file_direct} 
 # 将整个文件作为'一行'输入替换
-# sed -z 's/pattern/string/g' {cmd:comp_file_direct}
-sed -z "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:comp_file_direct}
+# sed 's/pattern/string/g' -z {cmd:comp_file_direct}
+sed "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" -z {cmd:comp_file_direct}
 # 禁止自动输出，仅输出匹配的内容
-# sed -n 's/pattern/string/p' {cmd:comp_file_direct}
-sed -n "{&apos;s&sol;pattern&sol;string&sol;p&apos;}" {cmd:comp_file_direct}
+# sed 's/pattern/string/p' -n {cmd:comp_file_direct}
+sed "{&apos;s&sol;pattern&sol;string&sol;p&apos;}" -n {cmd:comp_file_direct}
 # 在原文件上直接替换
-# sed -i 's/pattern/string/g' {cmd:comp_file_direct}
-sed -i "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" {cmd:comp_file_direct}
+# sed 's/pattern/string/g' -i {cmd:comp_file_direct}
+sed "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" -i {cmd:comp_file_direct}
 
 
 # 在文件上的每行行首添加行号

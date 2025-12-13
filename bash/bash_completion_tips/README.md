@@ -13,6 +13,7 @@
 | sed                 | 替换字符串命令行                                                                       |
 | sox                 | 音频处理命令行                                                                         |
 | update-alternatives | update-alternatives 是一个切换命令行版本的工具, 本质上是管理某个软链接指向那个那个文件 |
+| whisper             | whisper是openai开源的语音识别大模型                                                    |
 
 
 

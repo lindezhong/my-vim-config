@@ -12,6 +12,10 @@ sed "{&apos;s&sol;pattern&sol;string&sol;p&apos;}" -n {cmd:comp_file_direct}
 sed "{&apos;s&sol;pattern&sol;string&sol;g&apos;}" -i {cmd:comp_file_direct}
 
 
+# 通过sed为csv文件在行首添加BOM(解决excel中文乱码问题)
+# sed '1s/^/\xEF\xBB\xBF/' -i {cmd:comp_file_direct}
+sed "&apos;1s&sol;^&sol;&bsol;xEF&bsol;xBB&bsol;xBF&sol;&apos;" -i {cmd:comp_file_direct}
+
 # 在文件上的每行行首添加行号
 # `sed '=' table.md` 将文件变为, `行号 \n 内容`  格式
 # `sed 'N;s/\n/: /'` 将其合并为一行 

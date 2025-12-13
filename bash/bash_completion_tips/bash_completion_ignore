@@ -4,6 +4,4 @@ pandoc
 sox
 rsync
 nmcli
-sed
-jq
 README.md

@@ -1,3 +1,16 @@
 # 将json格式转成csv, 需要一个list格式, 比如 [{"k": "v"}] , 如果不是 list 格式需要使用在jq中获取到list格式的节点
 # echo '[{"k": "v,1\"1"}]' | jq -r '(.[0] | keys_unsorted) as $k | $k, (map([.[ $k[] ]])[]) | @csv'
-jq -r '(.[0] | keys_unsorted) as $k | $k, (map([.[ $k[] ]])[]) | @csv'
+jq -r "&apos;(.[0]&nbsp;|&nbsp;keys_unsorted)&nbsp;as&nbsp;&dollar;k&nbsp;|&nbsp;&dollar;k,&nbsp;(map([.[&nbsp;&dollar;k[]&nbsp;]])[])&nbsp;|&nbsp;@csv&apos;"
+
+# jq获取一个变量, 通过外部传入变量的方式, key 可以指定特殊值
+# echo '{"k": "v"}' | jq -r --arg key  "k" '.[$key]'
+# 输出: v
+jq -r --arg key  "k" '.[$key]'
+
+# jq获取一个变量, 通过外部传入变量的方式, key 可以指定特殊值
+# echo '{"k": "v"}' | jq -r  '.k'
+# 输出: v
+jq -r  '.k'
+
+# 循环遍历一个list的值
+jq -r '.[] | "key: \(.k)"'

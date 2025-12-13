@@ -31,15 +31,17 @@
 #   3.3 {-filenames} : 非提示, 但是将 complete 改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
 #   3.4 {or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
 #       即 cmd_item1 后可以提示cmd_item2, 反之亦然
-#   3.5 {and:("cmd_item1" "cmd_item2" "cmd_item3" ...)}, 该形式需要按照顺序匹配cmd_item1 cmd_item2 cmd_item3,
+#   3.5 {or_one:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
+#       与or模式相比如果有一个被匹配后就往下提示, 而不是再提示本身
+#   3.6 {and:("cmd_item1" "cmd_item2" "cmd_item3" ...)}, 该形式需要按照顺序匹配cmd_item1 cmd_item2 cmd_item3,
 #       即 cmd_item1 会提示出 cmd_item2 cmd_item3 , 但cmd_item1 cmd_item2 会提示出 cmd_item3
 #       但 直接输入 cmd_item2 不匹配, 因为 cmd_item2 前无 cmd_item1 (需要完全按照匹配)
 #       and 匹配模式一般用于kv的匹配比如 docker -v docker目录:宿主机目录 , 其中-v docker目录:宿主机目录就是 kv
-#   3.6 可以嵌套and和or实现一些操作比如 '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}'
-#   3.7 {kv:("key(为固定字符串)" "cmd_item" "suffix(后缀为固定字符串可省略)")}, 该形式提示出的格式如下${key}${cmd_item}${suffix}
+#   3.7 可以嵌套and和or实现一些操作比如 '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}'
+#   3.8 {kv:("key(为固定字符串)" "cmd_item" "suffix(后缀为固定字符串可省略)")}, 该形式提示出的格式如下${key}${cmd_item}${suffix}
 #       如果cmd_item生成的是一个数组则提示多个比如${key}${cmd_item[0]}${suffix} ${key}${cmd_item[1]}${suffix} ...
 #       例子: 1. {kv: ("--mainClass=" "{cmd:mvn.sh find_main src/main}")} 2. {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
-#   3.8 可以转义某些关键字比如 ` ` -> `$nbsp;` 转义规则与html转义一致
+#   3.9 可以转义某些关键字比如 ` ` -> `$nbsp;` 转义规则与html转义一致
 #       但这个转义只能使用在最终提示字符上, 如果需要多维数组格式还是需要自己转, 由于&是shell关键字, 所以使用转义需要用 '' 或 "" 包裹
 #       可以转哪些关键字查看变量 `keywords_mapping` 定义, 这里只列出几个 ` ` -> `$nbsp;`  `"` -> `&quot;`   `'` -> `&apos;`
 #       请注意: 在提示中出现  ' " 会导致后续的无法提示(在如果有重复前缀的情况下) 
@@ -370,6 +372,9 @@ function parse_cmd_item_data(){
     elif [[ "$cmd_str" == {cmd:* ]]; then
         # 执行命令模式
         echo '"cmd" "1"'
+    elif [[ "$cmd_str" == {or_one:* ]]; then
+        # 多参数or_one模式
+        echo '"or_one" "1"'
     elif [[ "$cmd_str" == {or:* ]]; then
         # 多参数or模式, or模式需要提示下一个cmd_item(or模式支持完全不匹配)
         echo '"or" "0 1"'
@@ -463,6 +468,17 @@ function is_match_cmd_simple() {
             cmd_index_index_shift "$item_add_num"
             return 0
         fi
+    elif [[ "${match_cmd_item_data[0]}" == "or_one" ]]; then
+
+        eval local multiple_cmd_item_list=$(cmd_normaliza "$match_cmd_item" "or_one")
+        for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
+            is_match_cmd_simple "$multiple_cmd_item" "$match_comp_cmd_item"
+            local match_result="$?"
+            if (( $match_result<=200 )); then
+                return 0
+            fi
+        done
+
     elif [[ "${match_cmd_item_data[0]}" == "or" ]]; then
         is_match_cmd_or "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
         return $?
@@ -712,6 +728,14 @@ function completion_cmd_normaliza() {
                 completion_txt="$completion_txt ${key}${value_item}${suffix}"
             done
             _completion_cmd_normaliza_result="$old_completion_cmd_normaliza_result"
+
+        elif [[ "${completion_stack_cmd_data[0]}" == "or_one" ]]; then
+            # 多参数模式
+            eval local multiple_cmd_item_list=$(cmd_normaliza "$completion_stack_cmd" "or_one")
+            for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
+               # 将多个提示追加到提示中
+               completion_cmd_stack[${#completion_cmd_stack[@]}]=$multiple_cmd_item
+            done
 
         elif [[ "${completion_stack_cmd_data[0]}" == "or" ]]; then
             # 多参数模式

@@ -62,6 +62,16 @@ Plug 'dhruvasagar/vim-table-mode'
 Plug 'tpope/vim-dadbod'
 Plug 'kristijanhusak/vim-dadbod-ui'
 " Plug 'kristijanhusak/vim-dadbod-completion' " Optional
+" vim 数据库看版, 可以链接数据库显示数据看版
+" 配置样例查看 `example/` 目录下的配置
+" 可用命令如下
+"   1. `:Dashboard` 打开当前目录下配置列表(yaml问卷)
+"   2. `:DashboardStart <config file>` 来启动数据看板
+"   3. `:DashboardRestart` 来重新刷新当前配置文件的执行结果
+"   4. `:DashboardStop [config file]` 来停止数据看板
+"   5. `:DashboardList` 来列出所有活动的数据看板
+"   6. `:DashboardStatus` 来查看当前数据看板的状态
+Plug 'lindezhong/vim-dashboard', {'do': 'install.py'}
 call plug#end()
 
 syntax on

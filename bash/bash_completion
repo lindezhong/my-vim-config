@@ -597,14 +597,14 @@ function is_match_cmd_and() {
 
     # 匹配成功往下走一个
     if (( i>=${#multiple_cmd_item_list[@]} )); then
-        # 如果and完全匹配则跳过了
-        comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
-        cmd_index_index_shift "$item_add_num"
-
         if (( match_comp_index>=COMP_CWORD && close_comp!=0 )); then 
             # 如果完全匹配到则往提示里加一个
             completion_cmd_add "${cmd_item_list[item_index+1]}"
         fi
+        # 如果and完全匹配则跳过了
+        comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+        cmd_index_index_shift "$item_add_num"
+
 
         # 完全匹配则返回100
         return 100

@@ -8,15 +8,15 @@ test_complete file {cmd:comp_file_direct} -f
 test_complete cmd {cmd:ls} -f
 # 这个方法由test_complete__func.sh提供
 test_complete cmd {cmd:__func_file_fun} -f
+test_complete repeat "{repeat:(-d -l)}" -t -f
 test_complete or "{or:(-d -l)}" -t -f
-test_complete or_one "{or_one:(-d -l)}" -t -f
 test_complete and '{and:(-v "{dir}")}' -t -f
-test_complete and_or '{or:("{and:(-v {dir})}" "{and:(-d {dir})}")}' -t -f
+test_complete and_repeat '{repeat:("{and:(-v {dir})}" "{and:(-d {dir})}")}' -t -f
 test_complete kv "{kv:('--mainClass=' '{cmd:mvn.sh find_main src/main}')}" -t -f
 # test_complete kv "{kv:('--mainClass=' '{cmd:mvn.sh find_main src/main}' '\\\"')}" -t -f
 # test_complete kv '{kv:("--mainClass=\\\"" "{cmd:mvn.sh find_main src/main}")}' -t -f
-# test_complete kv_or  '{or:("{kv:(-v {dir})}" "{kv:(-d {dir})}")}' -t -f
-test_complete kv_or1  "{or:('{kv:(\\\"--mainClass=\\\" \\\"{cmd:mvn.sh find_main src/main}\\\")}' '{kv:(-d {dir})}')}" -t -f
+# test_complete kv_repeat  '{repeat:("{kv:(-v {dir})}" "{kv:(-d {dir})}")}' -t -f
+test_complete kv_repeat1  "{repeat:('{kv:(\\\"--mainClass=\\\" \\\"{cmd:mvn.sh find_main src/main}\\\")}' '{kv:(-d {dir})}')}" -t -f
 # " 需要替换为 &quot; 但由于 " 在COMP_WORDBREAKS配置中所以会有些问题 
-test_complete kv_or2  "{or:('{kv:(\\\"--mainClass=&quot;\\\" \\\"{cmd:mvn.sh find_main src/main}\\\" \\\"&quot;\\\")}' '{kv:(-d {dir})}')}" -t -f
+test_complete kv_repeat2  "{repeat:('{kv:(\\\"--mainClass=&quot;\\\" \\\"{cmd:mvn.sh find_main src/main}\\\" \\\"&quot;\\\")}' '{kv:(-d {dir})}')}" -t -f
 

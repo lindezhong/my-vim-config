@@ -25,6 +25,6 @@
 
 # 将japanese.mp3语音翻译成英语
 # whisper japanese.mp3 --model medium --language Japanese --task translate
-whisper {cmd:comp_file_direct} --model "{or_one:(tiny base small medium large turbo)}" --language {language} --task translate
+whisper {cmd:comp_file_direct} --model "{or:(tiny base small medium large turbo)}" --language {language} --task translate
 
 

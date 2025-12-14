@@ -469,16 +469,8 @@ function is_match_cmd_simple() {
             return 0
         fi
     elif [[ "${match_cmd_item_data[0]}" == "or" ]]; then
-
-        eval local multiple_cmd_item_list=$(cmd_normaliza "$match_cmd_item" "or")
-        for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
-            is_match_cmd_simple "$multiple_cmd_item" "$match_comp_cmd_item"
-            local match_result="$?"
-            if (( $match_result<=200 )); then
-                return 0
-            fi
-        done
-
+        is_match_cmd_or "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
+        return $?
     elif [[ "${match_cmd_item_data[0]}" == "repeat" ]]; then
         is_match_cmd_repeat "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
         return $?
@@ -491,6 +483,51 @@ function is_match_cmd_simple() {
     # 不匹配
     return -1
 }
+
+
+# or 模式匹配, 参数和返回值保持跟 is_match_cmd_simple 一致
+function is_match_cmd_or() {
+    local match_cmd_item="${1:-${cmd_item}}" 
+    local match_comp_cmd_item="${2:-${comp_cmd_item}}"
+    # item下标是否向前加n, 只有在匹配成功的时候生效
+    local item_add_num="${3:-1}"
+    # comp下标是否向前加n, 只有在匹配成功的时候生效
+    local comp_add_num="${4:-1}"
+    # 是否关闭提示, 只有在匹配成功且comp_add_num>0情况下生效
+    local close_comp="${5:-1}"
+
+    eval local multiple_cmd_item_list=$(cmd_normaliza "$match_cmd_item" "or")
+    
+    # 是否下移comp_index,默认不下移坐标
+    local is_comp_index_shift="false"
+    local multiple_cmd_item
+    for multiple_cmd_item in "${multiple_cmd_item_list[@]}"; do
+        is_match_cmd_simple "$multiple_cmd_item" "$match_comp_cmd_item" "0" "0" "1"
+        local match_result="$?"
+        if (( $match_result<=200 )); then
+            # 如果有一个可以匹配则需要下移
+            is_comp_index_shift="true"
+        fi
+
+
+        if (( $match_result>100 && $match_result<=200 )); then
+            # 如果为and不完全匹配(或者已经有提示过滤)也由and模式自己提供提示
+            close_comp="0"
+            # 不完全匹配则cmd不cmd还停留在or本身 
+            item_add_num="0"
+        fi
+
+    done
+
+    if $is_comp_index_shift; then
+        comp_cmd_index_index_shift "$comp_add_num" "$close_comp"
+        cmd_index_index_shift "$item_add_num"
+        return 0
+    fi
+
+    return -1
+}
+
 
 # repeat 模式匹配, 参数和返回值保持跟 is_match_cmd_simple 一致
 function is_match_cmd_repeat() {

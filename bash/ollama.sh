@@ -675,6 +675,8 @@ Produce only the '${target_lang}' translation, without any additional explanatio
     
     ollama_chat_body=$(echo -n "$ollama_chat_body" | jq --arg key "messages" --argjson value "${ollama_message}" '.[$key][.[$key] | length]=$value')
     
+    # 打印BOM, 让goldendict兼容中文
+    echo -e -n '\xEF\xBB\xBF'
     curl $OLLAMA_CHAT -d "${ollama_chat_body}" -s \
     | jq -r '.message.content'
 }

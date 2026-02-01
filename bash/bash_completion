@@ -29,19 +29,24 @@
 #   3.1 {value} : 原样输出{value}目的是为了提示后面输入
 #   3.2 {cmd:value} : 输出value执行结果即 eval $value
 #   3.3 {-filenames} : 非提示, 但是将 complete 改成文件提示模式, 即按tab的时候不会自动在最后添加空格(space)
-#   3.4 {repeat:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
+#   3.4 {-completion} : 包装器模式, 从{-completion}后重新开始提示
+#       类似于 nohub 命令后面提示是重新开始的
+#       添加`test_complete completion {-completion}`
+#       则在命令行中输入`test_complete completion g`按tab会补全git之类的命令
+#       则在命令行中输入`test_complete completion git `按tab会补全git的命令
+#   3.5 {repeat:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
 #       重复的提示cmd_item1 cmd_item2 直到输入下一个提示后
-#   3.5 {or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
+#   3.6 {or:("cmd_item1" "cmd_item2" ...)}, 该形式为支持 cmd_item1 cmd_item2 乱顺提示
 #       匹配cmd_item1 或 cmd_item2 有一个匹配就算匹配 
-#   3.6 {and:("cmd_item1" "cmd_item2" "cmd_item3" ...)}, 该形式需要按照顺序匹配cmd_item1 cmd_item2 cmd_item3,
+#   3.7 {and:("cmd_item1" "cmd_item2" "cmd_item3" ...)}, 该形式需要按照顺序匹配cmd_item1 cmd_item2 cmd_item3,
 #       即 cmd_item1 会提示出 cmd_item2 cmd_item3 , 但cmd_item1 cmd_item2 会提示出 cmd_item3
 #       但 直接输入 cmd_item2 不匹配, 因为 cmd_item2 前无 cmd_item1 (需要完全按照匹配)
 #       and 匹配模式一般用于kv的匹配比如 docker -v docker目录:宿主机目录 , 其中-v docker目录:宿主机目录就是 kv
-#   3.7 可以嵌套and和repeat实现一些操作比如 '{repeat:("{and:(-v {dir})}" "{and:(-d {dir})}")}'
-#   3.8 {kv:("key(为固定字符串)" "cmd_item" "suffix(后缀为固定字符串可省略)")}, 该形式提示出的格式如下${key}${cmd_item}${suffix}
+#   3.8 可以嵌套and和repeat实现一些操作比如 '{repeat:("{and:(-v {dir})}" "{and:(-d {dir})}")}'
+#   3.9 {kv:("key(为固定字符串)" "cmd_item" "suffix(后缀为固定字符串可省略)")}, 该形式提示出的格式如下${key}${cmd_item}${suffix}
 #       如果cmd_item生成的是一个数组则提示多个比如${key}${cmd_item[0]}${suffix} ${key}${cmd_item[1]}${suffix} ...
 #       例子: 1. {kv: ("--mainClass=" "{cmd:mvn.sh find_main src/main}")} 2. {kv: ('--mainClass="' '{cmd:mvn.sh find_main src/main}' '"')}
-#   3.9 可以转义某些关键字比如 ` ` -> `$nbsp;` 转义规则与html转义一致
+#   3.10 可以转义某些关键字比如 ` ` -> `$nbsp;` 转义规则与html转义一致
 #       但这个转义只能使用在最终提示字符上, 如果需要多维数组格式还是需要自己转, 由于&是shell关键字, 所以使用转义需要用 '' 或 "" 包裹
 #       可以转哪些关键字查看变量 `keywords_mapping` 定义, 这里只列出几个 ` ` -> `$nbsp;`  `"` -> `&quot;`   `'` -> `&apos;`
 #       请注意: 在提示中出现  ' " 会导致后续的无法提示(在如果有重复前缀的情况下) 
@@ -384,6 +389,10 @@ function parse_cmd_item_data(){
     elif [[ "$cmd_str" == {kv:* ]]; then
         # kv模式 
         echo '"kv" "1"'
+    elif [[ "$cmd_str" == {-completion}* ]]; then
+        # 重新开始补全模式，类似 nohup，忽略之前的命令重新开始补全
+        # 返回 "0 1" 表示可以不消耗 comp_index 也能匹配
+        echo '"completion" "0 1"'
     elif [[ "$cmd_str" == {* ]]; then
         # 注释
         echo '"note" "1"'
@@ -476,6 +485,10 @@ function is_match_cmd_simple() {
         return $?
     elif [[ "${match_cmd_item_data[0]}" == "and" ]]; then
         is_match_cmd_and "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
+        return $?
+    elif [[ "${match_cmd_item_data[0]}" == "completion" ]]; then
+        # 重新开始补全模式：类似 nohup，从当前位置开始重新补全后续命令
+        is_match_cmd_completion "$match_cmd_item" "$match_comp_cmd_item" "$item_add_num" "$comp_add_num" "$close_comp"
         return $?
     fi
 
@@ -664,6 +677,70 @@ function is_match_cmd_and() {
 
 }
 
+# completion 模式匹配, 类似 nohup，从当前位置开始重新补全后续命令
+# 参数和返回值保持跟 is_match_cmd_simple 一致
+# 注意: 进入子命令补全后返回 -1 终止当前脚本的补全流程，让子命令的补全结果直接生效
+function is_match_cmd_completion() {
+    local match_cmd_item="${1:-${cmd_item}}"
+    local match_comp_cmd_item="${2:-${comp_cmd_item}}"
+    local item_add_num="${3:-1}"
+    local comp_add_num="${4:-1}"
+    local close_comp="${5:-1}"
+
+    # 从当前 comp_index 位置开始，查找后续命令
+    local cmd_start_index=$((comp_index))
+
+    if (( cmd_start_index >= COMP_CWORD )); then
+        return -1
+    fi
+
+    # 获取后续命令名
+
+    # 构造新的 COMP_WORDS 和 COMP_CWORD（从 sub_cmd 开始）
+    local new_words=("${COMP_WORDS[@]:$cmd_start_index}")
+    local new_cword=$((COMP_CWORD - cmd_start_index))
+
+    # 替换 COMP 变量，不保存原始值（进入子命令后不还原）
+    COMP_WORDS=("${new_words[@]}")
+    COMP_CWORD=$new_cword
+
+    # 获取子命令名
+    local sub_cmd="${COMP_WORDS[0]}"
+
+    # 尝试获取子命令在 bash-completion 系统中注册的补全函数
+    local complete_info=$(complete -p "$sub_cmd" 2>/dev/null)
+
+    # 如果没有加载，尝试从 bash-completion 目录加载
+    if [[ -z "$complete_info" ]]; then
+        local completion_file="/usr/share/bash-completion/completions/$sub_cmd"
+        if [[ -f "$completion_file" ]]; then
+            source "$completion_file" 2>/dev/null
+            complete_info=$(complete -p "$sub_cmd" 2>/dev/null)
+        fi
+    fi
+
+    if [[ -n "$complete_info" ]]; then
+        # 解析出补全函数名（从 complete -F _func_name cmd 中提取 _func_name）
+        local completion_func=$(echo "$complete_info" | sed -n 's/.*-F \([^ ]*\).*/\1/p')
+        if [[ -n "$completion_func" ]] && type "$completion_func" &>/dev/null; then
+            # 调用 bash-completion 系统注册的补全函数
+            "$completion_func"
+            return -1
+        fi
+    fi
+
+    # 如果没有系统补全函数，尝试使用本脚本的 complete_func 获取补全
+    local sub_completion_txt="$(complete_func)"
+    if [[ -n $sub_completion_txt ]]; then
+        echo "$sub_completion_txt"
+        return -1
+    fi
+
+    # 都没有，使用默认补全
+    compopt -o default
+    return -1
+}
+
 
 # 将 {option:cmd} 格式的字符串 中的cmd提取出来
 # :cmd:$1: 待提取的 cmd_item , 格式为 {option:cmd}
@@ -802,6 +879,15 @@ function completion_cmd_normaliza() {
                 eval local multiple_cmd_item_list=$(cmd_normaliza "$completion_stack_cmd" "and")
                 completion_cmd_stack[${#completion_cmd_stack[@]}]=${multiple_cmd_item_list[0]}
             fi
+
+        elif [[ "${completion_stack_cmd_data[0]}" == "completion" ]]; then
+            # completion 模式：重新开始补全，提示可执行命令
+            if [[ ! -z ${COMP_WORDS[COMP_CWORD]} ]]; then
+                # ${COMP_WORDS[COMP_CWORD]} 为包装器提示后的子命令, 如果有输入则提示完整命令
+                COMPREPLY=($(compgen -c -- "${COMP_WORDS[COMP_CWORD]}" 2>/dev/null))
+                completion_cmd_normaliza_result=""
+            fi
+            return
 
         else
             # 未知的情况为了不报错也追加到提示中

@@ -21,4 +21,8 @@ test_complete kv_repeat1  "{repeat:('{kv:(\\\"--mainClass=\\\" \\\"{cmd:mvn.sh f
 # " 需要替换为 &quot; 但由于 " 在COMP_WORDBREAKS配置中所以会有些问题 
 test_complete kv_repeat2  "{repeat:('{kv:(\\\"--mainClass=&quot;\\\" \\\"{cmd:mvn.sh find_main src/main}\\\" \\\"&quot;\\\")}' '{kv:(-d {dir})}')}" -t -f
 test_complete kv_or  "{or:('{kv:(\\\"--mainClass=&quot;\\\" \\\"{cmd:mvn.sh find_main src/main}\\\" \\\"&quot;\\\")}' '{kv:(-d {dir})}')}" -t -f
+# 包装器模式, 从{-completion}后重新开始提示
+# 在命令行中输入`test_complete completion g`按tab会补全git之类的命令
+# 在命令行中输入`test_complete completion git `按tab会补全git的命令
+test_complete completion {-completion}
 

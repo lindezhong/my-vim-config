@@ -712,11 +712,12 @@ function is_match_cmd_completion() {
 
     # 如果没有加载，尝试从 bash-completion 目录加载
     if [[ -z "$complete_info" ]]; then
-        local completion_file="/usr/share/bash-completion/completions/$sub_cmd"
-        if [[ -f "$completion_file" ]]; then
-            source "$completion_file" 2>/dev/null
-            complete_info=$(complete -p "$sub_cmd" 2>/dev/null)
-        fi
+        _completion_loader "$sub_cmd"
+        # local completion_file="/usr/share/bash-completion/completions/$sub_cmd"
+        # if [[ -f "$completion_file" ]]; then
+        #     source "$completion_file" 2>/dev/null
+        #     complete_info=$(complete -p "$sub_cmd" 2>/dev/null)
+        # fi
     fi
 
     if [[ -n "$complete_info" ]]; then

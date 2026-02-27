@@ -11,7 +11,7 @@ while [ -L $script_path ]; do
 done
 home_path=$(readlink -f $(dirname "$script_path"))
 # bash -x debug的时候需要打开这个注释, 在bash -x 的情况下home_path会获取到 '.' 路径
-home_path="/home/ldz/.vim/bash"
+# home_path="${HOME}/.vim/bash"
 
 # 默认的配置脚本
 default_config_shell_path="$home_path/template_config.sh"

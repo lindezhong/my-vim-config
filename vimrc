@@ -503,15 +503,20 @@ function! s:close_unnamed_buffers() abort
 endfunction
 
 " 通过vim打开一个干净的命令行
+" 如果需要完全干净需要通过vim打开一个目录才会把目录删除
 function! Terminal()
+    " 关闭自动保持消息
     let g:MkSessionFile = ''
+    " 关闭ap/vim-buftabline插件的缓冲区
     if exists('*buftabline#update')
         let g:buftabline_show = 0
         call buftabline#update(0)
     endif
     terminal
+    " 关闭未命名、未修改、且的普通缓冲区
+    " 只留一个干净的终端
     call s:close_unnamed_buffers()
-    " 强制刷新
+    " 强制刷新无用信息
     redraw!
 endfunction
 " 使用 `:Terminal` 触发一个完整干净的命令行, 需要打开目录的基础上使用

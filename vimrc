@@ -516,8 +516,14 @@ function! Terminal()
     " 关闭未命名、未修改、且的普通缓冲区
     " 只留一个干净的终端
     call s:close_unnamed_buffers()
+    " 兼容nvim关闭提示信息
+    set noshowmode
+    if has('nvim')
+        " 如果是nvim的修改快捷, nvim通过 <C-\><C-n> 退出模式
+        tmap <Esc> <C-\><C-n>
+    endif
     " 强制刷新无用信息
-    redraw!
+    echo ''
 endfunction
 " 使用 `:Terminal` 触发一个完整干净的命令行, 需要打开目录的基础上使用
 command! Terminal call Terminal()

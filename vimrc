@@ -224,7 +224,10 @@ imap <silent><C-n> <Esc>`^:bd <CR>i
 " nmap <silent><C-A-q> :bufdo bd <CR>
 " imap <silent><C-A-q> <Esc>`^:bufdo bd <CR>i
 
-
+" `:terminal` 模式下
+" 使用 `Esc` 进入终端普通模式(Terminal-Normal mode)即可以文本选择
+" 使用 `i` 重新进入命令行
+tmap <Esc> <C-w>N
 
 " 窗口跳转
 nmap <silent><Esc><C-h> <C-w><C-h>
@@ -481,6 +484,39 @@ endfunction
 " 连续执行退出 `:quit` n次
 " 使用 `:Q n` 触发
 command! -nargs=1 Q call Quit(<f-args>)
+
+" 关闭未命名、未修改、且是普通的缓冲
+function! s:close_unnamed_buffers() abort
+    let current_buf = bufnr('%')
+    for buf in range(1, bufnr('$'))
+        if buflisted(buf) && buf != current_buf
+            let bufname = bufname(buf)
+            let buftype = getbufvar(buf, '&buftype')
+            let modified = getbufvar(buf, '&modified')
+
+            " 如果是未命名、未修改、且是普通缓冲区，则删除
+            if empty(bufname) && !modified && buftype == ''
+                silent execute 'bdelete' buf
+            endif
+        endif
+    endfor
+endfunction
+
+" 通过vim打开一个干净的命令行
+function! Terminal()
+    let g:MkSessionFile = ''
+    if exists('*buftabline#update')
+        let g:buftabline_show = 0
+        call buftabline#update(0)
+    endif
+    terminal
+    call s:close_unnamed_buffers()
+    " 强制刷新
+    redraw!
+endfunction
+" 使用 `:Terminal` 触发一个完整干净的命令行, 需要打开目录的基础上使用
+command! Terminal call Terminal()
+
 
 
 " =================== Yggdroot/LeaderF ======================

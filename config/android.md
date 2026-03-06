@@ -100,7 +100,9 @@ env DISPLAY=:1 dbus-launch --exit-with-session xfce4-session
 
 ### 启动方式
 
-在termux执行`./x11`(配置xfce启动脚本中生成的脚本)后打开termux-x11查看桌面
+1. 在termux执行`sshd`开启远程(termux-x11)依赖sshd不知道为啥
+2. 在termux执行`./x11`(配置xfce启动脚本中生成的脚本)
+3. 打开termux-x11查看桌面
 
 
 ## ssh

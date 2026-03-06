@@ -64,6 +64,45 @@ termux-change-repo
 termux-setup-storage
 ```
 
+## 安装termux-x11
+
+### termux中安装依赖
+
+termux-x11: A Termux add-on app providing Android frontend for Xwayland.
+
+```shell
+# 在termux中安装依赖
+# 使用xfce作为桌面环境
+pkg install x11-repo
+pkg install termux-x11-nightly
+pkg install xfce
+# termux-x11基于xwayland所以需要依赖安装
+pkg install xwayland
+
+# 在https://github.com/termux/termux-x11/releases/tag/nightly下载
+# termux-x11-nightly-xxxx-all.deb
+dpkg -i termux-x11-xxxx-all.deb
+```
+
+### 配置xfce启动脚本
+
+将以下内容配置到`/data/data/com.termux/files/usr/bin/x11`
+并且执行`chmod +x /data/data/com.termux/files/usr/bin/x11`
+
+```shell
+XDG_RUNTIME_DIR=${TMPDIR} termux-x11 :1 &
+env DISPLAY=:1 dbus-launch --exit-with-session xfce4-session
+```
+
+### 安装termux-x11
+
+在https://github.com/termux/termux-x11/releases/tag/nightly下载的app-universal-debug.apk安装
+
+### 启动方式
+
+在termux执行`x11`(/data/data/com.termux/files/usr/bin/x11)后打开termux-x11查看桌面
+
+
 ## ssh
 
 ```shell

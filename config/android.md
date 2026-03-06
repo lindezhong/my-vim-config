@@ -86,8 +86,8 @@ dpkg -i termux-x11-xxxx-all.deb
 
 ### 配置xfce启动脚本
 
-将以下内容配置到`/data/data/com.termux/files/usr/bin/x11`
-并且执行`chmod +x /data/data/com.termux/files/usr/bin/x11`
+将以下内容配置到`x11`
+并且执行`chmod +x x11`
 
 ```shell
 XDG_RUNTIME_DIR=${TMPDIR} termux-x11 :1 &
@@ -100,7 +100,7 @@ env DISPLAY=:1 dbus-launch --exit-with-session xfce4-session
 
 ### 启动方式
 
-在termux执行`x11`(/data/data/com.termux/files/usr/bin/x11)后打开termux-x11查看桌面
+在termux执行`./x11`(配置xfce启动脚本中生成的脚本)后打开termux-x11查看桌面
 
 
 ## ssh

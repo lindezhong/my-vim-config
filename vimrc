@@ -109,46 +109,6 @@ autocmd VimLeave * call SaveDirectoryMkSession()
 
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"""""""""""""""""""" nvim定制化配置 """"""""""""""""""
-""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if has('nvim')
-    " neovim 报错: vimspector unavailable: Requires Vim Compiled with +python3:
-    " 解决方案: `pip3 install pynvim` 从 0.3.1 版本开始，python 包 neovim 已更名为 pynvim，将命令更新为 pip3 install pynvim
-
-    " 设置光标样式, 让nvim和vim保持一样都是闪烁的方块
-    set guicursor=n-v-c-i:block
-    " 设置底部状态栏样式, 0: 不显示状态栏 , 1: 仅在打开多个窗口时显示 , 2: 始终显示（即使只有一个窗口）
-    set laststatus=1
-    " 如果需要同步vim的默认颜色只要把 colors/vimdefault.vim 覆盖
-    " /usr/share/nvim/runtime/colors/default.vim 就好
-    " nvim 0.10 默认开启了真彩色, 但这个配色有点丑设置成关闭 
-    set notermguicolors
-
-
-    " 设置垂直选项卡分隔符为竖线字符
-    set fillchars+=vert:\|
-    " 设置水平分隔符为等号字符
-    " set fillchars+=horiz:=
-    " 设置折叠线为点字符
-    set fillchars+=fold:-
-    " 设置垂直和水平分隔符为不同的字符
-    " set fillchars+=vert:│,horiz:─
-    " 设置当前窗口边界为星号字符
-    " set fillchars+=stl:*,stlnc:*
-    " 设置不同窗口之间的分隔符为加号字符
-    set fillchars+=eob:~
-    " 配置分割符颜色, vim为 VertSplit 颜色组, 但nvim为WinSeparator
-    highlight WinSeparator term=reverse cterm=reverse gui=reverse
-
-    " 修复ap/vim-buftabline插件在nvim中颜色被反转的问题,所以事先配置成反转后的颜色,负负得正
-    " 如果后续颜色变了可以查看ap/vim-buftabline/plugin/buftabline.vim中这两个分组颜色
-    highlight BufTabLineCurrent    ctermfg=0 ctermbg=7  guibg=LightGrey
-    highlight BufTabLineHidden     term=bold,underline cterm=bold,underline gui=bold,underline
-
-else
-endif
-
 
 " 字典补全,使用Ctrl-X Ctrl-K快捷键，将在'dictionary'选项定义的文件中查找匹配的关键词。
 " set dictionary=/usr/dict/words,/usr/share/dict/words
@@ -200,6 +160,47 @@ highlight DiffDelete ctermfg=Black ctermbg=Blue
 " 树莓派兼容
 set backspace=2
 set nocompatible
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""" nvim定制化配置 """"""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+if has('nvim')
+    " neovim 报错: vimspector unavailable: Requires Vim Compiled with +python3:
+    " 解决方案: `pip3 install pynvim` 从 0.3.1 版本开始，python 包 neovim 已更名为 pynvim，将命令更新为 pip3 install pynvim
+
+    " 设置光标样式, 让nvim和vim保持一样都是闪烁的方块
+    set guicursor=n-v-c-i:block
+    " 设置底部状态栏样式, 0: 不显示状态栏 , 1: 仅在打开多个窗口时显示 , 2: 始终显示（即使只有一个窗口）
+    set laststatus=1
+    " 如果需要同步vim的默认颜色只要把 colors/vimdefault.vim 覆盖
+    " /usr/share/nvim/runtime/colors/default.vim 就好
+    " nvim 0.10 默认开启了真彩色, 但这个配色有点丑设置成关闭 
+    set notermguicolors
+
+
+    " 设置垂直选项卡分隔符为竖线字符
+    set fillchars+=vert:\|
+    " 设置水平分隔符为等号字符
+    " set fillchars+=horiz:=
+    " 设置折叠线为点字符
+    set fillchars+=fold:-
+    " 设置垂直和水平分隔符为不同的字符
+    " set fillchars+=vert:│,horiz:─
+    " 设置当前窗口边界为星号字符
+    " set fillchars+=stl:*,stlnc:*
+    " 设置不同窗口之间的分隔符为加号字符
+    set fillchars+=eob:~
+    " 配置分割符颜色, vim为 VertSplit 颜色组, 但nvim为WinSeparator
+    highlight WinSeparator term=reverse cterm=reverse gui=reverse
+
+    " 修复ap/vim-buftabline插件在nvim中颜色被反转的问题,所以事先配置成反转后的颜色,负负得正
+    " 如果后续颜色变了可以查看ap/vim-buftabline/plugin/buftabline.vim中这两个分组颜色
+    highlight BufTabLineCurrent    ctermfg=0 ctermbg=7  guibg=LightGrey
+    highlight BufTabLineHidden     term=bold,underline cterm=bold,underline gui=bold,underline
+
+else
+endif
+
 
 
 " ==================================================

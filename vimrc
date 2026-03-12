@@ -521,9 +521,10 @@ function! Terminal()
     if has('nvim')
         " 如果是nvim的修改快捷, nvim通过 <C-\><C-n> 退出模式
         tmap <Esc> <C-\><C-n>
+        set cmdheight=0
     endif
     " 强制刷新无用信息
-    echo ''
+    redraw
 endfunction
 " 使用 `:Terminal` 触发一个完整干净的命令行, 需要打开目录的基础上使用
 command! Terminal call Terminal()

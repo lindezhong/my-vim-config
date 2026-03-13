@@ -354,8 +354,9 @@ export TMUX_CREATED_AT="${TMUX_CREATED_AT}"
 
 # script creates PTY for TTY-dependent programs (vim, mysql, etc.)
 # --flush ensures real-time logging by flushing after each write
+# -O /dev/null prevents script from creating a typescript file in cwd
 # tee writes to both MAIN_LOG and PART_LOG for dual-log system
-exec script --flush -q -c "${COMMAND}" 2>&1 | tee -a "${MAIN_LOG}" "${PART_LOG}"
+exec script --flush -q -c "${COMMAND}" -O /dev/null 2>&1 | tee -a "${MAIN_LOG}" "${PART_LOG}"
 EOF
   # Export variables for envsubst
   export COMMAND="${command}"
@@ -718,26 +719,20 @@ cmd_clean() {
         echo "Removing: ${id} (age: ${age_days}d)"
         rm -f "${state_file}"
 
-        # Remove main log
+        # Remove entire session log directory (includes logs, wrapper, parts, etc.)
         if [[ -n "${log_file}" ]]; then
-          rm -f "${log_file}"
-        fi
+          local session_log_dir
+          session_log_dir=$(dirname "${log_file}")
+          if [[ -d "${session_log_dir}" ]]; then
+            rm -rf "${session_log_dir}"
+          fi
 
-        # Remove part log
-        if [[ -n "${part_log}" ]]; then
-          rm -f "${part_log}"
-        fi
-
-        # Remove parts directory (all archived partitions)
-        local session_log_dir
-        session_log_dir=$(dirname "${log_file}")
-        if [[ -d "${session_log_dir}/parts" ]]; then
-          rm -rf "${session_log_dir}/parts"
-        fi
-
-        # Remove session directory if empty
-        if [[ -d "${session_log_dir}" ]]; then
-          rmdir "${session_log_dir}" 2>/dev/null || true
+          # Remove session name directory if empty
+          local session_name_dir
+          session_name_dir=$(dirname "${session_log_dir}")
+          if [[ -d "${session_name_dir}" ]]; then
+            rmdir "${session_name_dir}" 2>/dev/null || true
+          fi
         fi
       fi
       count=$((count + 1))

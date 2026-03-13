@@ -882,11 +882,12 @@ function completion_cmd_normaliza() {
             fi
 
         elif [[ "${completion_stack_cmd_data[0]}" == "completion" ]]; then
+            # 清空结果，避免残留的提示 
+            completion_cmd_normaliza_result=""
             # completion 模式：重新开始补全，提示可执行命令
             if [[ ! -z ${COMP_WORDS[COMP_CWORD]} ]]; then
                 # ${COMP_WORDS[COMP_CWORD]} 为包装器提示后的子命令, 如果有输入则提示完整命令
                 COMPREPLY=($(compgen -c -- "${COMP_WORDS[COMP_CWORD]}" 2>/dev/null))
-                completion_cmd_normaliza_result=""
             fi
             return
 

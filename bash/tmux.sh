@@ -321,28 +321,26 @@ cmd_start() {
     mkdir -p "${session_logs_dir}"
   fi
 
-  # If no command provided, start a plain tmux session
+  # If no command provided, use the default shell as the command
   if [[ -z "${command}" ]]; then
-    # Create a plain tmux session without logging
-    tmux new-session -d -s "${tmux_session}"
-    log_file=""  # No log file for plain sessions
-    part_log=""  # No part log for plain sessions
-  else
-    # Create tmux session with the command (preserves TTY for interactive commands)
-    # Use script with tee to capture TTY input/output while preserving interactivity
-    # Dual-log system: main_log captures everything, part_log for partitioning
-    # New path format: LOGS_DIR/SESSION_NAME/SESSION_ID/NAME.log and NAME-part.log
-    log_file="${session_logs_dir}/${name}.log"
-    part_log="${session_logs_dir}/${name}-part.log"
+    command="${SHELL:-/bin/bash}"
+  fi
 
-    # Create wrapper using envsubst for variable expansion
-    # Use script with tee to create PTY for interactive commands with dual-log output
-    # --flush ensures real-time logging by flushing after each write
-    # tee writes to both main_log and part_log simultaneously
-    # New wrapper location: session_logs_dir/wrapper
-    # Export TMUX_ environment variables for use within the tmux session
-    local wrapper="${session_logs_dir}/wrapper"
-    cat > "${wrapper}" <<'EOF'
+  # Create tmux session with the command (preserves TTY for interactive commands)
+  # Use script with tee to capture TTY input/output while preserving interactivity
+  # Dual-log system: main_log captures everything, part_log for partitioning
+  # New path format: LOGS_DIR/SESSION_NAME/SESSION_ID/NAME.log and NAME-part.log
+  log_file="${session_logs_dir}/${name}.log"
+  part_log="${session_logs_dir}/${name}-part.log"
+
+  # Create wrapper using envsubst for variable expansion
+  # Use script with tee to create PTY for interactive commands with dual-log output
+  # --flush ensures real-time logging by flushing after each write
+  # tee writes to both main_log and part_log simultaneously
+  # New wrapper location: session_logs_dir/wrapper
+  # Export TMUX_ environment variables for use within the tmux session
+  local wrapper="${session_logs_dir}/wrapper"
+  cat > "${wrapper}" <<'EOF'
 #!/bin/bash
 # Export TMUX_ environment variables for use within the tmux session
 # These variables are only available within the tmux session, not the parent process
@@ -359,24 +357,23 @@ export TMUX_CREATED_AT="${TMUX_CREATED_AT}"
 # tee writes to both MAIN_LOG and PART_LOG for dual-log system
 exec script --flush -q -c "${COMMAND}" 2>&1 | tee -a "${MAIN_LOG}" "${PART_LOG}"
 EOF
-    # Export variables for envsubst
-    export COMMAND="${command}"
-    export MAIN_LOG="${log_file}"
-    export PART_LOG="${part_log}"
-    export TMUX_NAME="${name}"
-    export TMUX_ID="${session_id}"
-    export TMUX_SESSION="${tmux_session}"
-    export TMUX_COMMAND="${command}"
-    export TMUX_LOG_FILE="${log_file}"
-    export TMUX_PART_LOG="${part_log}"
-    export TMUX_CREATED_AT="${created_at}"
-    envsubst < "${wrapper}" > "${wrapper}.tmp"
-    mv "${wrapper}.tmp" "${wrapper}"
-    unset COMMAND MAIN_LOG PART_LOG TMUX_NAME TMUX_ID TMUX_SESSION TMUX_COMMAND TMUX_LOG_FILE TMUX_PART_LOG TMUX_CREATED_AT
-    chmod +x "${wrapper}"
+  # Export variables for envsubst
+  export COMMAND="${command}"
+  export MAIN_LOG="${log_file}"
+  export PART_LOG="${part_log}"
+  export TMUX_NAME="${name}"
+  export TMUX_ID="${session_id}"
+  export TMUX_SESSION="${tmux_session}"
+  export TMUX_COMMAND="${command}"
+  export TMUX_LOG_FILE="${log_file}"
+  export TMUX_PART_LOG="${part_log}"
+  export TMUX_CREATED_AT="${created_at}"
+  envsubst < "${wrapper}" > "${wrapper}.tmp"
+  mv "${wrapper}.tmp" "${wrapper}"
+  unset COMMAND MAIN_LOG PART_LOG TMUX_NAME TMUX_ID TMUX_SESSION TMUX_COMMAND TMUX_LOG_FILE TMUX_PART_LOG TMUX_CREATED_AT
+  chmod +x "${wrapper}"
 
-    tmux new-session -d -s "${tmux_session}" "${wrapper}"
-  fi
+  tmux new-session -d -s "${tmux_session}" "${wrapper}"
 
   # Configure tmux session appearance
   configure_tmux_style "${tmux_session}"

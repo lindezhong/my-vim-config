@@ -103,6 +103,9 @@ set noruler
 autocmd FileType mysql setlocal tabstop=2 shiftwidth=2
 autocmd FileType sql setlocal tabstop=2 shiftwidth=2
 autocmd FileType yaml setlocal tabstop=2 shiftwidth=2
+autocmd FileType html setlocal tabstop=2 shiftwidth=2
+autocmd FileType css setlocal tabstop=2 shiftwidth=2
+autocmd FileType javascript setlocal tabstop=2 shiftwidth=2
 " vim退出的时候自动保持 session , 在启动vim的时候可以使用 `LoadDirectoryMkSession` 加载
 autocmd VimEnter * call InitDirectoryMkSession()
 autocmd VimLeave * call SaveDirectoryMkSession()

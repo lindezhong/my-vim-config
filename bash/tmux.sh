@@ -37,7 +37,9 @@ init_dirs() {
 
 validate_name() {
   local name=$1
-  [[ "${name}" =~ ^[a-zA-Z0-9_-]+$ ]]
+  # Allow alphanumeric, underscore, hyphen, and / as delimiter
+  # Pattern: one or more valid chars, optionally followed by (/ + valid chars) repeated
+  [[ "${name}" =~ ^[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)*$ ]]
 }
 
 generate_session_id() {
@@ -45,7 +47,11 @@ generate_session_id() {
   local timestamp
   timestamp=$(date +%Y-%m-%d-%H-%M-%S)
 
-  echo "${base_name}-${timestamp}"
+  # Replace / with - for safe filename
+  local safe_name
+  safe_name=$(echo "${base_name}" | sed 's/\//-/g')
+
+  echo "${safe_name}-${timestamp}"
 }
 
 configure_tmux_style() {
@@ -306,7 +312,7 @@ cmd_start() {
   local created_at
 
   if ! validate_name "${name}"; then
-    echo "Error: Invalid name '${name}'. Use only letters, numbers, underscore, hyphen."
+    echo "Error: Invalid name '${name}'. Names cannot start/end with '/' or contain consecutive slashes. Use only letters, numbers, underscore, hyphen, and /." >&2
     return 1
   fi
 
@@ -329,9 +335,9 @@ cmd_start() {
   # Create tmux session with the command (preserves TTY for interactive commands)
   # Use script with tee to capture TTY input/output while preserving interactivity
   # Dual-log system: main_log captures everything, part_log for partitioning
-  # New path format: LOGS_DIR/SESSION_NAME/SESSION_ID/NAME.log and NAME-part.log
-  log_file="${session_logs_dir}/${name}.log"
-  part_log="${session_logs_dir}/${name}-part.log"
+  # Use session_id for log filenames (with hyphens instead of slashes) for valid filenames
+  log_file="${session_logs_dir}/${session_id}.log"
+  part_log="${session_logs_dir}/${session_id}-part.log"
 
   # Create wrapper using envsubst for variable expansion
   # Use script with tee to create PTY for interactive commands with dual-log output

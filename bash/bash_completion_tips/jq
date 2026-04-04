@@ -1,6 +1,9 @@
-# 将json格式转成csv, 需要一个list格式, 比如 [{"k": "v"}] , 如果不是 list 格式需要使用在jq中获取到list格式的节点
+# 将json格式转成csv(带表头), 需要一个list格式, 比如 [{"k": "v"}] , 如果不是 list 格式需要使用在jq中获取到list格式的节点
 # echo '[{"k": "v,1\"1"}]' | jq -r '(.[0] | keys_unsorted) as $k | $k, (map([.[ $k[] ]])[]) | @csv'
 jq -r "&apos;(.[0]&nbsp;|&nbsp;keys_unsorted)&nbsp;as&nbsp;&dollar;k&nbsp;|&nbsp;&dollar;k,&nbsp;(map([.[&nbsp;&dollar;k[]&nbsp;]])[])&nbsp;|&nbsp;@csv&apos;"
+
+# 将json格式转成csv(不带表头, 而且可以过滤字段), 需要一个list格式, 比如 [{"k": "v"}] , 如果不是 list 格式需要使用在jq中获取到list格式的节点
+#  echo '[{"k": "v,1\"1"}]' | jq -r '.[] |  [.key] | @csv'
 
 # jq获取一个变量, 通过外部传入变量的方式, key 可以指定特殊值
 # echo '{"k": "v"}' | jq -r --arg key  "k" '.[$key]'
@@ -14,3 +17,29 @@ jq -r  '.k'
 
 # 循环遍历一个list的值
 jq -r '.[] | "key: \(.k)"'
+
+# 只保留两个字段
+# echo '{"k1": "v1", "k2": "v2", "k3": "v3"}' | jq -r '{k1, k2}'
+# 输出: {"k1": "v1", "k2": "v2"}
+jq -r '{k1, k2}'
+
+# jq过滤条件, 使用map保留原始的数组结构
+# echo '[{"k": "v1","key": "value"},{"k": "v2","key": "value"}]' | jq -r 'map(select(.k == "v1"))'
+# 输出: [{"k": "v1","key": "value"}]
+# map函数只能作用于数组
+jq -r 'map(select(.k == "v1"))'
+
+# jq过滤条件, 针对对象的话不满足则空输出
+# echo '{"k": "v1","key": "value"}' | jq -r 'select(.k == "v1")'
+# 输出: {"k": "v1","key": "value"}
+# echo '{"k": "v1","key": "value"}' | jq -r 'select(.k == "v2")'
+# 输出:
+jq -r 'select(.k == "v1")'
+
+# jq过滤条件, 使用 .[] 提取独立对象
+# echo '[{"k": "v1","key": "value"},{"k": "v2","key": "value"}]' | jq -r '.[] | select(.k == "v1")'
+# 输出: {"k": "v1","key": "value"}
+# .[] 变成一个个独立对象
+jq -r 'map(select(.k == "v1"))'
+
+

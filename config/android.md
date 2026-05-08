@@ -79,10 +79,22 @@ pkg install xfce
 # termux-x11基于xwayland所以需要依赖安装
 pkg install xwayland
 
+# 这个步骤无需执行如果有问题再执行
 # 在https://github.com/termux/termux-x11/releases/tag/nightly下载
 # termux-x11-nightly-xxxx-all.deb
-dpkg -i termux-x11-xxxx-all.deb
+# dpkg -i termux-x11-xxxx-all.deb
 ```
+
+### 配置ssh x11支持
+
+修改文件`$PREFIX/etc/ssh/sshd_config` 开启以下配置
+```config
+X11Forwarding yes	    # 允许X11转发
+X11DisplayOffset 10   #（可选）转发从localhost:10开始
+X11UseLocalhost no	#（可选）禁止将X11转发请求绑定到本地回环地址上
+AddressFamily inet	#（可选）强制使用IPv4通道。
+```
+
 
 ### 配置xfce启动脚本
 
@@ -100,9 +112,8 @@ env DISPLAY=:1 dbus-launch --exit-with-session xfce4-session
 
 ### 启动方式
 
-1. 在termux执行`sshd`开启远程(termux-x11)依赖sshd不知道为啥
-2. 在termux执行`./x11`(配置xfce启动脚本中生成的脚本)
-3. 打开termux-x11查看桌面
+1. 在termux执行`./x11`(配置xfce启动脚本中生成的脚本, 需要执行两次不知道为啥)
+2. 打开termux-x11查看桌面
 
 
 ## ssh

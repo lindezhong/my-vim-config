@@ -155,7 +155,7 @@ highlight Normal ctermbg=Black
 " 设置选中行颜色
 highlight Visual ctermfg=Black
 " 设置vim diff 颜色
-highlight DiffChange ctermfg=White ctermbg=Black
+highlight DiffChange ctermfg=Black ctermbg=Blue
 highlight DiffText ctermfg=Black ctermbg=Red
 highlight DiffAdd ctermfg=Black ctermbg=Blue
 highlight DiffDelete ctermfg=Black ctermbg=Blue

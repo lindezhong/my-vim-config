@@ -85,6 +85,8 @@ if [ ! -d ~/.bash_completion ]; then
     ln -s ${home_path}/bash/bash_completion_tips ~/.bash_completion
 fi
 
+# tmux 配置软链接
+ln -s ${home_path}/config/tmux.conf ${HOME}/.tmux.conf
 
 # python软连接:coc-jedi使用
 if [ ! -f /usr/bin/python ]; then
@@ -93,6 +95,7 @@ fi
 # w3m命令行查看图片
 # sudo apt install -y  w3m-inline-image
 sudo apt install -y w3m w3m-img
+sudo apt install -y tmux
 
 sudo apt install -y jq
 sudo apt install -y nodejs npm

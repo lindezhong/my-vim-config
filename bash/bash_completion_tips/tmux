@@ -77,4 +77,10 @@ tmux split-window
 # 给tmux发送指令需要使用""包裹message, Enter表示回车
 # 即 `tmux send-keys -t session 'ls ./' Enter` 表示给session发送一个 `ls ./` 命令
 tmux send-keys -t {cmd:activity_session} "{&apos;message&apos;}" Enter
+# 重新加载配置
+tmux source-file ~/.tmux.conf
 
+# 显示状态栏
+tmux set -g status
+# 完全隐藏状态栏
+tmux set -g status off

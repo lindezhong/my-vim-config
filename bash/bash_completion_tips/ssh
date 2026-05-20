@@ -1,0 +1,9 @@
+# ssh 开启X11转发(-X), 并且开启压缩(-C)
+ssh -X -C user@host
+
+# ssh开启 SOCKS 代理, 可以将本地1080端口socks到远程
+# 在本地执行 `ssh -D 1080 user@host`
+# 然后在本地启动浏览器, 可以让浏览器的流量走ssh的服务器
+# Firefox: 设置 → 网络 → 手动代理 → SOCKS Host: 127.0.0.1，端口 1080。
+# 谷歌流量器: google-chrome --proxy-server="socks5://127.0.0.1:1080"
+ssh -D 1080 user@host

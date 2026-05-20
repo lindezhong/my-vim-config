@@ -15,6 +15,7 @@
 | update-alternatives | update-alternatives 是一个切换命令行版本的工具, 本质上是管理某个软链接指向那个那个文件                                     |
 | whisper             | whisper是openai开源的语音识别大模型                                                                                        |
 | tmux                | tmux（Terminal Multiplexer）是一个终端复用工具，它允许你在单个终端窗口中创建多个虚拟终端会话，并能保持这些会话在后台运行。 |
+| ssh                 | 远程连接工具                                                                                                               |
 
 
 

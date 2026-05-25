@@ -39,6 +39,22 @@
 # 同步这个source下的所有信息包括元数据比如修改时间, 到destination , 并且显示进度
 # 由于 rsync 默认使用文件大小和修改时间决定文件是否需要更新，所以-a比-r更有用。
 rsync -azv --progress {source} {destination}
+
+# u盘格式化为 exFAT 格式,并且挂载
+# ```
+# # 1. 查找u盘 : 假设输出 `/dev/sdb1`
+# sudo fdisk -l
+# # 2. 卸载分区(如果已经挂载)
+# sudo umount /dev/sdb1
+# # 3. 格式化为 exFAT , -n 同时设置卷标(名称)
+# sudo mkfs.exfat -n "MYUSB" /dev/sdb1
+# # 4. 挂载u盘
+# sudo mkdir -p /mnt/usb
+# sudo mount /dev/sda1 /mnt/usb
+# ```
+# --no-perms --no-owner --no-group:同步忽略文件权限(比如-rw-r--r--)
+# 适用于 U 盘是 exFAT 格式(同时适用于linux安卓window)的情况
+rsync -azv --no-perms --no-owner --no-group --progress {source} {destination}
 # 同步这个source下的所有信息包括元数据比如修改时间, 到destination , 并且显示进度
 # 由于 rsync 默认使用文件大小和修改时间决定文件是否需要更新，所以-a比-r更有用。
 # 并且指定ssh的端口: rsync -azv -e 'ssh -p 2234' --progress {source} {destination}

@@ -52,7 +52,7 @@ rsync -azv --progress {source} {destination}
 # sudo mkdir -p /mnt/usb
 # sudo mount /dev/sda1 /mnt/usb
 # ```
-# --no-perms --no-owner --no-group:同步忽略文件权限(比如-rw-r--r--)
+# --no-perms --no-owner --no-group : 同步忽略文件权限(比如-rw-r--r--)
 # 适用于 U 盘是 exFAT 格式(同时适用于linux安卓window)的情况
 rsync -azv --no-perms --no-owner --no-group --progress {source} {destination}
 # 同步这个source下的所有信息包括元数据比如修改时间, 到destination , 并且显示进度

@@ -51,6 +51,8 @@ rsync -azv --progress {source} {destination}
 # # 4. 挂载u盘
 # sudo mkdir -p /mnt/usb
 # sudo mount /dev/sda1 /mnt/usb
+# # 5. 重新加载 systemctl (如果需要)
+# sudo systemctl daemon-reload
 # ```
 # --no-perms --no-owner --no-group : 同步忽略文件权限(比如-rw-r--r--)
 # 适用于 U 盘是 exFAT 格式(同时适用于linux安卓window)的情况

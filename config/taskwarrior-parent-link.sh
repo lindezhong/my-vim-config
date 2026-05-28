@@ -26,6 +26,14 @@
 # uda._op.type=string          # internal: previous p staging slot
 # uda._op.label=_OldP
 # 
+# # task project: list all project root tasks (filter=project:root), always ignore context
+# report.project.description=Project root tasks
+# report.project.columns=id,uuid.short,project,tags,depends.count,description.count
+# report.project.labels=ID,UUID,Project,Tags,Children,Desc
+# report.project.sort=project+,id+
+# report.project.filter=project:root
+# report.project.context=0
+#
 # # Context pattern (placeholders: <ctx>, <project>, <root_uuid>, <desc>):
 # #   context.<ctx>.read  = filter applied to reports/lists
 # #   context.<ctx>.write = modifiers auto-applied to `task add` / `task modify`
@@ -46,14 +54,6 @@
 # # And `task add "<desc>" p:<parent_uuid>` adds a second parent without
 # # losing the context's proot.
 # #
-# #
-# # task project: list all project root tasks (filter=project:root), always ignore context
-# report.project.description=Project root tasks
-# report.project.columns=id,uuid.short,project,tags,depends.count,description.count
-# report.project.labels=ID,UUID,Project,Tags,Children,Desc
-# report.project.sort=project+,id+
-# report.project.filter=project:root
-# report.project.context=0
 # ```
 #
 

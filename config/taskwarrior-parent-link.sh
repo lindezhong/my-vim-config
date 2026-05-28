@@ -6,11 +6,36 @@
 #   ~/.task/hooks/on-exit-parent    ->  taskwarrior-parent-link.sh
 #
 # REQUIRED CONFIG in ~/.taskrc:
+# ```
 #   uda.p.type=string
 #   uda.p.label=Parent
 #   uda._op.type=string          # internal: previous parent staging slot
 #   uda._op.label=_OldP
 #
+#   # task project: list all project root tasks (filter=project:root), always ignore context
+#   report.project.description=Project root tasks
+#   report.project.columns=id,uuid.short,project,tags,depends.count,description.count
+#   report.project.labels=ID,UUID,Project,Tags,Children,Desc
+#   report.project.sort=project+,id+
+#   report.project.filter=project:root
+#   report.project.context=0
+#   
+#   # Context pattern (placeholders: <ctx>, <project>, <parent_uuid>, <desc>):
+#   #   context.<ctx>.read  = filter applied to reports/lists
+#   #   context.<ctx>.write = modifiers auto-applied to `task add` / `task modify`
+#   #   p:<parent_uuid>     = UDA "Parent" (see uda.p above). Value is the parent
+#   #                         task's UUID (full, or unambiguous prefix). The
+#   #                         on-modify/on-exit hooks turn this into a depends:
+#   #                         edge on the parent task.
+#   #
+#   # Template:
+#   #   context.<ctx>.read=project:<project>
+#   #   context.<ctx>.write=project:<project> p:<parent_uuid>
+#   #   context=<ctx>
+#   #
+#   # Under the active context, `task add "<desc>"` becomes equivalent to:
+#   #   task add "<desc>" project:<project> p:<parent_uuid>
+# ```
 # Why two hooks?
 #   on-modify runs BEFORE Taskwarrior flushes pending.data, so cross-task
 #   modifications get silently overwritten when the main process rewrites

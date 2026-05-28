@@ -29,7 +29,7 @@
 # # task project: list all project root tasks (filter=project:root), always ignore context
 # report.project.description=Project root tasks
 # report.project.columns=id,uuid.short,tags,depends.count,description.count,entry,end
-# report.project.labels=ID,UUID,Tags,Children,Desc,StartedEnded
+# report.project.labels=ID,UUID,Tags,Children,Desc,Started,Ended
 # report.project.sort=project+,id+
 # report.project.filter=project:root
 # report.project.context=0

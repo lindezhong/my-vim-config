@@ -33,6 +33,9 @@
 # report.project.sort=project+,id+
 # report.project.filter=project:root
 # report.project.context=0
+# 
+# report.all.description=all task
+# report.all.context=0
 #
 # # Context pattern (placeholders: <ctx>, <project>, <root_uuid>, <desc>):
 # #   context.<ctx>.read  = filter applied to reports/lists

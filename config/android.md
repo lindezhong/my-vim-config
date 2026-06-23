@@ -72,7 +72,111 @@ termux-change-repo
 termux-setup-storage
 ```
 
-## 安装termux-x11
+## proot-distro 
+
+```shell
+# 安装proot-distro
+pkg install proot-distro
+
+# 可以查看已经安装的Linux系统。
+proot-distro list
+
+# 安装debian
+# proot-distro 新版本(5.0后)已经支持使用docker镜像安装
+# 所以需要安装那些可以去docker hub上获取
+proot-distro install debian
+
+# 登陆debian
+proot-distro login debian
+
+```
+
+## 安装termux-x11(proot-distro)
+
+termux-x11: A Termux add-on app providing Android frontend for Xwayland.
+
+### termux中安装依赖
+
+```shell
+# 在termux中安装x11依赖
+pkg install x11-repo
+pkg install termux-x11-nightly
+
+# 这个步骤无需执行如果有问题再执行
+# 在https://github.com/termux/termux-x11/releases/tag/nightly下载
+# termux-x11-nightly-xxxx-all.deb
+# dpkg -i termux-x11-xxxx-all.deb
+
+# 允许外部应用调用 termux
+# 让debian支持x11
+echo 'allow-external-apps=true' >> ~/.termux/termux.properties
+
+# proot-distro 中视频和声音可以显示的依赖
+# 安装 Virglrenderer 依赖以支持 GPU 3D 加速 
+pkg install virglrenderer-android
+# 安装 Pulseaudio 依赖以支持音频
+pkg install pulseaudio
+
+# proot-distro 安装 debian
+pkg install proot-distro
+proot-distro install debian
+# 登录debian继续
+proot-distro login debian
+```
+
+
+### 在debian中继续安装依赖
+
+```shell
+# 先更新源
+apt update
+
+# 安装桌面环境
+apt install xfce4
+
+# 如果需要使用 ssh -X 的方式连接则不能直接ssh到termux需要ssh到proot-distro debian
+# 因为这样才能使用单独的转发能力, 所以需要单独的安装ssh服务端
+# 这样可以使用  ssh -X root@android_ip -p 8122 启动X11转发
+apt install openssh-server
+# 开启远程连接和X11转发
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sed -i -E 's/^#?Port .*/Port 8122/'                  /etc/ssh/sshd_config
+sed -i -E 's/^#?X11Forwarding.*/X11Forwarding yes/'  /etc/ssh/sshd_config
+sed -i -E 's/^#?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# 生成.Xauthority文件让登录正常
+touch ~/.Xauthority
+
+# 设置root用户密码
+passwd
+```
+
+### 在debian配置xfce启动脚本
+
+将以下内容配置到`x11`
+并且执行`chmod +x x11`
+
+
+```shell
+# 同时启用 sshd, 让  ssh -X root@android_ip -p 8122 支持 X11 转发
+/usr/sbin/sshd
+XDG_RUNTIME_DIR=${TMPDIR} termux-x11 :1 &
+env DISPLAY=:1 dbus-launch --exit-with-session xfce4-session
+
+```
+
+### 安装termux-x11
+
+在https://github.com/termux/termux-x11/releases/tag/nightly下载的app-universal-debug.apk安装
+
+### 启动方式
+
+1. 在debian执行`./x11`(配置xfce启动脚本中生成的脚本, 需要执行两次不知道为啥)
+2. 打开termux-x11查看桌面
+
+
+
+## 安装termux-x11(原生安装在原始termux中)
 
 ### termux中安装依赖
 
@@ -147,56 +251,6 @@ ifconfig
 
 # 客户端运行
 ssh android_ip -p 8022
-```
-
-## proot-distro 
-
-```shell
-# 安装proot-distro
-pkg install proot-distro
-
-# 可以查看可安装的Linux系统。
-proot-distro list
-
-# 安装debian
-proot-distro install debian
-
-# 登陆debian
-proot-distro login debian
-
-```
-
-## 桌面环境安装
-
-```shell
-# 安裝TigerVNC。
-pkg install x11-repo
-pkg install tigervnc
-
-# 安裝XFCE4桌面环境、Firefox浏览器
-pkg install xfce4 xfce4-goodies firefox vim
-
-# 用VIM編輯：vim ~/.vnc/xstartup，全部刪除，改加入以下內容:
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADRESS
-export PULSE_SERVER=127.0.0.1 && pulseaudio --start --disable-shm=1 --exit-idle-time=-1
-exec startxfce4
-
-# 賦予xstartup執行權限
-chmod +x ~/.vnc/xstartup
-
-# 用VIM編輯：vim ~/.vnc/config，加入以下內容
-geometry=1920x1080
-depth=32
-localhost=no
-
-# 在本機開啟vnc server，再設定vnc的密碼。
-vncserver
-
-# 查看vnc端口
-ps -ef | grep vnc
-
-# 開啟AVNC APP，輸入localhost:port，再輸入密碼即可連線。
 ```
 
 ## Termux防止杀后台 解决signal 9错误 

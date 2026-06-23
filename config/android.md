@@ -107,21 +107,22 @@ pkg install termux-x11-nightly
 # termux-x11-nightly-xxxx-all.deb
 # dpkg -i termux-x11-xxxx-all.deb
 
-# 允许外部应用调用 termux
-# 让debian支持x11
-echo 'allow-external-apps=true' >> ~/.termux/termux.properties
 
-# proot-distro 中视频和声音可以显示的依赖
-# 安装 Virglrenderer 依赖以支持 GPU 3D 加速 
-pkg install virglrenderer-android
-# 安装 Pulseaudio 依赖以支持音频
-pkg install pulseaudio
+# 安装总线, 让x11脚本能跑起来
+pkg install dbus
+
+# # proot-distro 中GPU加速和声音可以显示的依赖(可选)
+# # 安装 Virglrenderer 依赖以支持 GPU 3D 加速 
+# pkg install virglrenderer-android
+# # 安装 Pulseaudio 依赖以支持音频
+# pkg install pulseaudio
 
 # proot-distro 安装 debian
 pkg install proot-distro
 proot-distro install debian
 # 登录debian继续
 proot-distro login debian
+
 ```
 
 

@@ -132,8 +132,15 @@ proot-distro login debian
 # 先更新源
 apt update
 
+# 安装sudo
+apt install sudo
+
 # 安装桌面环境
 apt install xfce4
+
+# 安装中文支持
+apt install locales-all
+
 
 # 如果需要使用 ssh -X 的方式连接则不能直接ssh到termux需要ssh到proot-distro debian
 # 因为这样才能使用单独的转发能力, 所以需要单独的安装ssh服务端
@@ -150,6 +157,18 @@ touch ~/.Xauthority
 
 # 设置root用户密码
 passwd
+
+
+
+# 添加新用户, 并且设置新用户使用shell 解释器为bash , 需要先切到新用户并且设置密码才能切换
+useradd -m -d /home/ldz ldz
+# 在root种设置ldz密码
+passwd ldz
+# 添加ldz有sudo权限 
+echo "ldz ALL=(ALL:ALL) ALL" | sudo tee /etc/sudoers.d/ldz
+su ldz
+# 在ldz用户下设置shell 解释器为bash
+chsh -s /bin/bash
 ```
 
 ### 在debian配置xfce启动脚本

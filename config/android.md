@@ -144,7 +144,7 @@ apt install locales-all
 
 # 如果需要使用 ssh -X 的方式连接则不能直接ssh到termux需要ssh到proot-distro debian
 # 因为这样才能使用单独的转发能力, 所以需要单独的安装ssh服务端
-# 这样可以使用  ssh -X root@android_ip -p 8122 启动X11转发
+# 这样可以使用  ssh -X user@android_ip -p 8122 启动X11转发
 apt install openssh-server
 # 开启远程连接和X11转发
 cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
@@ -169,16 +169,20 @@ echo "ldz ALL=(ALL:ALL) ALL" | sudo tee /etc/sudoers.d/ldz
 su ldz
 # 在ldz用户下设置shell 解释器为bash
 chsh -s /bin/bash
+
+# 退出ldz用户
+exit
 ```
 
 ### 在debian配置xfce启动脚本
 
-将以下内容配置到`x11`
+将以下内容配置到`x11` 
 并且执行`chmod +x x11`
 
+在root用户下配置x11脚本, 因为 proot-distro login debian登录的使用root用户这样方便
 
 ```shell
-# 同时启用 sshd, 让  ssh -X root@android_ip -p 8122 支持 X11 转发
+# 同时启用 sshd, 让  ssh -X user@android_ip -p 8122 支持 X11 转发
 # 请注意如果要vim支持x11转发需要再安装vim-gtk3前就要启动这个脚本
 # 并且需要在这个脚本启动的时候安装否则无法使用 -X 复制(不知道为啥)
 # 如果在非启动这个脚本的时候安装了请先卸载后启动这个脚本再安装

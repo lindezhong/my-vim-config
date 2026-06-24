@@ -160,6 +160,9 @@ passwd
 
 ```shell
 # 同时启用 sshd, 让  ssh -X root@android_ip -p 8122 支持 X11 转发
+# 请注意如果要vim支持x11转发需要再安装vim-gtk3前就要启动这个脚本
+# 并且需要在这个脚本启动的时候安装否则无法使用 -X 复制(不知道为啥)
+# 如果在非启动这个脚本的时候安装了请先卸载后启动这个脚本再安装
 /usr/sbin/sshd
 XDG_RUNTIME_DIR=${TMPDIR} termux-x11 :1 &
 env DISPLAY=:1 dbus-launch --exit-with-session xfce4-session

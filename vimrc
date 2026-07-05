@@ -1069,6 +1069,39 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 " | `<Plug>VimspectorDownFrame`                   | Move down a frame in the current call stack                         | `vimspector#DownFrame()`                                          |
 " | `<Plug>VimspectorBalloonEval`                 | Evaluate expression under cursor (or visual) in popup               | *internal*                                                        |
 
+"  调整debug布局为如下
+"  [sidebar 左][   code 右（占满）   ]
+"  [stack     ][                     ]
+"  [watch     ][                     ]
+"  [vars      ][── Output ┬terminal ─]
+" (见 :h vimspector.txt → VimspectorTerminalOpened；:h win_splitmove)
+function! s:LayoutTerminalBesideOutput()
+  if !exists( 'g:vimspector_session_windows.terminal' ) | return | endif
+  let term_id = g:vimspector_session_windows.terminal
+
+  if exists( 'g:vimspector_session_windows.output' ) && exists( '*win_splitmove' )
+    let out_id = g:vimspector_session_windows.output
+    if win_id2win( out_id ) > 0
+      " 把终端移到 Output 右侧（垂直分栏）：两者在 code 下方右列左右并排，
+      " sidebar 保持左侧全高，终端不再压到整屏底部全宽。
+      " vertical:1 左右分栏；rightbelow:1 终端在 Output 右侧（要左侧改 0）
+      call win_splitmove( term_id, out_id, { 'vertical': 1, 'rightbelow': 1 } )
+      " Output|terminal 那行高度，按需调
+      call win_gotoid( term_id )
+      resize 10
+    endif
+  endif
+
+  " 光标回到 code 窗口
+  if exists( 'g:vimspector_session_windows.code' )
+    call win_gotoid( g:vimspector_session_windows.code )
+  endif
+endfunction
+
+augroup VimspectorLayout
+  autocmd!
+  autocmd User VimspectorTerminalOpened call s:LayoutTerminalBesideOutput()
+augroup END
 
 " ==================== gillescastel/latex-snippets ====================
 " ==================== lervag/vimtex ====================

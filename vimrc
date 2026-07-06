@@ -405,7 +405,6 @@ function! InitDirectoryMkSession()
         " 如果为 '' 则说明是一个目录, 不为空是一个文件
         " expand('%:p:h')为当前文件夹的完整路径, 如果在排除目录中目则直接结束
         " 如果vim打开的是一个文件直接结束, 这个方法只是保存文件夹得 mksession
-        " 如果数据存储目录不存在则也不做任何事情
         return
     endif
 

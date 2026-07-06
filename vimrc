@@ -400,7 +400,7 @@ let g:MkSessionDirectory = expand('~') .  "/.vim-session"
 " 初始化g:MkSessionFile(当前需要保存的mksession路径)
 function! InitDirectoryMkSession()
 
-    if  expand('%:p') != "" || index(g:ExcludeMkSessionDirectoryList,expand('%:p:h')) != -1 || !isdirectory(g:MkSessionDirectory)
+    if  expand('%:p') != "" || index(g:ExcludeMkSessionDirectoryList,expand('%:p:h')) != -1 
         " expand('%:p')为当前文件的完整路径
         " 如果为 '' 则说明是一个目录, 不为空是一个文件
         " expand('%:p:h')为当前文件夹的完整路径, 如果在排除目录中目则直接结束
@@ -408,6 +408,13 @@ function! InitDirectoryMkSession()
         " 如果数据存储目录不存在则也不做任何事情
         return
     endif
+
+    if !isdirectory(g:MkSessionDirectory)
+        " 如果初始目录不存在则创建
+        silent! call mkdir(g:MkSessionDirectory, 'p')
+    endif
+
+
 
     " 获取当前文件夹路径并且替换 / -> _
     let current_directory = substitute(expand('%:p:h'), '/', '_', 'g')
@@ -418,8 +425,18 @@ function! InitDirectoryMkSession()
         let g:MkSessionFile = g:MkSessionDirectory . "/" . current_directory . ".vim"
     endif
 
+    " vimspector 保存断点和加载断点方法
+    " Vimspector 插件本身通过 g:loaded_vimpector 变量判断是否已加载
+    " 而方法无法判断得原因如下: 这两个方法只有首次调用时才会加载所以无法判断
+    " if exists('*vimspector#ReadSessionFile') && exists('*vimspector#WriteSessionFile')
+    if exists('g:loaded_vimpector')
+        let g:VimspectorMkSessionFile = g:MkSessionFile . ".vimspector_session"
+    endif
 
-    call LoadDirectoryMkSession()
+        
+
+
+    silent! call LoadDirectoryMkSession()
 
 endfunction
 
@@ -427,26 +444,36 @@ endfunction
 " 保存mksession
 function! SaveDirectoryMkSession()
 
-    if !exists("g:MkSessionFile") || g:MkSessionFile == ''
+    if exists("g:MkSessionFile") && g:MkSessionFile != ''
         " 如果mksession文件路径没定义则不保存mksession
         " 该变量由InitDirectoryMkSession定义,所以执行SaveDirectoryMkSession前需要先执行LoadDirectoryMkSession
-        return
+        execute 'silent! mksession! ' . g:MkSessionFile
     endif
 
-    execute 'silent! mksession! ' . g:MkSessionFile
+
+    if exists("g:VimspectorMkSessionFile") && g:VimspectorMkSessionFile != ''
+        " g:VimspectorMkSessionFile 加载和保存同 g:MkSessionFile
+        silent! call vimspector#WriteSessionFile(g:VimspectorMkSessionFile)
+    endif
+
 
 endfunction
 
 " 加载mksession
 function! LoadDirectoryMkSession()
 
-    if !exists("g:MkSessionFile") || !filereadable(g:MkSessionFile)
+    if exists("g:MkSessionFile") && filereadable(g:MkSessionFile)
         " 如果mksession文件路径没定义则不保存mksession
         " 该变量由InitDirectoryMkSession定义,所以执行LoadDirectoryMkSession前需要先执行LoadDirectoryMkSession
-        return
+        execute 'silent! source ' . g:MkSessionFile
     endif
 
-    execute 'silent! source ' . g:MkSessionFile
+
+    if exists("g:VimspectorMkSessionFile") && filereadable(g:VimspectorMkSessionFile)
+        " g:VimspectorMkSessionFile 加载和保存同 g:MkSessionFile
+        silent! call vimspector#ReadSessionFile(g:VimspectorMkSessionFile)
+    endif
+
 
 endfunction
 
@@ -462,6 +489,15 @@ function! Exit()
         endif
          " 将原始变量置为空
          let g:MkSessionFile = ''
+    endif
+
+    if exists("g:VimspectorMkSessionFile")
+        if filereadable(g:VimspectorMkSessionFile)
+            " 如果老的session文件存在需要清理掉
+            call delete(g:VimspectorMkSessionFile)
+        endif
+         " 将原始变量置为空
+         let g:VimspectorMkSessionFile = ''
     endif
 
     quit

@@ -6,7 +6,7 @@
 # 只是影响到最终的提示, 不影响过程中的转换, 即如果需要嵌套数组还是需要通过 ' " 的变化
 # 规则与html的特殊转义符一致
 declare -A keywords_mapping=(
-    ["&amp;"]="&"
+    ["&amp;"]="\&"
     ["&nbsp;"]=" "
     ["&apos;"]="'"
     ["&quot;"]='"'
@@ -23,6 +23,24 @@ declare -A keywords_mapping=(
     ["&grave;"]='`'
     ["&dollar;"]='$'
     ["&excl;"]='!'
+)
+
+
+# 反模板化模式开关, 设为 "true" 则将目录反向生成为模板
+# 正常模式: 模板(含${var}和实体编码) → 生成目录(变量展开, 实体还原)
+# 反模板化: 生成目录(普通文件) → 模板(特殊字符实体编码)
+templatize_mode=""
+
+# 反模板化实体编码映射 (与 keywords_mapping 反方向)
+# 仅包含 eval 必须转义的字符, 避免过度编码影响可读性
+# & 必须最先替换, 迭代时显式跳过并优先处理
+declare -A templatize_keywords_mapping=(
+    ["&"]='\&amp;'
+    ["\\"]='\&bsol;'
+    ["\""]='\&quot;'
+    ["\`"]='\&grave;'
+    ["\$"]='\&dollar;'
+    ["!"]='\&excl;'
 )
 
 
@@ -130,7 +148,28 @@ function generate_path_after() {
 # :return:echo: 处理后的文件内容 
 function internal_process_file_content_before() {
     local file_path="$1"
-    cat "$file_path"
+    if [[ "$templatize_mode" == "true" ]]; then
+        # 实体编码: 按 templatize_keywords_mapping 替换, 编码后不含 eval 特殊字符
+        local file_content
+        file_content=$(cat "$file_path")
+        # & 必须最先替换, 避免后续实体中的 & 被二次编码
+        local normaliza_value=${templatize_keywords_mapping["&"]}
+        file_content=${file_content//&/${normaliza_value}}
+        local keyword=""
+        for keyword in ${!templatize_keywords_mapping[@]}; do
+            if [[ "$keyword" == "&" ]]; then continue; fi
+            normaliza_value=${templatize_keywords_mapping[$keyword]}
+            if [[ "$keyword" == '\' ]]; then
+                # \ 在 ${//} 模式中是转义符, 需写 \\
+                file_content=${file_content//\\/${normaliza_value}}
+            else
+                file_content=${file_content//${keyword}/${normaliza_value}}
+            fi
+        done
+        echo "$file_content"
+    else
+        cat "$file_path"
+    fi
 }
 
 # 内部的处理文件内容生成可用的文件, 后置处理, 用于还原真实内容
@@ -138,6 +177,11 @@ function internal_process_file_content_before() {
 # :return:echo: 处理后的文件内容 
 function internal_process_file_content_after() {
     local file_content="$1"
+
+    if [[ "$templatize_mode" == "true" ]]; then
+        echo "$file_content"
+        return
+    fi
     # 关键字转义
     if [[ "$file_content" == *"&"* ]]; then
         local keyword=""

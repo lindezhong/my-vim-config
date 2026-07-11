@@ -1,6 +1,30 @@
 #!/bin/bash
 
-# 全局的变量可在config_init初始化
+# 全局的变量可在config_init初始化/修改
+
+# 关键字映射, 在最终的提示中会将 key 替换成 value
+# 只是影响到最终的提示, 不影响过程中的转换, 即如果需要嵌套数组还是需要通过 ' " 的变化
+# 规则与html的特殊转义符一致
+declare -A keywords_mapping=(
+    ["&amp;"]="&"
+    ["&nbsp;"]=" "
+    ["&apos;"]="'"
+    ["&quot;"]='"'
+    ["&vert;"]="|"
+    ["&lt;"]="<"
+    ["&gt;"]=">"
+    ["&equals;"]="="
+    ["&semi;"]=";"
+    ["&lpar;"]="("
+    ["&rpar;"]=")"
+    ["&colon;"]=":"
+    ["&sol;"]="/"
+    ["&bsol;"]='\'
+    ["&grave;"]='`'
+    ["&dollar;"]='$'
+    ["&excl;"]='!'
+)
+
 
 # 忽略路径列表, 可以匹配, ${template_scr_path} 或 ${generate_target_path}
 # 如果匹配成功的路径则不做任何事情
@@ -98,3 +122,48 @@ function generate_path_after() {
     
 }
 
+
+
+# 内部的处理文件内容生成可用的文件, 前置处理, 用于防止执行脚本失败
+# 默认不做任何处理完全显示
+# :file_path:$1: 原始文路径 
+# :return:echo: 处理后的文件内容 
+function internal_process_file_content_before() {
+    local file_path="$1"
+    cat "$file_path"
+}
+
+# 内部的处理文件内容生成可用的文件, 后置处理, 用于还原真实内容
+# :file_content:$1: 原始文件内容 
+# :return:echo: 处理后的文件内容 
+function internal_process_file_content_after() {
+    local file_content="$1"
+    # 关键字转义
+    if [[ "$file_content" == *"&"* ]]; then
+        local keyword=""
+        local normaliza_value=""
+        for keyword in ${!keywords_mapping[@]}; do
+            normaliza_value=${keywords_mapping[$keyword]}
+            file_content=${file_content//${keyword}/${normaliza_value}}
+        done
+    fi
+    echo "$file_content"
+}
+
+# 处理文件内容生成可用的文件, 前置处理
+# :file_path:$1: 原始文路径 
+# :return:echo: 处理后的文件内容 
+function process_file_content_before() {
+    local file_path="$1"
+    internal_process_file_content_before "$file_path"
+    
+}
+
+# 处理文件内容生成可用的文件, 后置处理
+# :file_content:$1: 原始文件内容 
+# :return:echo: 处理后的文件内容 
+function process_file_content_after() {
+    local file_content="$1"
+    internal_process_file_content_after "$file_content"
+    
+}

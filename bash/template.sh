@@ -20,47 +20,9 @@ default_config_shell_path="$home_path/template_config.sh"
 # 内置的模板必须在自身目录下有配置脚本
 internal_template_base_path="${home_path}/template"
 
-# 关键字映射, 在最终的提示中会将 key 替换成 value
-# 只是影响到最终的提示, 不影响过程中的转换, 即如果需要嵌套数组还是需要通过 ' " 的变化
-# 规则与html的特殊转义符一致
-declare -A keywords_mapping=(
-    ["&nbsp;"]=" "
-    ["&amp;"]="&"
-    ["&apos;"]="'"
-    ["&quot;"]='"'
-    ["&vert;"]="|"
-    ["&lt;"]="<"
-    ["&gt;"]=">"
-    ["&equals;"]="="
-    ["&semi;"]=";"
-    ["&lpar;"]="("
-    ["&rpar;"]=")"
-    ["&colon;"]=":"
-    ["&sol;"]="/"
-    ["&bsol;"]='\'
-    ["&grave;"]='`'
-    ["&dollar;"]='$'
-    ["&excl;"]='!'
-)
-
-
 
 # 帮助文档
 help() {
-    echo '
-这个是一个通过 shell 命令 : eval "echo \"$(cat "模板引擎文件路径")\" > \"生成文件路径\"" 根据模板生成文件的脚本
-支持以下几个特点
-    1. 可用通过 ``/$() 来执行shell命令, 使用echo最终替换被``/$()包裹的行
-    2. 由于实现逻辑会导致部分特殊字符出现在模板文件的时候执行错误, 所以支持通过转义实现特殊字符的替换, 以下是替换规则'
-    local key=""
-    local value=""
-    local key_conversion_rule=""
-    for key in ${!keywords_mapping[@]}; do
-        value=${keywords_mapping[$key]}
-        echo "      $key => $value"
-    done
-
-
 
 echo '
 template : 通过模板生成一个目录 
@@ -201,21 +163,14 @@ function template_generate_dir() {
             generate_target_path=${generate_target_path/\./${generate_path}}
             generate_path_before "$template_src_path" "$generate_target_path"
             # eval "echo \"$(cat "$template_src_path")\" > \"$generate_file_path\""
-            eval "local generate_file_content=\"$(cat "$template_src_path")\""
+            eval "local generate_file_content=\"$(process_file_content_before "$template_src_path")\""
             if [ ! $? -eq 0 ]; then
                 echo "模板生成异常 ${template_src_path} ==> ${generate_target_path}"
             fi
             
-            # 关键字转义
-            if [[ "$generate_file_content" == *"&"* ]]; then
-                local keyword=""
-                local normaliza_value=""
-                for keyword in ${!keywords_mapping[@]}; do
-                    normaliza_value=${keywords_mapping[$keyword]}
-                    generate_file_content=${generate_file_content//${keyword}/${normaliza_value}}
-                done
-            fi
-        
+
+            generate_file_content="$(process_file_content_after "$generate_file_content")"
+       
             echo "$generate_file_content" > "$generate_target_path"
             # 复制原始文件的权限到生成路径
             chmod "--reference=$template_src_path" "$generate_target_path"

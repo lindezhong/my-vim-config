@@ -31,7 +31,7 @@
 # report.project.columns=id,uuid.short,tags,depends.count,description.count,entry,end
 # report.project.labels=ID,UUID,Tags,Children,Desc,Started,Ended
 # report.project.sort=project+,id+
-# report.project.filter=project:root
+# report.project.filter=(project:root) and (status:pending or status:waiting or status.recurring)
 # report.project.context=0
 # 
 # report.all.description=all task

@@ -106,6 +106,7 @@ autocmd FileType yaml setlocal tabstop=2 shiftwidth=2
 autocmd FileType html setlocal tabstop=2 shiftwidth=2
 autocmd FileType css setlocal tabstop=2 shiftwidth=2
 autocmd FileType javascript setlocal tabstop=2 shiftwidth=2
+autocmd FileType javascriptreact setlocal tabstop=2 shiftwidth=2
 " vim退出的时候自动保持 session , 在启动vim的时候可以使用 `LoadDirectoryMkSession` 加载
 autocmd VimEnter * call InitDirectoryMkSession()
 autocmd VimLeave * call SaveDirectoryMkSession()
@@ -913,6 +914,9 @@ let g:NERDTreeIgnore = [
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+" 为jsx(javascriptreact)文件添加js支持(javascript)
+" 通过`:set filetype`得知当前的文件类型
+autocmd FileType javascriptreact call UltiSnips#AddFiletypes('javascriptreact.javascript')
 
 " ==================== neoclide/coc.nvim ====================
 " coc.nvim 提供vscode的vim移植

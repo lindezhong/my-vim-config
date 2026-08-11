@@ -72,6 +72,13 @@ Plug 'kristijanhusak/vim-dadbod-ui'
 "   5. `:DashboardList` 来列出所有活动的数据看板
 "   6. `:DashboardStatus` 来查看当前数据看板的状态
 Plug 'lindezhong/vim-dashboard', {'do': 'install.py'}
+
+" vim-matchup 是 Vim 内置 matchit 和 matchparen 的增强替代，主要提供三个功能：
+"  1. 配对高亮 — 光标停在 if 上时高亮对应的 else/endif，不只是 ()
+"  2. 配对跳转 — % 可以在 if/else/endif 之间跳转，[%/]% 跳到块边界
+"  3. 文本对象 — i% 选中块内部，a% 选中整个块（包含首尾关键词）
+"  相比内置 matchit，它还支持 tree-sitter、异步高亮、offscreen 匹配项预览等
+Plug 'andymass/vim-matchup'
 call plug#end()
 
 syntax on
@@ -129,6 +136,11 @@ autocmd VimLeave * call SaveDirectoryMkSession()
 """""""""""""""""""""""""""""""""""""""""""""""""
 " vim颜色方案(用来兼容ubuntu) ： 查看目录 /usr/share/vim/vim82/colors
 colorscheme vim8
+
+" 配对项高亮: 使用浅灰色作为背景
+" hi MatchParen guibg=#6a6a6a guifg=NONE gui=NONE ctermbg=242 ctermfg=NONE cterm=NONE
+hi MatchParen guibg=#4e4e4e guifg=NONE gui=NONE ctermbg=239   ctermfg=NONE cterm=NONE
+
 " 要选择其他背景颜色，您可以使用 
 " :highlight CocFloating ctermbg=color
 " 并更改错误消息的前景（文本）颜色，请使用

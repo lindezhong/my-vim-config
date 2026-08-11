@@ -140,6 +140,10 @@ colorscheme vim8
 " 配对项高亮: 使用浅灰色作为背景
 " hi MatchParen guibg=#6a6a6a guifg=NONE gui=NONE ctermbg=242 ctermfg=NONE cterm=NONE
 hi MatchParen guibg=#4e4e4e guifg=NONE gui=NONE ctermbg=239   ctermfg=NONE cterm=NONE
+" " 光标所在的位置项保持原色(vim-matchup颜色分组)
+" hi MatchParenCur guibg=NONE guifg=NONE gui=NONE ctermbg=NONE ctermfg=NONE cterm=NONE
+" " 光标所在的匹配项保持原色(vim-matchup颜色分组)
+" hi MatchWordCur guibg=NONE guifg=NONE gui=NONE ctermbg=NONE ctermfg=NONE cterm=NONE
 
 " 要选择其他背景颜色，您可以使用 
 " :highlight CocFloating ctermbg=color
